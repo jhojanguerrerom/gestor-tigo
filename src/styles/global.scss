@@ -1,0 +1,443 @@
+/*
+  Estilos globales y utilidades genéricas.
+  Mantener este archivo liviano y sin dependencias de componentes.
+*/
+
+/* ===============================
+   VARIABLES
+================================= */
+
+$font-primary: "DM Sans", sans-serif;
+$color-blue-primary: #001eb4;
+$color-blue-light: #45c8f6;
+$color-blue-hover: #1a8afd;
+$color-text-muted: #999;
+$color-input-line: #757575;
+$color-input-focus: #5264AE;
+$color-bg-app: #f6f7fb;
+
+/* ===============================
+   MIXINS
+================================= */
+
+@mixin ellipsis($max: 190px) {
+  display: inline-block;
+  max-width: $max;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin transition($props...) {
+  transition: $props 0.2s ease;
+}
+
+@function font-path($file) {
+  @return "../assets/fonts/#{$file}";
+}
+
+@mixin dm-font($file, $weight, $style) {
+  @font-face {
+    font-family: "DM Sans";
+    src: url(font-path($file)) format("truetype");
+    font-weight: $weight;
+    font-style: $style;
+    font-display: swap;
+  }
+}
+
+/* ===============================
+   FONTS
+================================= */
+
+@include dm-font("DMSans-Thin.ttf", 100, normal);
+@include dm-font("DMSans-ThinItalic.ttf", 100, italic);
+@include dm-font("DMSans-ExtraLight.ttf", 200, normal);
+@include dm-font("DMSans-ExtraLightItalic.ttf", 200, italic);
+@include dm-font("DMSans-Light.ttf", 300, normal);
+@include dm-font("DMSans-LightItalic.ttf", 300, italic);
+@include dm-font("DMSans-Regular.ttf", 400, normal);
+@include dm-font("DMSans-Italic.ttf", 400, italic);
+@include dm-font("DMSans-Medium.ttf", 500, normal);
+@include dm-font("DMSans-MediumItalic.ttf", 500, italic);
+@include dm-font("DMSans-SemiBold.ttf", 600, normal);
+@include dm-font("DMSans-SemiBoldItalic.ttf", 600, italic);
+@include dm-font("DMSans-Bold.ttf", 700, normal);
+@include dm-font("DMSans-BoldItalic.ttf", 700, italic);
+@include dm-font("DMSans-ExtraBold.ttf", 800, normal);
+@include dm-font("DMSans-ExtraBoldItalic.ttf", 800, italic);
+@include dm-font("DMSans-Black.ttf", 900, normal);
+@include dm-font("DMSans-BlackItalic.ttf", 900, italic);
+
+/* ===============================
+   RESET
+================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: $font-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/* ===============================
+   UTILIDADES DE FUENTE
+================================= */
+
+.font-dm {
+  font-family: $font-primary;
+
+  &-thin { font-weight: 100; font-style: normal; }
+  &-thin-italic { font-weight: 100; font-style: italic; }
+  &-extralight { font-weight: 200; font-style: normal; }
+  &-extralight-italic { font-weight: 200; font-style: italic; }
+  &-light { font-weight: 300; font-style: normal; }
+  &-light-italic { font-weight: 300; font-style: italic; }
+  &-regular { font-weight: 400; font-style: normal; }
+  &-regular-italic { font-weight: 400; font-style: italic; }
+  &-medium { font-weight: 500; font-style: normal; }
+  &-medium-italic { font-weight: 500; font-style: italic; }
+  &-semibold { font-weight: 600; font-style: normal; }
+  &-semibold-italic { font-weight: 600; font-style: italic; }
+  &-bold { font-weight: 700; font-style: normal; }
+  &-bold-italic { font-weight: 700; font-style: italic; }
+  &-extrabold { font-weight: 800; font-style: normal; }
+  &-extrabold-italic { font-weight: 800; font-style: italic; }
+  &-black { font-weight: 900; font-style: normal; }
+  &-black-italic { font-weight: 900; font-style: italic; }
+}
+
+/* ===============================
+   APP LAYOUT
+================================= */
+
+.app {
+  &-shell {
+    min-height: 100vh;
+    background-color: $color-bg-app;
+  }
+
+  &-header {
+    background-color: $color-blue-primary;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1081;
+  }
+
+  &-logo {
+    height: 36px;
+    width: auto;
+  }
+
+  &-user {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.1;
+
+    &__label {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    &__name {
+      font-weight: 600;
+    }
+  }
+
+  &-nav__link {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    margin: 0 10px;
+    @include transition(color, border-color);
+
+    &.active,
+    &:hover {
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+  }
+
+  &-logout {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 4px 0;
+    min-width: auto;
+    cursor: pointer;
+    @include transition(color);
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  &-content {
+    padding-bottom: 32px;
+  }
+}
+
+/* ===============================
+   DATA TABLE
+================================= */
+
+.data {
+  &-table__toolbar {
+    .data-table__search {
+      max-width: 420px;
+    }
+
+    .input-group-text {
+      background-color: #f1f5ff;
+      border-color: #dbe4ff;
+      color: $color-blue-primary;
+      font-weight: 600;
+    }
+
+    .form-control {
+      border-color: #dbe4ff;
+      box-shadow: none;
+    }
+
+    .form-control:focus {
+      border-color: $color-blue-primary;
+      box-shadow: 0 0 0 0.15rem rgba(0, 30, 180, 0.15);
+    }
+  }
+
+  &-table__meta {
+    font-size: 0.95rem;
+  }
+
+  &-table {
+    th,
+    td {
+      padding: .5rem;
+      vertical-align: middle;
+    }
+
+    td {
+      line-height: 1.4;
+      white-space: nowrap;
+
+      span {
+        vertical-align: middle;
+      }
+    }
+
+    .cell-text {
+      @include ellipsis(190px);
+    }
+  }
+
+  &-detail-table {
+    th,
+    td {
+      padding: 0.6rem 0.75rem;
+    }
+
+    .cell-text {
+      @include ellipsis(190px);
+    }
+  }
+
+  &-details-row {
+    td {
+      padding: 0;
+      background-color: transparent;
+    }
+  }
+
+  &-details-toggle {
+    font-size: 18px;
+    color: $color-blue-primary;
+
+    &:hover {
+      color: #0f172a;
+    }
+  }
+}
+nav ul.pagination{
+  .page-item .page-link {
+        color: $color-blue-primary !important;
+        border-color: #dbe4ff !important;
+        background-color: #ffffff !important;
+      }
+
+      .page-item.active .page-link {
+        background-color: $color-blue-primary !important;
+        border-color: $color-blue-primary !important;
+        color: #ffffff !important;
+      }
+
+      .page-item.disabled .page-link {
+        color: rgba(0, 30, 180, 0.5) !important;
+        background-color: #f8f9ff !important;
+      }
+
+      .page-item .page-link:focus {
+        box-shadow: 0 0 0 0.15rem rgba(0, 30, 180, 0.15) !important;
+      }
+}
+
+/* ===============================
+   UTILIDADES GENÉRICAS
+================================= */
+
+.u-text-balance {
+  text-wrap: balance;
+}
+
+.u-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===============================
+   COLORES (CLASES ORIGINALES)
+================================= */
+
+.bg {
+  &-blue {
+    background-color: $color-blue-primary;
+  }
+}
+
+.text {
+  &-bg-blue {
+    background-color: $color-blue-primary;
+  }
+
+  &-bg-bluelight {
+    background-color: $color-blue-light;
+  }
+}
+
+/* ===============================
+   INPUTS
+================================= */
+
+.group {
+  position: relative;
+  margin-bottom: 20px;
+
+  input {
+    font-size: 18px;
+    padding: 10px 10px 10px 5px;
+    display: block;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid $color-input-line;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus ~ label,
+    &:not(:placeholder-shown) ~ label {
+      top: -10px;
+      font-size: 14px;
+      color: $color-input-focus;
+    }
+
+    &:focus ~ .bar::before,
+    &:focus ~ .bar::after {
+      width: 50%;
+    }
+
+    &:focus ~ .highlight {
+      animation: inputHighlighter 0.3s ease;
+    }
+  }
+
+  label {
+    color: $color-text-muted;
+    font-size: 18px;
+    position: absolute;
+    pointer-events: none;
+    left: 5px;
+    top: 10px;
+    @include transition(all);
+  }
+
+  .bar {
+    position: relative;
+    display: block;
+    width: 100%;
+
+    &::before,
+    &::after {
+      content: "";
+      height: 2px;
+      width: 0;
+      bottom: 0;
+      position: absolute;
+      background: $color-input-focus;
+      @include transition(width);
+    }
+
+    &::before { left: 50%; }
+    &::after { right: 50%; }
+  }
+
+  .highlight {
+    position: absolute;
+    height: 60%;
+    width: 100px;
+    top: 25%;
+    left: 0;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}
+
+@keyframes inputHighlighter {
+  from { background: $color-input-focus; }
+  to { width: 0; background: transparent; }
+}
+
+/* ===============================
+   BUTTONS
+================================= */
+
+.button {
+  border-radius: 30px;
+  border: 1px solid;
+  padding: 5px 15px;
+  transition: 0.2s ease;
+  min-width: 200px;
+  font-family: $font-primary;
+  font-weight: 400;
+
+  &-blue {
+    background-color: $color-blue-light;
+    border-color: $color-blue-light;
+    color: #ffffff;
+
+    &:hover {
+      background-color: $color-blue-hover;
+      border-color: $color-blue-hover;
+    }
+  }
+}
