@@ -1,5 +1,6 @@
 import loginImage from '../../assets/logo-tigo-blanco.png'
 import './auth.scss'
+import { Icon } from '@/icons/Icon'
 
 /**
  * Página de inicio de sesión.
@@ -15,7 +16,7 @@ export default function LoginPage() {
           <div className="col-12 col-lg-5 d-flex align-items-center">
             <div className="w-100 container-login p-4 p-md-5 bg-white shadow-sm">
               <header className="mb-4 text-center text-lg-start">
-                <h1 className="h2 mb-2 text-center font-dm-bold">Gestor de operaciones</h1>
+                <h1 className="h2 mb-2 text-center font-dm-bold"><Icon name="window" size="xl" className="me-2 icon--sxl" />Gestor de operaciones</h1>
                 <hr />
                 <h3 className="h5 mb-2 font-dm-semibold">Iniciar sesión</h3>
                 <p className="text-body-secondary mb-0 font-dm-regular">

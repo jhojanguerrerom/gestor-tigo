@@ -92,6 +92,25 @@ src/
 - SCSS por vista dentro de `pages/**`.
 - Bootstrap para layout y utilidades básicas.
 
+## Iconos SVG (SVGR)
+- Los SVG viven en `src/assets/icons/`.
+- Se cargan automáticamente con `import.meta.glob`.
+- Se exponen como componentes React con `vite-plugin-svgr`.
+- Los tamaños se controlan **solo** con clases (`icon--xs` a `icon--xl`).
+- No se sobreescribe `fill` ni `stroke` (los SVG mantienen sus colores originales).
+
+### Ejemplo de uso
+```tsx
+import { Icon } from './icons/Icon'
+
+export const Example = () => (
+  <div className="d-flex align-items-center gap-2">
+    <Icon name="calendar-day" size="md" aria-label="Calendario" />
+    <span>Agenda</span>
+  </div>
+)
+```
+
 ## Accesibilidad
 - Uso de etiquetas semánticas (`section`, `header`, `main`).
 - Títulos claros por vista (`h1`).

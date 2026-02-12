@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from '@/icons/Icon'
 
 /**
  * Case assignment and resolution form (visual only).
@@ -57,7 +58,8 @@ export default function CaseResolutionForm() {
                     </select>
                   </div>
 
-                  <div className="col-md-12 d-flex justify-content-md-end">
+                  <div className="col-md-12 d-flex justify-content-md-end align-items-center">
+                    <Icon name="user-call" size="xl" className="me-2" />
                     <button
                       className="button button-blue w-100"
                       type="button"
@@ -77,7 +79,8 @@ export default function CaseResolutionForm() {
                       placeholder="Ingresar oferta"
                     />
                   </div>
-                  <div className="col-md-12 d-flex justify-content-md-end">
+                  <div className="col-md-12 d-flex justify-content-md-end align-items-center">
+                    <Icon name="look-for" size="xl" className="me-2" />
                     <button
                       className="button button-blue w-100"
                       type="button"
@@ -86,7 +89,8 @@ export default function CaseResolutionForm() {
                     </button>
                   </div>
                   <hr className="my-4"/>
-                  <div className="col-md-12 d-flex justify-content-md-end mt-0 mb-2">
+                  <div className="col-md-12 d-flex justify-content-md-end mt-0 mb-2 align-items-center">
+                    <Icon name="edit" size="xl" className="me-2" />
                     <button
                       className="button button-blue w-100"
                       type="button"
@@ -209,6 +213,7 @@ export default function CaseResolutionForm() {
                   <div className="col-12 d-flex justify-content-end">
                     <button className="button button-blue" type="button">
                       Enviar
+                      <Icon name="send" size="lg" className="ms-3" />
                     </button>
                   </div>
               </form>

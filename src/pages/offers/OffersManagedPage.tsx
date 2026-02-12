@@ -165,7 +165,7 @@ export default function OffersManagedPage() {
     { header: 'Fuente' },
     { header: 'Concepto final' },
     { header: 'Acción' },
-    { header: 'Sub acción' },
+    { header: 'Subacción' },
     { header: 'Ciudad' },
     { header: 'Observación' },
   ]

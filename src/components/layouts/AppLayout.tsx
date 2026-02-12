@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import logoTigo from '../../assets/logo-tigo-blanco.png'
+import { Icon } from '@/icons/Icon'
 
 /**
  * Layout principal para el flujo autenticado.
@@ -32,6 +33,7 @@ export default function AppLayout() {
 
           <button className="app-logout" type="button">
             Cerrar sesión
+             <Icon name="close" size="xl" className="ms-2 bg-light ps-1 rounded-3" />
           </button>
         </div>
       </header>

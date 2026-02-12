@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { Link } from 'react-router-dom'
 import DataTable from '../../components/tables/DataTable'
+import { Icon } from '@/icons/Icon'
 
 /**
  * Admin home page.
@@ -388,6 +389,7 @@ export default function AdminHomePage() {
                 <input className="form-check-input" type="checkbox" aria-label={`Seleccionar fila ${row.id}`} />
               </td>
               <td>
+                <Icon name="user-call" size="lg" className="me-2" />
                 <span className="badge text-bg-blue" data-bs-toggle="tooltip" data-bs-placement="top" title={row.advisor}>
                   {row.advisor}
                 </span>
@@ -423,22 +425,18 @@ export default function AdminHomePage() {
                 </span>
               </td>
               <td className="text-center">
-                <button
-                  className="btn btn-link p-0 text-decoration-none data-details-toggle"
-                  type="button"
+                <Icon name="plus" size="lg"
+                  className='cursor-pointer'
                   data-bs-toggle="collapse"
                   data-bs-target={`#caseDetails-${row.id}`}
                   aria-expanded="false"
                   aria-controls={`caseDetails-${row.id}`}
-                  title="Ver detalles"
-                >
-                  <span aria-hidden="true">▾</span>
-                  <span className="visually-hidden">Ver detalles</span>
-                </button>
+                />
+                
               </td>
               <td>
                 <Link className="badge rounded-pill text-bg-bluelight text-decoration-none p-2" to="/cases/resolve">
-                  Resolver
+                  Tomar pedido
                 </Link>
               </td>
             </tr>
