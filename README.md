@@ -1,7 +1,7 @@
 # gestor-tigo
 
 ## Descripción del proyecto
-Aplicación frontend en React pensada para evolucionar hacia la integración de endpoints. La arquitectura prioriza claridad, escalabilidad y mantenibilidad, con UI mínima y estilos organizados por vista.
+Aplicación frontend en React orientada a la gestión de casos y ofertas, con páginas para perfiles de administrador y asesor. La arquitectura prioriza claridad, escalabilidad y mantenibilidad, con estilos organizados por dominio.
 
 ## Tecnologías
 - React
@@ -17,12 +17,12 @@ Aplicación frontend en React pensada para evolucionar hacia la integración de 
 - Enrutamiento declarativo con React Router (`createBrowserRouter`).
 - Separación por dominios y capas (páginas, rutas, componentes, hooks, utils).
 - `AppProviders` como punto único para agregar contextos en el futuro.
-- `api` y `auth` como carpetas placeholder para integración posterior.
+- `api` y `auth` como carpetas base para integración posterior.
 
 ## Flujo de renderizado
 - `main.tsx` monta la app en el DOM.
 - `App.tsx` aplica layout mínimo y delega el enrutamiento.
-- `router.tsx` define rutas hacia páginas.
+- `router.tsx` define rutas hacia páginas y se integra con `AppLayout`.
 
 ## Integración futura API REST
 - `api/httpClient.ts` centralizará el cliente HTTP.
@@ -46,25 +46,43 @@ src/
     types/
     styles/
   components/
+    cases/
+      CaseResolutionForm.tsx
     layouts/
-    ui/
+      AppLayout.tsx
+    tables/
+      DataTable.tsx
   hooks/
+    useBootstrapTooltips.ts
+    useTableSearchPagination.ts
+  icons/
+    Icon.tsx
+    iconsMap.ts
   pages/
+    admin/
+      AdminHomePage.tsx
+    advisor/
+      AdvisorHomePage.tsx
     auth/
       LoginPage.tsx
       auth.scss
-    dashboard/
-      DashboardPage.tsx
+    cases/
+      CaseResolutionPage.tsx
     common/
       NotFoundPage.tsx
+    offers/
+      OffersManagedPage.tsx
   routes/
     router.tsx
     AppProviders.tsx
   styles/
     global.scss
+    app.scss
   types/
   utils/
   assets/
+    fonts/
+    icons/
 ```
 
 ## Instalación
@@ -84,11 +102,12 @@ src/
 - Documentación y comentarios en español.
 - Tipado estricto con TypeScript.
 - Rutas definidas solo en `routes/router.tsx`.
-- Estilos globales en `styles/global.scss`.
+- Estilos globales en `styles/global.scss` y base en `styles/app.scss`.
 - Estilos por vista en `pages/**/`.
 
 ## Estilos
 - Globales en `styles/global.scss`.
+- Base y layout en `styles/app.scss`.
 - SCSS por vista dentro de `pages/**`.
 - Bootstrap para layout y utilidades básicas.
 

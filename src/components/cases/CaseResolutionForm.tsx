@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Icon } from '@/icons/Icon'
 
 /**
@@ -6,6 +6,9 @@ import { Icon } from '@/icons/Icon'
  */
 export default function CaseResolutionForm() {
   const [accionAuto, setAccionAuto] = useState("");
+  const [subaccion, setSubaccion] = useState("");
+  const observacionRef = useRef<HTMLTextAreaElement>(null);
+  const [copied, setCopied] = useState(false);
 
   const subaccionesPorAccion: Record<string, string[]> = {
     Asignado: [
@@ -22,6 +25,16 @@ export default function CaseResolutionForm() {
       "Gpon Extendido",
     ],
     Reconfigurar: ["Cobertura GPON", "Cobertura HFC"],
+  };
+
+  const handleCopy = () => {
+    const observacion = observacionRef.current?.value || "";
+    const texto = [accionAuto, subaccion, observacion].filter(Boolean).join(" / ");
+    if (texto) {
+      navigator.clipboard.writeText(texto);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
   };
 
   return (
@@ -179,7 +192,10 @@ export default function CaseResolutionForm() {
                       className="form-select"
                       id="Accion"
                       value={accionAuto}
-                      onChange={(event) => setAccionAuto(event.target.value)}
+                      onChange={(event) => {
+                        setAccionAuto(event.target.value);
+                        setSubaccion("");
+                      }}
                     >
                       <option value="">Seleccionar</option>
                       <option value="Asignado">Asignado</option>
@@ -194,12 +210,14 @@ export default function CaseResolutionForm() {
                     <select
                       className="form-select"
                       id="SubAccion"
+                      value={subaccion}
+                      onChange={e => setSubaccion(e.target.value)}
                       disabled={!accionAuto}
                     >
                       <option value="">Seleccionar</option>
-                      {(subaccionesPorAccion[accionAuto] ?? []).map((subaccion) => (
-                        <option key={subaccion} value={subaccion}>
-                          {subaccion}
+                      {(subaccionesPorAccion[accionAuto] ?? []).map((sub) => (
+                        <option key={sub} value={sub}>
+                          {sub}
                         </option>
                       ))}
                     </select>
@@ -208,9 +226,23 @@ export default function CaseResolutionForm() {
                     <label className="form-label" htmlFor="Observacion">
                       Observación
                     </label>
-                    <textarea className="form-control" id="Observacion" rows={4} />
+                    <textarea className="form-control" id="Observacion" rows={4} ref={observacionRef} />
                   </div>
-                  <div className="col-12 d-flex justify-content-end">
+                  <div className="col-12 d-flex justify-content-between align-items-center gap-2">
+                    <div>
+                      <button
+                        className="button button-outline-blue"
+                        type="button"
+                        onClick={handleCopy}
+                        title="Copiar acción/subacción/observación"
+                      >
+                        Copiar texto
+                        <Icon name="copy" size="md" className="ms-2" />
+                      </button>
+                      {copied && (
+                        <span className="ms-2 text-success small">¡Copiado!</span>
+                      )}
+                    </div>
                     <button className="button button-blue" type="button">
                       Enviar
                       <Icon name="send" size="lg" className="ms-3" />

@@ -117,7 +117,6 @@ video {
 
 .font-dm {
   font-family: $font-primary;
-
   &-thin { font-weight: 100; font-style: normal; }
   &-thin-italic { font-weight: 100; font-style: italic; }
   &-extralight { font-weight: 200; font-style: normal; }
@@ -158,7 +157,7 @@ video {
   }
 
   &-logo {
-    height: 36px;
+    height: 40px;
     width: auto;
   }
 
