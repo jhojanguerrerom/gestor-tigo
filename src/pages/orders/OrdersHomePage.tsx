@@ -6,7 +6,7 @@ import { Icon } from '@/icons/Icon'
 /**
  * Admin home page.
  */
-export default function AdminHomePage() {
+export default function OrdersHomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const tableId = 'adminTable'
 

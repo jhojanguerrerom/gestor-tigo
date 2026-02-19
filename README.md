@@ -60,7 +60,7 @@ src/
     iconsMap.ts
   pages/
     admin/
-      AdminHomePage.tsx
+      OrdersHomePage.tsx
     advisor/
       AdvisorHomePage.tsx
     auth/

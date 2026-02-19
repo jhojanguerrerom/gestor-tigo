@@ -1,11 +1,12 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import AppLayout from '../components/layouts/AppLayout'
 import LoginPage from '../pages/auth/LoginPage'
-import AdminHomePage from '../pages/admin/AdminHomePage'
-import AdvisorHomePage from '../pages/advisor/AdvisorHomePage'
+import OrdersHomePage from '../pages/orders/OrdersHomePage'
 import CaseResolutionPage from '../pages/cases/CaseResolutionPage'
 import OffersManagedPage from '../pages/offers/OffersManagedPage'
 import NotFoundPage from '../pages/common/NotFoundPage'
+import { PrivateRoute } from './PrivateRoute'
+import { UserRole } from '@/auth/types/auth.types'
 
 /**
  * Router principal de la aplicación.
@@ -25,20 +26,28 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       {
-        path: '/admin/home',
-        element: <AdminHomePage />,
+        path: '/orders/home',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
+            <OrdersHomePage />
+          </PrivateRoute>
+        ),
       },
       {
         path: '/advisor/home',
-        element: <AdvisorHomePage />,
-      },
-      {
-        path: '/cases/resolve',
-        element: <CaseResolutionPage />,
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER, UserRole.ASESOR]}>
+            <CaseResolutionPage />
+          </PrivateRoute>
+        ),
       },
       {
         path: '/offers/managed',
-        element: <OffersManagedPage />,
+        element: (
+          <PrivateRoute>
+            <OffersManagedPage />
+          </PrivateRoute>
+        ),
       },
     ],
   },
