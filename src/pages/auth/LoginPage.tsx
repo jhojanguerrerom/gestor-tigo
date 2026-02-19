@@ -52,7 +52,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="d-flex flex-sm-row justify-content-between align-items-center mt-5">
-                  <a className="link-primary" href="#">
+                  <a className="link-primary" href="https://gestionatucuenta.tigoune.com/sigma/app/index?breakGlass=true#/forgot-password" target='_blank'>
                     ¿Olvidaste tu contraseña?
                   </a>
                   <button className="button button-blue text-uppercase" type="submit">
