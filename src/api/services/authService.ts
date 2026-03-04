@@ -8,7 +8,10 @@ export const authService = {
   logout: () => httpClient.post(ENDPOINTS.AUTH.LOGOUT),
   refreshToken: (refreshToken: string) =>
     httpClient.post(ENDPOINTS.AUTH.REFRESH_TOKEN, {}, {
-      headers: { Authorization: `Bearer ${refreshToken}` },
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+        'Content-Type': 'application/json',
+      },
     }),
   // Agrega aquí más métodos relacionados con auth si es necesario
 }

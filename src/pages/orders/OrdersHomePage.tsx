@@ -1,19 +1,9 @@
-import { Fragment, useState } from 'react'
-// Utilidad para formatear fecha y hora
-function formatDateTime(dateString?: string) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString;
-  // Formatear fecha y hora con segundos manualmente
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
-    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
+import { Fragment, useState, useCallback } from 'react'
+import { useEffect } from 'react'
 import { useEnlistmentTable } from '@/hooks/useEnlistmentTable'
 import { Link } from 'react-router-dom'
 import DataTable from '../../components/tables/DataTable'
 import { Icon } from '@/icons/Icon'
-
 /**
  * Admin home page.
  */
@@ -21,6 +11,7 @@ export default function OrdersHomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const tableId = 'adminTable'
   const pageSize = 10
+  const [refreshKey, setRefreshKey] = useState(0)
   const {
     data: rows,
     total,
@@ -28,7 +19,27 @@ export default function OrdersHomePage() {
     currentPage,
     setCurrentPage,
     loading,
-  } = useEnlistmentTable({ pageSize, searchQuery })
+  } = useEnlistmentTable({ pageSize, searchQuery, refreshKey })
+
+  // Utilidad para formatear fecha y hora
+  function formatDateTime(dateString?: string) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    // Formatear fecha y hora con segundos manualmente
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
+      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
+  // Resetear página a 1 cuando cambia el searchQuery
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshKey(prev => prev + 1)
+  }, [])
 
   const columns = [
     { header: 'Asesor' },
@@ -61,11 +72,11 @@ export default function OrdersHomePage() {
 
   return (
     <section className="container py-4">
-      <header className="mb-4">
-        <h1 className="h3 font-dm-bold mb-2">Estado de trabajo</h1>
-        {/* <p className="text-body-secondary mb-0">
-          Summary table for admin operations.
-        </p> */}
+      <header className="mb-4 d-flex align-items-center justify-content-between">
+        <h1 className="h3 font-dm-bold mb-2 mb-0">Estado de trabajo</h1>
+        <button type="button" className="btn btn-link p-0 ms-2" onClick={handleRefresh} data-bs-toggle="tooltip" data-bs-placement="left" title="Actualizar tabla">
+          <Icon name="refresh" size="xl" />
+        </button>
       </header>
 
       <DataTable<any>
@@ -197,8 +208,9 @@ export default function OrdersHomePage() {
           </Fragment>
         )}
         getSearchText={() => ''}
-        searchQuery=""
-        onSearchChange={() => {}}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Buscar por oferta"
         tableId={tableId}
       />
     </section>

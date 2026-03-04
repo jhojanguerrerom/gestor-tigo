@@ -42,6 +42,7 @@ export function useAuth() {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
       localStorage.removeItem('refresh_expires_at')
+      localStorage.removeItem('access_expires_at')
     localStorage.removeItem('user')
   }
 

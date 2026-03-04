@@ -12,8 +12,8 @@ const httpClient = axios.create({
 
 // Función para validar expiración de token
 function isTokenExpired(expiry: number) {
-  // expiry en milisegundos, Date.now() también
-  return Date.now() > expiry;
+  // expiry en segundos, convertir a milisegundos
+  return Date.now() > expiry * 1000;
 }
 
 // Interceptor de Solicitud: Inyecta el token automáticamente
@@ -60,8 +60,8 @@ httpClient.interceptors.response.use(
           }
         );
 
-        // Extraer los datos desde response.data.auth
-        const { access_token, refresh_token: newRefreshToken, access_expires_at, refresh_expires_at } = response.data.auth;
+        // Extraer los datos directamente desde response.data (ajustado a tu backend)
+        const { access_token, refresh_token: newRefreshToken, access_expires_at, refresh_expires_at } = response.data;
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', newRefreshToken);
         localStorage.setItem('access_expires_at', access_expires_at.toString());
@@ -74,7 +74,7 @@ httpClient.interceptors.response.use(
 
         // Validar expiración local del refresh token antes de reintentar
         const refreshExpiresAt = localStorage.getItem('refresh_expires_at');
-        if (!refreshToken || !refreshExpiresAt) {
+        if (!newRefreshToken || !refreshExpiresAt) {
           throw new Error('No refresh token or expiry available');
         }
         if (isTokenExpired(Number(refreshExpiresAt))) {
@@ -83,6 +83,7 @@ httpClient.interceptors.response.use(
           window.location.href = '/login';
           return Promise.reject(new Error('Refresh token expired'));
         }
+        // Si el refresh fue exitoso, reintenta la petición original con el nuevo access token
         return httpClient(originalRequest);
 
       } catch (refreshError) {

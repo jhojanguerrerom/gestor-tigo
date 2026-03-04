@@ -97,7 +97,7 @@ export default function DataTable<T>({
     <div className="card shadow-sm">
       <div className="card-body">
         <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3">
-          <div className="input-group opacity-0" style={{ maxWidth: '420px' }}>
+          <div className="input-group" style={{ maxWidth: '420px' }}>
             <span className="input-group-text" id={searchLabelId}>
               {searchLabel}
             </span>
