@@ -20,6 +20,7 @@ export function useAuth() {
       // Guardar tokens
       localStorage.setItem('access_token', data.auth.access_token)
       localStorage.setItem('refresh_token', data.auth.refresh_token)
+        localStorage.setItem('refresh_expires_at', String(data.auth.refresh_expires_at))
       // Simular menú si no viene en la respuesta
       const menu = data.menu && data.menu.length > 0 ? data.menu : MENU_BY_ROLE[data.profile_id as UserRole]
       const userData = { ...data, menu }
@@ -40,6 +41,7 @@ export function useAuth() {
     setUser(null)
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+      localStorage.removeItem('refresh_expires_at')
     localStorage.removeItem('user')
   }
 

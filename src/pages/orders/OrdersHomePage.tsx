@@ -128,7 +128,7 @@ export default function OrdersHomePage() {
               </td>
               <td>
                 <Link className="badge rounded-pill text-bg-bluelight text-decoration-none p-2" to="/cases/resolve">
-                  Tomar pedido
+                  Gestionar
                 </Link>
               </td>
             </tr>

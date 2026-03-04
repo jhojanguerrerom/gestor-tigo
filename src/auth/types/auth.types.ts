@@ -2,9 +2,9 @@
 
 export const UserRole = {
   SUPER_USER: 1,
-  SUPERVISOR: 2,
-  ASESOR: 3,
-  VIEWER: 4,
+  SUPERVISOR: 3,
+  ASESOR: 4,
+  VIEWER: 5,
 } as const;
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 

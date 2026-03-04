@@ -10,6 +10,12 @@ const httpClient = axios.create({
   },
 });
 
+// Función para validar expiración de token
+function isTokenExpired(expiry: number) {
+  // expiry en milisegundos, Date.now() también
+  return Date.now() > expiry;
+}
+
 // Interceptor de Solicitud: Inyecta el token automáticamente
 httpClient.interceptors.request.use(
   (config) => {
@@ -19,7 +25,6 @@ httpClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
 );
 
 // Interceptor de Respuesta: Manejo de errores y Refresh Token
@@ -37,6 +42,7 @@ httpClient.interceptors.response.use(
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
+
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (!refreshToken) {
@@ -44,20 +50,38 @@ httpClient.interceptors.response.use(
         }
 
         // Usamos una instancia nueva de axios para evitar bucles infinitos en los interceptores
-        const response = await axios.post(`${BASE_URL}${ENDPOINTS.AUTH.REFRESH_TOKEN}`, {}, {
-          headers: {
-            Authorization: `Bearer ${refreshToken}`
+        const response = await axios.post(
+          `${BASE_URL}${ENDPOINTS.AUTH.REFRESH_TOKEN}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`
+            }
           }
-        });
+        );
 
-        const { access_token, refresh_token: newRefreshToken } = response.data;
-
+        // Extraer los datos desde response.data.auth
+        const { access_token, refresh_token: newRefreshToken, access_expires_at, refresh_expires_at } = response.data.auth;
         localStorage.setItem('access_token', access_token);
-        if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
+        localStorage.setItem('refresh_token', newRefreshToken);
+        localStorage.setItem('access_expires_at', access_expires_at.toString());
+        localStorage.setItem('refresh_expires_at', refresh_expires_at.toString());
 
         // Actualizamos el header de la petición original y reintentamos
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        }
+
+        // Validar expiración local del refresh token antes de reintentar
+        const refreshExpiresAt = localStorage.getItem('refresh_expires_at');
+        if (!refreshToken || !refreshExpiresAt) {
+          throw new Error('No refresh token or expiry available');
+        }
+        if (isTokenExpired(Number(refreshExpiresAt))) {
+          // El refresh token está expirado localmente
+          localStorage.clear();
+          window.location.href = '/login';
+          return Promise.reject(new Error('Refresh token expired'));
         }
         return httpClient(originalRequest);
 
