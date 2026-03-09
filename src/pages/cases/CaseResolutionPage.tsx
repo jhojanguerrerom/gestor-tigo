@@ -1,41 +1,51 @@
 /**
  * Shared case resolution view for all roles.
  */
-import { useState, useRef } from "react";
-import { Icon } from '@/icons/Icon'
+import { useState, useRef, useEffect } from "react";
+import { Icon } from '@/icons/Icon';
+import { actionService } from '@/api/services/actionService';
 
 export default function CaseResolutionPage() {
   // Estado y lógica del form
-  const [accionAuto, setAccionAuto] = useState("");
-  const [subaccion, setSubaccion] = useState("");
-  const observacionRef = useRef<HTMLTextAreaElement>(null);
-  const [copied, setCopied] = useState(false);
+    const [acciones, setAcciones] = useState<any[]>([]);
+    const [accionAuto, setAccionAuto] = useState(""); // id de acción
+    const [subacciones, setSubacciones] = useState<any[]>([]);
+    const [subaccion, setSubaccion] = useState(""); // id de subacción
+    const observacionRef = useRef<HTMLTextAreaElement>(null);
+    const [copied, setCopied] = useState(false);
 
-  const subaccionesPorAccion: Record<string, string[]> = {
-    Asignado: [
-      "Se busca elemento con red libre",
-      "Se busca elemento con red libre /Dirección Estado E",
-      "Se corrige dirección Estado E",
-    ],
-    Cancelado: [
-      "Dirección no existe/errada",
-      "Sin cobertura",
-      "Red copada",
-      "Garantia en el ingreso",
-      "Minipoligono",
-      "Gpon Extendido",
-    ],
-    Reconfigurar: ["Cobertura GPON", "Cobertura HFC"],
-  };
+    useEffect(() => {
+      actionService.getActionsWithSubactions()
+        .then((res: any) => {
+          // Filtrar solo acciones activas y subacciones activas
+          const data = res.data || [];
+          const accionesActivas = data
+            .filter((a: any) => a.is_active)
+            .map((a: any) => ({
+              ...a,
+              subacciones: (a.subacciones || []).filter((s: any) => s.is_active)
+            }));
+          setAcciones(accionesActivas);
+        });
+    }, []);
+
+    useEffect(() => {
+      // Actualizar subacciones cuando cambia la acción seleccionada
+      const accion = acciones.find(a => a.id === accionAuto);
+      setSubacciones(accion ? accion.subacciones : []);
+      setSubaccion("");
+    }, [accionAuto, acciones]);
 
   const handleCopy = () => {
-    const observacion = observacionRef.current?.value || "";
-    const texto = [accionAuto, subaccion, observacion].filter(Boolean).join(" / ");
-    if (texto) {
-      navigator.clipboard.writeText(texto);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }
+      const observacion = observacionRef.current?.value || "";
+      const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre || "";
+      const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre || "";
+      const texto = [accionNombre, subaccionNombre, observacion].filter(Boolean).join(" / ");
+      if (texto) {
+        navigator.clipboard.writeText(texto);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }
   };
 
   return (
@@ -193,15 +203,14 @@ export default function CaseResolutionPage() {
                       className="form-select"
                       id="Accion"
                       value={accionAuto}
-                      onChange={(event) => {
-                        setAccionAuto(event.target.value);
-                        setSubaccion("");
-                      }}
+                      onChange={event => setAccionAuto(event.target.value)}
                     >
                       <option value="">Seleccionar</option>
-                      <option value="Asignado">Asignado</option>
-                      <option value="Cancelado">Cancelado</option>
-                      <option value="Reconfigurar">Reconfigurar</option>
+                      {acciones.map((accion) => (
+                        <option key={accion.id} value={accion.id}>
+                          {accion.nombre}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -216,9 +225,9 @@ export default function CaseResolutionPage() {
                       disabled={!accionAuto}
                     >
                       <option value="">Seleccionar</option>
-                      {(subaccionesPorAccion[accionAuto] ?? []).map((sub) => (
-                        <option key={sub} value={sub}>
-                          {sub}
+                      {subacciones.map((sub) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.nombre}
                         </option>
                       ))}
                     </select>
