@@ -6,8 +6,9 @@ import { useLocation } from "react-router-dom";
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import { offerService } from '@/api/services/offerService';
-import { offerManagementService } from '@/api/services/offerManagementService';
+//import { offerManagementService } from '@/api/services/offerManagementService';
 import { useToast } from '@/context/ToastContext';
+import OrderHistoryModal from '@/pages/cases/OrderHistoryModal';
 
 const INITIAL_FORM_DATA = {
   oferta: '',
@@ -40,6 +41,7 @@ export default function CaseResolutionPage() {
   const [observacion, setObservacion] = useState("");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   
   const { success, info, error } = useToast();
 
@@ -54,7 +56,7 @@ export default function CaseResolutionPage() {
         setFormData(extractFormData(res.data.campos_dinamicos));
       } catch (err) {
         if (!isMounted.current) return;
-        info('Solicite un pedido para comenzar a gestionar.', 'Sin caso asignado');
+        info('Solicite un pedido para comenzar a gestionar.', 'Sin pedido asignado');
         setFormData(INITIAL_FORM_DATA);
       } finally {
         if (isMounted.current) setLoading(false);
@@ -66,17 +68,6 @@ export default function CaseResolutionPage() {
       isMounted.current = false;
     };
   }, [location.pathname, location.key, info]);
-
-  // Utilidad para formatear fecha y hora
-  function formatDateTime(dateString?: string) {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    // Formatear fecha y hora con segundos manualmente
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
-      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-  }
 
   // Cargar acciones
   useEffect(() => {
@@ -106,7 +97,7 @@ export default function CaseResolutionPage() {
       .then(res => {
         const campos = res.data.campos_dinamicos || {};
         setFormData(extractFormData(campos));
-        info(`Caso ${campos.oferta || ''} asignado exitosamente.`);
+        info(`Pedido ${campos.oferta || ''} asignado exitosamente.`);
       })
       .catch(() => error('No se pudo asignar pedido'))
       .finally(() => setLoading(false));
@@ -124,7 +115,7 @@ export default function CaseResolutionPage() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setLoading(true);
     const payload = {
       oferta: formData.oferta,
@@ -133,16 +124,40 @@ export default function CaseResolutionPage() {
       observacion: observacion,
     };
 
-    offerManagementService.manageOffer(payload)
-      .then(() => {
-        success(`Caso ${payload.oferta} cerrado exitosamente.`);
+    try {
+      // 1. Intentamos enviar la gestión
+      await offerService.manageOffer(payload);
+      
+      // Si funciona, mostramos éxito y limpiamos todo
+      success(`Pedido ${payload.oferta} cerrado exitosamente.`);
+      setFormData(INITIAL_FORM_DATA);
+      setAccionAuto("");
+      setSubaccion("");
+      setObservacion("");
+
+    } catch (err) {
+      console.error("Error al gestionar el pedido:", err);
+
+      // 2. Si falla, verificamos si el caso SIGUE siendo tuyo en base de datos
+      try {
+        await offerService.getMyOffer();
+        
+        // Si responde bien, el caso sigue siendo tuyo. NO borramos lo que escribiste.
+        error('Ocurrió un error al enviar, pero el pedido sigue asignado. Por favor, intenta de nuevo.');
+        
+      } catch (verifyErr) {
+        // Si falla, significa que te quitaron el caso. AQUÍ SÍ limpiamos la pantalla.
+        error('El pedido fue liberado o ya  no se encuentra asignado.');
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
         setObservacion("");
-      })
-      .catch(() => error('Error al gestionar el caso.'))
-      .finally(() => setLoading(false));
+      }
+
+    } finally {
+      // 3. Apagamos el botón de carga siempre
+      setLoading(false);
+    }
   };
 
   // Configuración de los campos de solo lectura para evitar repetición en el JSX
@@ -156,7 +171,7 @@ export default function CaseResolutionPage() {
     { id: 'Pagina', label: 'Página', value: '' },
     { id: 'NodoIdTap', label: 'Nodo ID TAP', value: '' },
     { id: 'Megagold', label: 'Megagold', value: '' },
-    { id: 'FechaIngreso', label: 'Fecha y hora de ingreso', value: formatDateTime(formData.fecha_creado) },
+    { id: 'FechaIngreso', label: 'Fecha y hora de ingreso', value: formData.fecha_creado ? new Date(formData.fecha_creado).toLocaleString('es-CO') : '' },
   ];
 
   return (
@@ -266,13 +281,18 @@ export default function CaseResolutionPage() {
                   </div>
                 </div>
                 <div className="col-md-6 d-flex justify-content-md-end align-items-center">
-                  <button
-                      className="button button-gray button-small"
-                      type="button"
-                    >
-                      Ver historico de pedido
-                    </button>
-                    <Icon name="look-for" size="md" className="ms-1 align-bottom" />
+                  {formData.oferta && (
+                    <>
+                      <button
+                        className="button button-gray button-small"
+                        type="button"
+                        onClick={() => setIsHistoryOpen(true)}
+                      >
+                        Ver historico de pedido
+                      </button>
+                      <Icon name="look-for" size="md" className="ms-1 align-bottom" />
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -295,7 +315,7 @@ export default function CaseResolutionPage() {
 
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Accion">
-                      Acción
+                      Acción*
                     </label>
                     <select
                       className="form-select"
@@ -314,7 +334,7 @@ export default function CaseResolutionPage() {
                   
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="SubAccion">
-                      Subacción
+                      Subacción*
                     </label>
                     <select
                       className="form-select"
@@ -334,7 +354,7 @@ export default function CaseResolutionPage() {
                   
                   <div className="col-12">
                     <label className="form-label" htmlFor="Observacion">
-                      Observación
+                      Observación*
                     </label>
                     <textarea 
                       className="form-control" 
@@ -375,6 +395,12 @@ export default function CaseResolutionPage() {
           </div>
         </div>
       </div>
+
+      <OrderHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        ofertaId={formData.oferta}
+      />
     </section>
   )
 }

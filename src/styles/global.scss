@@ -153,7 +153,7 @@ video {
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     position: sticky;
     top: 0;
-    z-index: 1081;
+    z-index: 1050;
   }
 
   &-logo {
@@ -479,4 +479,17 @@ nav ul.pagination{
 
 .toast-container{
   margin-top: 75px;
+}
+
+
+.text{
+  &-primary{
+    color: $color-blue-primary !important;
+  }
+}
+
+.bg{
+  &-primary{
+    background-color: $color-blue-primary !important;
+  }
 }

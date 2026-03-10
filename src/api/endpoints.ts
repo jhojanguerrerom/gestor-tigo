@@ -5,11 +5,19 @@ export const ENDPOINTS = {
     REFRESH_TOKEN: '/refresh-token',
     SESSIONS: '/sessions',
   },
-  AUTOMATION: {
-    GET_DATA_FENIX: '/v1/getdatafenix',
-    GET_DATA_SIEBEL: '/v1/getdatasiebel',
-  },
   ENLISTMENT: {
     BASE: '/v1/enlistment',
+    SEARCH: '/v1/enlistment/search/field',
+  },
+  OFFERS: {
+    BASE: '/offers',
+    MY_OFFER: '/v1/ofertas/mi-oferta',
+    FREEZE: '/v1/ofertas/congelar',
+    MANAGE: '/v1/ofertas/gestionar',
+    HISTORY: (oferta: string) => `/v1/ofertas/historico/${oferta}`,
+    MANAGEMENT_DETAIL: (oferta: string) => `/v1/ofertas/gestion-detalle/${oferta}`,
+  },
+  ACTIONS: {
+    CATALOG: '/v1/ofertas/catalogo/acciones',
   }
 } as const;

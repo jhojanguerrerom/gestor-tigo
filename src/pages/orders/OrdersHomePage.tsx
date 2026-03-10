@@ -124,8 +124,8 @@ export default function OrdersHomePage() {
                 </span>
               </td>
               <td>
-                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={formatDateTime(row.campos_dinamicos?.fecha_creado)}>
-                  {formatDateTime(row.campos_dinamicos?.fecha_creado)}
+                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}>
+                  {row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}
                 </span>
               </td>
               <td className="text-center">

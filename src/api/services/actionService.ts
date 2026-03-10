@@ -1,5 +1,6 @@
 import httpClient from '../httpClient';
+import { ENDPOINTS } from '../endpoints';
 
 export const actionService = {
-  getActionsWithSubactions: () => httpClient.get('/v1/ofertas/catalogo/acciones'), // Ajusta el endpoint si es diferente
+  getActionsWithSubactions: () => httpClient.get(ENDPOINTS.ACTIONS.CATALOG),
 };
