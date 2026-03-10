@@ -21,17 +21,6 @@ export default function OrdersHomePage() {
     loading,
   } = useEnlistmentTable({ pageSize, searchQuery, refreshKey })
 
-  // Utilidad para formatear fecha y hora
-  function formatDateTime(dateString?: string) {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    // Formatear fecha y hora con segundos manualmente
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
-      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-  }
-
   // Resetear página a 1 cuando cambia el searchQuery
   useEffect(() => {
     setCurrentPage(1);
