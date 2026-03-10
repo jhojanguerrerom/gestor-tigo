@@ -26,7 +26,9 @@ export default function AppLayout() {
             <img className="app-logo" src={logoTigo} alt="Tigo" />
             <div className="app-user">
               <span className="app-user__label">Bienvenido(a)</span>
-              <span className="app-user__name">{user?.full_name || 'Usuario'} <small>{'rol: '+user?.profile_id}</small></span>
+              <span className="app-user__name">{user?.full_name || 'Usuario'} 
+                {/* <small>{'rol: '+user?.profile_id}</small> */}
+              </span>
             </div>
           </div>
 

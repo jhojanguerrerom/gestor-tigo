@@ -2,11 +2,12 @@
  * Shared case resolution view for all roles.
  */
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import { offerService } from '@/api/services/offerService';
 import { offerManagementService } from '@/api/services/offerManagementService';
+import { useToast } from '@/context/ToastContext';
 
 export default function CaseResolutionPage() {
   const location = useLocation();
@@ -68,6 +69,7 @@ export default function CaseResolutionPage() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { success } = useToast();
     // Handler para "Deme pedido"
     const handleDemePedido = () => {
       setLoading(true);
@@ -133,6 +135,7 @@ export default function CaseResolutionPage() {
 
     offerManagementService.manageOffer(payload)
       .then(() => {
+        success('Caso cerrado exitosamente.');
         setError("No hay caso asignado");
         setFormData({
           oferta: '',
@@ -250,7 +253,7 @@ export default function CaseResolutionPage() {
               {formData.oferta ? (
                 <span className="badge bg-warning text-dark mb-3" style={{position: 'relative', zIndex: 2}}>Caso en gestión</span>
               ) : error ? (
-                <span className="badge bg-danger text-light mb-3" style={{position: 'relative', zIndex: 2}}>{error}</span>
+                <span className="badge bg-dark text-light mb-3" style={{position: 'relative', zIndex: 2}}>{error}</span>
               ) : null}
 
               <form className="row g-3">
