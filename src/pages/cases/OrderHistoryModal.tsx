@@ -29,7 +29,18 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
           }
 
           if (detailsResult.status === 'fulfilled') {
-            setDetails(detailsResult.value.data || []);
+            const data = detailsResult.value.data;
+            
+            // NORMALIZACIÓN: Si 'data' existe pero NO es un arreglo (es decir, es un solo objeto),
+            // lo envolvemos en un arreglo [data] para que el .map() funcione sin romperse.
+            if (!data) {
+              setDetails([]);
+            } else if (Array.isArray(data)) {
+              setDetails(data);
+            } else {
+              setDetails([data]);
+            }
+            
           } else {
             console.error("Error al obtener el detalle de gestión:", detailsResult.reason);
             setDetails([]);
@@ -58,7 +69,7 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
         <div className="d-flex flex-column gap-4">
           {/* Sección Histórico de Cambios */}
           <div className="mb-4">
-            <h6 className="fw-bold mb-4 text-primary">Histórico de Cambios</h6>
+            <h6 className="fw-bold mb-4 text-primary">Histórico de cambios</h6>
             
             {history.length > 0 ? (
               // Contenedor principal del Timeline (línea lateral izquierda)
@@ -159,6 +170,8 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
                     <div className="d-flex justify-content-between align-items-center mb-2">
                       <div>
                         Acción: <span className="badge bg-primary p-1 fw-bold text-uppercase">{item.accion || '-'}</span>
+                        <br />
+                        Subacción: <span className="badge bg-primary p-1 fw-bold text-uppercase">{item.subaccion || '-'}</span>
                       </div>
                       <small className="fw-bold">
                         {item.fecha_gestion ? new Date(item.fecha_gestion).toLocaleString('es-CO') : '-'}
@@ -172,12 +185,6 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
                         <div className="col-12 mb-1 mt-0">
                           <strong className="text-dark">Usuario:</strong> <span className="ms-2">{item.usuario_nombre || item.usuario || '-'}</span>
                         </div>
-                        
-                        {item.subaccion && (
-                          <div className="col-12 mb-1 mt-0">
-                            <strong className="text-dark">Subacción:</strong> <span className="ms-2">{item.subaccion}</span>
-                          </div>
-                        )}
 
                         {item.observacion && (
                           <div className="col-12 mt-2 pt-2 border-top">
