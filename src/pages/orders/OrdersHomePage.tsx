@@ -152,11 +152,8 @@ export default function OrdersHomePage() {
                         <thead className="table-light text-center">
                           <tr>
                             <th scope="col">Dirección</th>
-                            <th scope="col">Paginación</th>
+                            <th scope="col">Página</th>
                             <th scope="col">Coordenadas</th>
-                            <th scope="col">Acción</th>
-                            <th scope="col">Subacción</th>
-                            <th scope="col">Observación</th>
                             <th scope="col">Nodo ID TAP</th>
                           </tr>
                         </thead>
@@ -175,21 +172,6 @@ export default function OrdersHomePage() {
                             <td>
                               <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.coordenadas}>
                                 {row.campos_dinamicos?.coordenadas || '-'}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.accion}>
-                                {row.campos_dinamicos?.accion || '-'}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.subaccion}>
-                                {row.campos_dinamicos?.subaccion || '-'}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.observacion}>
-                                {row.campos_dinamicos?.observacion || '-'}
                               </span>
                             </td>
                             <td>

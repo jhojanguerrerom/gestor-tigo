@@ -1,7 +1,7 @@
-import httpClient from '../httpClient'
+import httpClient from '../httpClient';
 
 export const offerService = {
-  // Ejemplo: obtener ofertas
   getOffers: () => httpClient.get('/offers'),
-  // Agrega aquí más métodos relacionados con ofertas
-}
+  getMyOffer: () => httpClient.get('/v1/ofertas/mi-oferta'),
+  freezeOffer: () => httpClient.post('/v1/ofertas/congelar'),
+};

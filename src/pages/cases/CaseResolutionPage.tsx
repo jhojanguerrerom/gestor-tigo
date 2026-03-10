@@ -2,10 +2,54 @@
  * Shared case resolution view for all roles.
  */
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
+import { offerService } from '@/api/services/offerService';
 
 export default function CaseResolutionPage() {
+  const location = useLocation();
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    setLoading(true);
+    const fetchOffer = async () => {
+      try {
+        const res = await offerService.getMyOffer();
+        if (!isMounted.current) return;
+        const campos = res.data.campos_dinamicos || {};
+        setFormData(prev => ({
+          ...prev,
+          oferta: campos.oferta || '',
+          pedido_id: campos.pedido_id || '',
+          concepto_id: campos.concepto_id || '',
+          concepto: campos.concepto || '',
+          direccion: campos.direccion || '',
+          fecha_creado: campos.fecha_creado || '',
+        }));
+        setError('');
+      } catch (err) {
+        if (!isMounted.current) return;
+        setError('No hay caso asignado');
+        setFormData(prev => ({
+          ...prev,
+          oferta: '',
+          pedido_id: '',
+          concepto_id: '',
+          concepto: '',
+          direccion: '',
+          fecha_creado: '',
+        }));
+      } finally {
+        if (isMounted.current) setLoading(false);
+      }
+    };
+    fetchOffer();
+    return () => {
+      isMounted.current = false;
+    };
+  }, [location.pathname, location.key]);
   // Estado y lógica del form
     const [acciones, setAcciones] = useState<any[]>([]);
     const [accionAuto, setAccionAuto] = useState(""); // id de acción
@@ -13,6 +57,35 @@ export default function CaseResolutionPage() {
     const [subaccion, setSubaccion] = useState(""); // id de subacción
     const observacionRef = useRef<HTMLTextAreaElement>(null);
     const [copied, setCopied] = useState(false);
+    const [formData, setFormData] = useState({
+      oferta: '',
+      pedido_id: '',
+      concepto_id: '',
+      concepto: '',
+      direccion: '',
+      fecha_creado: '',
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    // Handler para "Deme pedido"
+    const handleDemePedido = () => {
+      setLoading(true);
+      offerService.freezeOffer()
+        .then(res => {
+          const campos = res.data.campos_dinamicos || {};
+          setFormData({
+            oferta: campos.oferta || '',
+            pedido_id: campos.pedido_id || '',
+            concepto_id: campos.concepto_id || '',
+            concepto: campos.concepto || '',
+            direccion: campos.direccion || '',
+            fecha_creado: campos.fecha_creado || '',
+          });
+          setError(''); // Limpiar error al asignar caso
+        })
+        .catch(() => setError('No se pudo asignar pedido'))
+        .finally(() => setLoading(false));
+    };
 
     useEffect(() => {
       actionService.getActionsWithSubactions()
@@ -56,10 +129,15 @@ export default function CaseResolutionPage() {
           Espacio de trabajo para la gestión de pedidos.
         </p>
       </header>
-
+      {loading && (
+        <div className="d-flex justify-content-center align-items-center mb-3">
+          <span className="spinner-border text-primary" role="status" aria-hidden="true"></span>
+          <span className="ms-2">Cargando oferta...</span>
+        </div>
+      )}
       <div className="row">
         <div className="col-md-3">
-          <div className="card shadow-sm mb-4">
+          <div className={`card shadow-sm mb-4 ${formData.oferta ? 'opacity-50' : ''}`} style={formData.oferta ? { pointerEvents: 'none', cursor: 'not-allowed' } : {}}>
             <div className="card-body">
               <div className="d-flex flex-column gap-3">
                 <div>
@@ -74,11 +152,10 @@ export default function CaseResolutionPage() {
                     <label className="form-label" htmlFor="TipoServicio">
                       Conceptos
                     </label>
-                    <select className="form-select" id="TipoServicio">
+                    {/* <select className="form-select" id="TipoServicio" disabled={!!formData.oferta} style={formData.oferta ? { cursor: 'not-allowed' } : {}}> */}
+                    <select className="form-select" id="TipoServicio" disabled>
                       <option>Seleccionar</option>
-                      <option>Opcción A</option>
-                      <option>Opción B</option>
-                      <option>Opción C</option>
+                      {/* ...existing code... */}
                     </select>
                   </div>
 
@@ -87,11 +164,14 @@ export default function CaseResolutionPage() {
                     <button
                       className="button button-blue w-100"
                       type="button"
+                      onClick={handleDemePedido}
+                      disabled={!!formData.oferta || loading}
+                      style={!!formData.oferta || loading ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
                     >
                       Deme pedido
                     </button>
                   </div>
-                  <hr className="my-4"/>
+                  {/* <hr className="my-4"/>
                   <div className="col-md-12 mt-0">
                     <label className="form-label" htmlFor="oferta">
                       Buscar oferta
@@ -99,8 +179,10 @@ export default function CaseResolutionPage() {
                     <input
                       className="form-control"
                       id="oferta"
+                      disabled={!!formData.oferta || loading}
                       type="text"
                       placeholder="Ingresar oferta"
+                      style={formData.oferta ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
                     />
                   </div>
                   <div className="col-md-12 d-flex justify-content-md-end align-items-center">
@@ -108,16 +190,20 @@ export default function CaseResolutionPage() {
                     <button
                       className="button button-blue w-100"
                       type="button"
+                      disabled={!!formData.oferta}
+                      style={formData.oferta ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
                     >
                       Buscar
                     </button>
-                  </div>
+                  </div> */}
                   <hr className="my-4"/>
                   <div className="col-md-12 d-flex justify-content-md-end mt-0 mb-2 align-items-center">
                     <Icon name="edit" size="xl" className="me-2" />
                     <button
                       className="button button-blue w-100"
                       type="button"
+                      disabled={!!formData.oferta}
+                      style={formData.oferta ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
                     >
                       Ingreso manual
                     </button>
@@ -130,70 +216,75 @@ export default function CaseResolutionPage() {
         <div className="col-md-9">
           <div className="card shadow-sm">
             <div className="card-body">
-              <div className="mb-3">
+              {formData.oferta ? (
+                <span className="badge bg-warning text-dark mb-3" style={{position: 'relative', zIndex: 2}}>Caso en gestión</span>
+              ) : error ? (
+                <span className="badge bg-danger text-light mb-3" style={{position: 'relative', zIndex: 2}}>{error}</span>
+              ) : null}
+              {/* <div className="mb-3">
                 <h2 className="h5 mb-1">Detalle:</h2>
-              </div>
+              </div> */}
 
               <form className="row g-3">
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="OfertaSiebel">
                       Oferta Siebel
                     </label>
-                    <input className="form-control" id="OfertaSiebel" type="text" />
+                    <input className="form-control" id="OfertaSiebel" type="text" value={formData.oferta} disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="PedidoFenix">
                       Pedido Fenix
                     </label>
-                    <input className="form-control" id="PedidoFenix" type="text" />
+                    <input className="form-control" id="PedidoFenix" type="text" value={formData.pedido_id} disabled />
                   </div>
-                  <div className="col-md-3">
+                   <div className="col-md-3">
                     <label className="form-label" htmlFor="ConceptoCola">
                       Concepto o cola
                     </label>
-                    <input className="form-control" id="ConceptoCola" type="text" />
+                      <input className="form-control" id="ConceptoCola" type="text" value={formData.concepto_id ? formData.concepto_id : formData.concepto} disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Segmento">
                       Segmento
                     </label>
-                    <input className="form-control" id="Segmento" type="text" />
+                    <input className="form-control" id="Segmento" type="text" disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Direccion">
                       Dirección
                     </label>
-                    <input className="form-control" id="Direccion" type="text" />
+                    <input className="form-control" id="Direccion" type="text" value={formData.direccion} disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Coordenadas">
                       Coordenadas
                     </label>
-                    <input className="form-control" id="Coordenadas" type="text" />
+                    <input className="form-control" id="Coordenadas" type="text" disabled />
                   </div>
                   <div className="col-md-3">
-                    <label className="form-label" htmlFor="Paginacion">
-                      Paginación
+                    <label className="form-label" htmlFor="Pagina">
+                      Página
                     </label>
-                    <input className="form-control" id="Paginacion" type="text" />
+                    <input className="form-control" id="Pagina" type="text" disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="NodoIdTap">
                       Nodo ID TAP
                     </label>
-                    <input className="form-control" id="NodoIdTap" type="text" />
+                    <input className="form-control" id="NodoIdTap" type="text" disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Megagold">
                       Megagold
                     </label>
-                    <input className="form-control" id="Megagold" type="text" />
+                    <input className="form-control" id="Megagold" type="text" disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="FechaIngreso">
                       Fecha y hora de ingreso
                     </label>
-                    <input className="form-control" id="FechaIngreso" type="datetime-local" />
+                    <input className="form-control" id="FechaIngreso" type="text" value={formData.fecha_creado} disabled />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Accion">
