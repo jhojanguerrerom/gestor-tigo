@@ -11,7 +11,7 @@ $font-primary: "DM Sans", sans-serif;
 $color-blue-primary: #001eb4;
 $color-blue-light: #45c8f6;
 $color-blue-hover: #1a8afd;
-$color-text-muted: #999;
+$color-text-muted: #9B9B9B;
 $color-input-line: #757575;
 $color-input-focus: #5264AE;
 $color-bg-app: #f6f7fb;
@@ -450,7 +450,6 @@ nav ul.pagination{
   min-width: 200px;
   font-family: $font-primary;
   font-weight: 400;
-
   &-blue {
     background-color: $color-blue-light;
     border-color: $color-blue-light;
@@ -461,4 +460,23 @@ nav ul.pagination{
       border-color: $color-blue-hover;
     }
   }
+  &-gray {
+    background-color: $color-text-muted;
+    border-color: $color-text-muted;
+    color: #ffffff;
+
+    &:hover {
+      background-color: $color-input-line;
+      border-color: $color-input-line;
+    }
+  }
+  &-small{
+    padding: 3px 10px;
+    min-width: auto;
+    font-size: 12px;
+  }
+}
+
+.toast-container{
+  margin-top: 75px;
 }

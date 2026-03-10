@@ -9,7 +9,7 @@ interface ToastContainerProps {
 export default function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
   return (
     <div
-      className="toast-container position-fixed bottom-0 end-0 p-3"
+      className="toast-container position-fixed top-0 end-0 p-3"
       style={{ zIndex: 1055 }} // z-index superior a modales y offcanvas estándar de Bootstrap
     >
       {toasts.map((toast) => (

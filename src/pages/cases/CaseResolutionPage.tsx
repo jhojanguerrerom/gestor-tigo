@@ -9,119 +9,119 @@ import { offerService } from '@/api/services/offerService';
 import { offerManagementService } from '@/api/services/offerManagementService';
 import { useToast } from '@/context/ToastContext';
 
+const INITIAL_FORM_DATA = {
+  oferta: '',
+  pedido_id: '',
+  concepto_id: '',
+  concepto: '',
+  direccion: '',
+  fecha_creado: '',
+};
+
+const extractFormData = (campos: any = {}) => ({
+  oferta: campos.oferta || '',
+  pedido_id: campos.pedido_id || '',
+  concepto_id: campos.concepto_id || '',
+  concepto: campos.concepto || '',
+  direccion: campos.direccion || '',
+  fecha_creado: campos.fecha_creado || '',
+});
+
 export default function CaseResolutionPage() {
   const location = useLocation();
   const isMounted = useRef(true);
 
+  // Estados
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const [acciones, setAcciones] = useState<any[]>([]);
+  const [accionAuto, setAccionAuto] = useState(""); 
+  const [subacciones, setSubacciones] = useState<any[]>([]);
+  const [subaccion, setSubaccion] = useState(""); 
+  const [observacion, setObservacion] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  const { success, info, error } = useToast();
+
   useEffect(() => {
     isMounted.current = true;
     setLoading(true);
+
     const fetchOffer = async () => {
       try {
         const res = await offerService.getMyOffer();
         if (!isMounted.current) return;
-        const campos = res.data.campos_dinamicos || {};
-        setFormData(prev => ({
-          ...prev,
-          oferta: campos.oferta || '',
-          pedido_id: campos.pedido_id || '',
-          concepto_id: campos.concepto_id || '',
-          concepto: campos.concepto || '',
-          direccion: campos.direccion || '',
-          fecha_creado: campos.fecha_creado || '',
-        }));
-        setError('');
+        setFormData(extractFormData(res.data.campos_dinamicos));
       } catch (err) {
         if (!isMounted.current) return;
-        setError('No hay caso asignado');
-        setFormData(prev => ({
-          ...prev,
-          oferta: '',
-          pedido_id: '',
-          concepto_id: '',
-          concepto: '',
-          direccion: '',
-          fecha_creado: '',
-        }));
+        info('Solicite un pedido para comenzar a gestionar.', 'Sin caso asignado');
+        setFormData(INITIAL_FORM_DATA);
       } finally {
         if (isMounted.current) setLoading(false);
       }
     };
+
     fetchOffer();
     return () => {
       isMounted.current = false;
     };
-  }, [location.pathname, location.key]);
-  // Estado y lógica del form
-    const [acciones, setAcciones] = useState<any[]>([]);
-    const [accionAuto, setAccionAuto] = useState(""); // id de acción
-    const [subacciones, setSubacciones] = useState<any[]>([]);
-    const [subaccion, setSubaccion] = useState(""); // id de subacción
-    const observacionRef = useRef<HTMLTextAreaElement>(null);
-    const [copied, setCopied] = useState(false);
-    const [formData, setFormData] = useState({
-      oferta: '',
-      pedido_id: '',
-      concepto_id: '',
-      concepto: '',
-      direccion: '',
-      fecha_creado: '',
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const { success } = useToast();
-    // Handler para "Deme pedido"
-    const handleDemePedido = () => {
-      setLoading(true);
-      offerService.freezeOffer()
-        .then(res => {
-          const campos = res.data.campos_dinamicos || {};
-          setFormData({
-            oferta: campos.oferta || '',
-            pedido_id: campos.pedido_id || '',
-            concepto_id: campos.concepto_id || '',
-            concepto: campos.concepto || '',
-            direccion: campos.direccion || '',
-            fecha_creado: campos.fecha_creado || '',
-          });
-          setError(''); // Limpiar error al asignar caso
-        })
-        .catch(() => setError('No se pudo asignar pedido'))
-        .finally(() => setLoading(false));
-    };
+  }, [location.pathname, location.key, info]);
 
-    useEffect(() => {
-      actionService.getActionsWithSubactions()
-        .then((res: any) => {
-          // Filtrar solo acciones activas y subacciones activas
-          const data = res.data || [];
-          const accionesActivas = data
-            .filter((a: any) => a.is_active)
-            .map((a: any) => ({
-              ...a,
-              subacciones: (a.subacciones || []).filter((s: any) => s.is_active)
-            }));
-          setAcciones(accionesActivas);
-        });
-    }, []);
+  // Utilidad para formatear fecha y hora
+  function formatDateTime(dateString?: string) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    // Formatear fecha y hora con segundos manualmente
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
+      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
 
-    useEffect(() => {
-      // Actualizar subacciones cuando cambia la acción seleccionada
-      const accion = acciones.find(a => a.id === accionAuto);
-      setSubacciones(accion ? accion.subacciones : []);
-      setSubaccion("");
-    }, [accionAuto, acciones]);
+  // Cargar acciones
+  useEffect(() => {
+    actionService.getActionsWithSubactions()
+      .then((res: any) => {
+        const data = res.data || [];
+        const accionesActivas = data
+          .filter((a: any) => a.is_active)
+          .map((a: any) => ({
+            ...a,
+            subacciones: (a.subacciones || []).filter((s: any) => s.is_active)
+          }));
+        setAcciones(accionesActivas);
+      });
+  }, []);
+
+  // Actualizar subacciones al cambiar de acción
+  useEffect(() => {
+    const accion = acciones.find(a => a.id === accionAuto);
+    setSubacciones(accion ? accion.subacciones : []);
+    setSubaccion("");
+  }, [accionAuto, acciones]);
+
+  const handleDemePedido = () => {
+    setLoading(true);
+    offerService.freezeOffer()
+      .then(res => {
+        const campos = res.data.campos_dinamicos || {};
+        setFormData(extractFormData(campos));
+        info(`Caso ${campos.oferta || ''} asignado exitosamente.`);
+      })
+      .catch(() => error('No se pudo asignar pedido'))
+      .finally(() => setLoading(false));
+  };
 
   const handleCopy = () => {
-      const observacion = observacionRef.current?.value || "";
-      const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre || "";
-      const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre || "";
-      const texto = [accionNombre, subaccionNombre, observacion].filter(Boolean).join(" / ");
-      if (texto) {
-        navigator.clipboard.writeText(texto);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      }
+    const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre || "";
+    const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre || "";
+    const texto = [accionNombre, subaccionNombre, observacion].filter(Boolean).join(" / ");
+    
+    if (texto) {
+      navigator.clipboard.writeText(texto);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
   };
 
   const handleSubmit = () => {
@@ -130,30 +130,34 @@ export default function CaseResolutionPage() {
       oferta: formData.oferta,
       accion_id: accionAuto,
       subaccion_id: subaccion,
-      observacion: observacionRef.current?.value || "",
+      observacion: observacion,
     };
 
     offerManagementService.manageOffer(payload)
       .then(() => {
-        success('Caso cerrado exitosamente.');
-        setError("No hay caso asignado");
-        setFormData({
-          oferta: '',
-          pedido_id: '',
-          concepto_id: '',
-          concepto: '',
-          direccion: '',
-          fecha_creado: '',
-        });
+        success(`Caso ${payload.oferta} cerrado exitosamente.`);
+        setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
-        if (observacionRef.current) {
-          observacionRef.current.value = "";
-        }
+        setObservacion("");
       })
-      .catch(() => setError('Error al gestionar la oferta'))
+      .catch(() => error('Error al gestionar el caso.'))
       .finally(() => setLoading(false));
   };
+
+  // Configuración de los campos de solo lectura para evitar repetición en el JSX
+  const readOnlyFields = [
+    { id: 'OfertaSiebel', label: 'Oferta Siebel', value: formData.oferta },
+    { id: 'PedidoFenix', label: 'Pedido Fenix', value: formData.pedido_id },
+    { id: 'ConceptoCola', label: 'Concepto o cola', value: formData.concepto_id || formData.concepto },
+    { id: 'Segmento', label: 'Segmento', value: '' },
+    { id: 'Direccion', label: 'Dirección', value: formData.direccion },
+    { id: 'Coordenadas', label: 'Coordenadas', value: '' },
+    { id: 'Pagina', label: 'Página', value: '' },
+    { id: 'NodoIdTap', label: 'Nodo ID TAP', value: '' },
+    { id: 'Megagold', label: 'Megagold', value: '' },
+    { id: 'FechaIngreso', label: 'Fecha y hora de ingreso', value: formatDateTime(formData.fecha_creado) },
+  ];
 
   return (
     <section className="container py-4">
@@ -163,15 +167,20 @@ export default function CaseResolutionPage() {
           Espacio de trabajo para la gestión de pedidos.
         </p>
       </header>
+      
       {loading && (
         <div className="d-flex justify-content-center align-items-center mb-3">
           <span className="spinner-border text-primary" role="status" aria-hidden="true"></span>
           <span className="ms-2">Cargando oferta...</span>
         </div>
       )}
+      
       <div className="row">
         <div className="col-md-3">
-          <div className={`card shadow-sm mb-4 ${formData.oferta ? 'opacity-50' : ''}`} style={formData.oferta ? { pointerEvents: 'none', cursor: 'not-allowed' } : {}}>
+          <div 
+            className={`card shadow-sm mb-4 ${formData.oferta ? 'opacity-50' : ''}`} 
+            style={formData.oferta ? { pointerEvents: 'none', cursor: 'not-allowed' } : {}}
+          >
             <div className="card-body">
               <div className="d-flex flex-column gap-3">
                 <div>
@@ -189,7 +198,6 @@ export default function CaseResolutionPage() {
                     {/* <select className="form-select" id="TipoServicio" disabled={!!formData.oferta} style={formData.oferta ? { cursor: 'not-allowed' } : {}}> */}
                     <select className="form-select" id="TipoServicio" disabled>
                       <option>Seleccionar</option>
-                      {/* ...existing code... */}
                     </select>
                   </div>
 
@@ -200,7 +208,7 @@ export default function CaseResolutionPage() {
                       type="button"
                       onClick={handleDemePedido}
                       disabled={!!formData.oferta || loading}
-                      style={!!formData.oferta || loading ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
+                      style={!!formData.oferta || loading ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                     >
                       Deme pedido
                     </button>
@@ -247,76 +255,44 @@ export default function CaseResolutionPage() {
             </div>
           </div>
         </div>
+        
         <div className="col-md-9">
           <div className="card shadow-sm">
             <div className="card-body">
-              {formData.oferta ? (
-                <span className="badge bg-warning text-dark mb-3" style={{position: 'relative', zIndex: 2}}>Caso en gestión</span>
-              ) : error ? (
-                <span className="badge bg-dark text-light mb-3" style={{position: 'relative', zIndex: 2}}>{error}</span>
-              ) : null}
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <h2 className="h5 mb-1">Detalle:</h2>
+                  </div>
+                </div>
+                <div className="col-md-6 d-flex justify-content-md-end align-items-center">
+                  <button
+                      className="button button-gray button-small"
+                      type="button"
+                    >
+                      Ver historico de pedido
+                    </button>
+                    <Icon name="look-for" size="md" className="ms-1 align-bottom" />
+                </div>
+              </div>
 
               <form className="row g-3">
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="OfertaSiebel">
-                      Oferta Siebel
-                    </label>
-                    <input className="form-control" id="OfertaSiebel" type="text" value={formData.oferta} disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="PedidoFenix">
-                      Pedido Fenix
-                    </label>
-                    <input className="form-control" id="PedidoFenix" type="text" value={formData.pedido_id} disabled />
-                  </div>
-                   <div className="col-md-3">
-                    <label className="form-label" htmlFor="ConceptoCola">
-                      Concepto o cola
-                    </label>
-                      <input className="form-control" id="ConceptoCola" type="text" value={formData.concepto_id ? formData.concepto_id : formData.concepto} disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="Segmento">
-                      Segmento
-                    </label>
-                    <input className="form-control" id="Segmento" type="text" disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="Direccion">
-                      Dirección
-                    </label>
-                    <input className="form-control" id="Direccion" type="text" value={formData.direccion} disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="Coordenadas">
-                      Coordenadas
-                    </label>
-                    <input className="form-control" id="Coordenadas" type="text" disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="Pagina">
-                      Página
-                    </label>
-                    <input className="form-control" id="Pagina" type="text" disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="NodoIdTap">
-                      Nodo ID TAP
-                    </label>
-                    <input className="form-control" id="NodoIdTap" type="text" disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="Megagold">
-                      Megagold
-                    </label>
-                    <input className="form-control" id="Megagold" type="text" disabled />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label" htmlFor="FechaIngreso">
-                      Fecha y hora de ingreso
-                    </label>
-                    <input className="form-control" id="FechaIngreso" type="text" value={formData.fecha_creado} disabled />
-                  </div>
+                  {/* Renderizado dinámico de los campos de solo lectura */}
+                  {readOnlyFields.map(field => (
+                    <div className="col-md-3" key={field.id}>
+                      <label className="form-label" htmlFor={field.id}>
+                        {field.label}
+                      </label>
+                      <input 
+                        className="form-control" 
+                        id={field.id} 
+                        type="text" 
+                        value={field.value} 
+                        disabled 
+                      />
+                    </div>
+                  ))}
+
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="Accion">
                       Acción
@@ -325,7 +301,7 @@ export default function CaseResolutionPage() {
                       className="form-select"
                       id="Accion"
                       value={accionAuto}
-                      onChange={event => setAccionAuto(event.target.value)}
+                      onChange={e => setAccionAuto(e.target.value)}
                     >
                       <option value="">Seleccionar</option>
                       {acciones.map((accion) => (
@@ -335,6 +311,7 @@ export default function CaseResolutionPage() {
                       ))}
                     </select>
                   </div>
+                  
                   <div className="col-md-3">
                     <label className="form-label" htmlFor="SubAccion">
                       Subacción
@@ -354,16 +331,24 @@ export default function CaseResolutionPage() {
                       ))}
                     </select>
                   </div>
+                  
                   <div className="col-12">
                     <label className="form-label" htmlFor="Observacion">
                       Observación
                     </label>
-                    <textarea className="form-control" id="Observacion" rows={4} ref={observacionRef} />
+                    <textarea 
+                      className="form-control" 
+                      id="Observacion" 
+                      rows={4} 
+                      value={observacion} 
+                      onChange={e => setObservacion(e.target.value)} 
+                    />
                   </div>
+                  
                   <div className="col-12 d-flex justify-content-between align-items-center gap-2">
                     <div>
                       <button
-                        className="button button-outline-blue"
+                        className="button button-gray button-small"
                         type="button"
                         onClick={handleCopy}
                         title="Copiar acción/subacción/observación"
@@ -379,7 +364,7 @@ export default function CaseResolutionPage() {
                       className="button button-blue"
                       type="button"
                       onClick={handleSubmit}
-                      disabled={loading || !formData.oferta}
+                      disabled={loading || !formData.oferta || !accionAuto || !subaccion || !observacion}
                     >
                       Enviar
                       <Icon name="send" size="lg" className="ms-3" />
