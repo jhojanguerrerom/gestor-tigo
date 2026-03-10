@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { offerService } from '@/api/services/offerService';
 import { Icon } from '@/icons/Icon';
 

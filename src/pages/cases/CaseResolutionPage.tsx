@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import { offerService } from '@/api/services/offerService';
+import { offerManagementService } from '@/api/services/offerManagementService';
 
 export default function CaseResolutionPage() {
   const location = useLocation();
@@ -121,6 +122,36 @@ export default function CaseResolutionPage() {
       }
   };
 
+  const handleSubmit = () => {
+    setLoading(true);
+    const payload = {
+      oferta: formData.oferta,
+      accion_id: accionAuto,
+      subaccion_id: subaccion,
+      observacion: observacionRef.current?.value || "",
+    };
+
+    offerManagementService.manageOffer(payload)
+      .then(() => {
+        setError("No hay caso asignado");
+        setFormData({
+          oferta: '',
+          pedido_id: '',
+          concepto_id: '',
+          concepto: '',
+          direccion: '',
+          fecha_creado: '',
+        });
+        setAccionAuto("");
+        setSubaccion("");
+        if (observacionRef.current) {
+          observacionRef.current.value = "";
+        }
+      })
+      .catch(() => setError('Error al gestionar la oferta'))
+      .finally(() => setLoading(false));
+  };
+
   return (
     <section className="container py-4">
       <header className="mb-4">
@@ -196,7 +227,7 @@ export default function CaseResolutionPage() {
                       Buscar
                     </button>
                   </div> */}
-                  <hr className="my-4"/>
+                  {/* <hr className="my-4"/>
                   <div className="col-md-12 d-flex justify-content-md-end mt-0 mb-2 align-items-center">
                     <Icon name="edit" size="xl" className="me-2" />
                     <button
@@ -207,7 +238,7 @@ export default function CaseResolutionPage() {
                     >
                       Ingreso manual
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
@@ -221,9 +252,6 @@ export default function CaseResolutionPage() {
               ) : error ? (
                 <span className="badge bg-danger text-light mb-3" style={{position: 'relative', zIndex: 2}}>{error}</span>
               ) : null}
-              {/* <div className="mb-3">
-                <h2 className="h5 mb-1">Detalle:</h2>
-              </div> */}
 
               <form className="row g-3">
                   <div className="col-md-3">
@@ -344,7 +372,12 @@ export default function CaseResolutionPage() {
                         <span className="ms-2 text-success small">¡Copiado!</span>
                       )}
                     </div>
-                    <button className="button button-blue" type="button">
+                    <button
+                      className="button button-blue"
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={loading || !formData.oferta}
+                    >
                       Enviar
                       <Icon name="send" size="lg" className="ms-3" />
                     </button>
