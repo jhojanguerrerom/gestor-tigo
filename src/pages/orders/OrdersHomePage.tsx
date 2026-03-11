@@ -47,6 +47,18 @@ export default function OrdersHomePage() {
     handleRefresh()
   }
 
+  const processRuralAddress = (address: string) => {
+    if (address?.toUpperCase().includes('RURAL')) {
+      const match = address.match(/(\d{5,})/)
+      if (match) {
+        const numericString = match[0]
+        const cleanedAddress = address.replace(numericString, '').trim()
+        return { cleanedAddress, paginacion: numericString }
+      }
+    }
+    return { cleanedAddress: address, paginacion: null }
+  }
+
   const columns = [
     { header: 'Asesor' },
     { header: 'Oferta Siebel' },
@@ -76,107 +88,112 @@ export default function OrdersHomePage() {
         total={total ?? 0}
         totalPages={totalPages ?? 1}
         loading={loading}
-        renderRow={(row: any) => (
-          <Fragment key={row.hash_registro}>
-            <tr>
-              <td>
-                <Icon name="user-call" size="lg" className="me-2" />
-                {row.campos_dinamicos?.usuario ? (
-                  <span className="badge text-bg-blue" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.usuario}>
-                    {row.campos_dinamicos?.usuario}
+        renderRow={(row: any) => {
+          const { cleanedAddress, paginacion } = processRuralAddress(row.campos_dinamicos?.direccion)
+          const processedAddress = cleanedAddress
+          const processedPaginacion = paginacion || row.campos_dinamicos?.paginacion || '-'
+          return (
+            <Fragment key={row.hash_registro}>
+              <tr>
+                <td>
+                  <Icon name="user-call" size="lg" className="me-2" />
+                  {row.campos_dinamicos?.usuario ? (
+                    <span className="badge text-bg-blue" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.usuario}>
+                      {row.campos_dinamicos?.usuario}
+                    </span>
+                  ) : (
+                    <span className="badge text-bg-warning text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Sin asignar">
+                      Sin asignar
+                    </span>
+                  )}
+                </td>
+                <td>
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.oferta}>
+                    {row.campos_dinamicos?.oferta}
                   </span>
-                ) : (
-                  <span className="badge text-bg-warning text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Sin asignar">
-                    Sin asignar
+                </td>
+                <td>
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.pedido_id}>
+                    {row.campos_dinamicos?.pedido_id || '-'}
                   </span>
-                )}
-              </td>
-              <td>
-                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.oferta}>
-                  {row.campos_dinamicos?.oferta}
-                </span>
-              </td>
-              <td>
-                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.pedido_id}>
-                  {row.campos_dinamicos?.pedido_id || '-'}
-                </span>
-              </td>
-              <td>
-                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto}>
-                  {row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto || '-'}
-                </span>
-              </td>
-              <td>
-                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.uen}>
-                  {row.campos_dinamicos?.uen}
-                </span>
-              </td>
-              <td>
-                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}>
-                  {row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}
-                </span>
-              </td>
-              <td className="text-center">
-                <Icon name="plus" size="lg"
-                  className='cursor-pointer'
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#caseDetails-${row.hash_registro}`}
-                  aria-expanded="false"
-                  aria-controls={`caseDetails-${row.hash_registro}`}
-                />
-              </td>
-              <td>
-                <button className="badge rounded-pill text-bg-bluelight text-decoration-none p-2 border-0" onClick={() => handleOpenModal(row.campos_dinamicos?.oferta)}>
-                  Gestionar
-                </button>
-              </td>
-            </tr>
-            <tr className="data-details-row">
-              <td colSpan={8}>
-                <div className="collapse" id={`caseDetails-${row.hash_registro}`} data-bs-parent={`#${tableId}`}>
-                  <div className="p-3">
-                    <div className="table-responsive">
-                      <table className="table table-sm table-bordered mb-0 data-detail-table text-center">
-                        <thead className="table-light text-center">
-                          <tr>
-                            <th scope="col">Dirección</th>
-                            <th scope="col">Página</th>
-                            <th scope="col">Coordenadas</th>
-                            <th scope="col">Nodo ID TAP</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.direccion}>
-                                {row.campos_dinamicos?.direccion}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.paginacion}>
-                                {row.campos_dinamicos?.paginacion || '-'}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.coordenadas}>
-                                {row.campos_dinamicos?.coordenadas || '-'}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.nodo_id}>
-                                {row.campos_dinamicos?.nodo_id || '-'}
-                              </span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                </td>
+                <td>
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto}>
+                    {row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto || '-'}
+                  </span>
+                </td>
+                <td>
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.uen}>
+                    {row.campos_dinamicos?.uen}
+                  </span>
+                </td>
+                <td>
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}>
+                    {row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}
+                  </span>
+                </td>
+                <td className="text-center">
+                  <Icon name="plus" size="lg"
+                    className='cursor-pointer'
+                    data-bs-toggle="collapse"
+                    data-bs-target={`#caseDetails-${row.hash_registro}`}
+                    aria-expanded="false"
+                    aria-controls={`caseDetails-${row.hash_registro}`}
+                  />
+                </td>
+                <td>
+                  <button className="badge rounded-pill text-bg-bluelight text-decoration-none p-2 border-0" onClick={() => handleOpenModal(row.campos_dinamicos?.oferta)}>
+                    Gestionar
+                  </button>
+                </td>
+              </tr>
+              <tr className="data-details-row">
+                <td colSpan={8}>
+                  <div className="collapse" id={`caseDetails-${row.hash_registro}`} data-bs-parent={`#${tableId}`}>
+                    <div className="p-3">
+                      <div className="table-responsive">
+                        <table className="table table-sm table-bordered mb-0 data-detail-table text-center">
+                          <thead className="table-light text-center">
+                            <tr>
+                              <th scope="col">Dirección</th>
+                              <th scope="col">Página</th>
+                              <th scope="col">Coordenadas</th>
+                              <th scope="col">Nodo ID TAP</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.direccion}>
+                                  {row.campos_dinamicos?.direccion || '-' }
+                                </span>
+                              </td>
+                              <td>
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={processedPaginacion}>
+                                  {processedPaginacion}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.coordenadas}>
+                                  {row.campos_dinamicos?.coordenadas || '-'}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.nodo_id}>
+                                  {row.campos_dinamicos?.nodo_id || '-'}
+                                </span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          </Fragment>
-        )}
+                </td>
+              </tr>
+            </Fragment>
+          )
+        }}
         getSearchText={() => ''}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

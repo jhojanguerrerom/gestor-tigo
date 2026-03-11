@@ -153,8 +153,6 @@ export default function DataTable<T>({
             {(() => {
               const pages = []
               const maxPagesToShow = 5
-              const showLeftDots = safePage > 3
-              const showRightDots = safePage < totalPages - 2
               let start = 1
               let end = totalPages
               if (totalPages > maxPagesToShow) {
