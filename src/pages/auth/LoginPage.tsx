@@ -1,7 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import loginImage from '@/assets/logo-tigo-blanco.png'
-import './auth.scss'
 import { Icon } from '@/icons/Icon'
 import { useAuth } from '@/auth/hooks/useAuth'
 import { UserRole } from '@/auth/types/auth.types'
@@ -106,11 +105,6 @@ export default function LoginPage() {
                   <span className="bar"></span>
                   <label>Contraseña</label>
                 </div>
-                {error && (
-                  <div className="alert alert-danger p-2" role="alert">
-                    {error}
-                  </div>
-                )}
 
                 <div className="d-flex flex-sm-row justify-content-between align-items-center mt-5">
                   <a 
@@ -126,7 +120,8 @@ export default function LoginPage() {
                     type="submit"
                     disabled={loading}
                   >
-                      {loading ? 'Entrando...' : 'Entrar'}
+                      {loading && <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>}
+                      Entrar
                   </button>
                 </div>
               </form>

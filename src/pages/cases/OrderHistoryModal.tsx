@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import BaseModal from '@/components/BaseModal';
 import { offerService } from '@/api/services/offerService';
+import { useToast } from '@/context/ToastContext';
 
 interface OrderHistoryModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [details, setDetails] = useState<any[]>([]);
+  const { error } = useToast();
 
   useEffect(() => {
     if (isOpen && ofertaId) {
@@ -24,7 +26,8 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
           if (historyResult.status === 'fulfilled') {
             setHistory(historyResult.value.data || []);
           } else {
-            console.error("Error al obtener el histórico:", historyResult.reason);
+            const mensajeError = historyResult.reason?.message || "Error desconocido";
+            error(`Error al obtener el histórico: ${mensajeError}`);
             setHistory([]);
           }
 
@@ -42,7 +45,8 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
             }
             
           } else {
-            console.error("Error al obtener el detalle de gestión:", detailsResult.reason);
+            const errorMessage = detailsResult.reason?.message || detailsResult.reason || "Error desconocido";
+            error(`Error en detalle de gestión: ${errorMessage}`);
             setDetails([]);
           }
         })

@@ -40,14 +40,16 @@ export default function CaseResolutionPage() {
   const [subaccion, setSubaccion] = useState(""); 
   const [observacion, setObservacion] = useState("");
   const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false); // Carga inicial
+  const [isAssigning, setIsAssigning] = useState(false);  // Para el botón "Deme pedido"
+  const [isSubmitting, setIsSubmitting] = useState(false); // Para el botón "Enviar"
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   
   const { success, info, error } = useToast();
 
   useEffect(() => {
     isMounted.current = true;
-    setLoading(true);
+    setIsPageLoading(true);
 
     const fetchOffer = async () => {
       try {
@@ -56,10 +58,10 @@ export default function CaseResolutionPage() {
         setFormData(extractFormData(res.data.campos_dinamicos));
       } catch (err) {
         if (!isMounted.current) return;
-        info('Solicite un pedido para comenzar a gestionar', 'Sin pedido asignado');
+        info('Solicite un pedido para comenzar a gestionar');
         setFormData(INITIAL_FORM_DATA);
       } finally {
-        if (isMounted.current) setLoading(false);
+        if (isMounted.current) setIsPageLoading(false);
       }
     };
 
@@ -92,7 +94,7 @@ export default function CaseResolutionPage() {
   }, [accionAuto, acciones]);
 
   const handleDemePedido = () => {
-    setLoading(true);
+    setIsAssigning(true); // <--- Solo este botón entra en carga
     offerService.freezeOffer()
       .then(res => {
         const campos = res.data.campos_dinamicos || {};
@@ -100,7 +102,7 @@ export default function CaseResolutionPage() {
         info(`Pedido ${campos.oferta || ''} asignado exitosamente`);
       })
       .catch(() => error('No se pudo asignar pedido'))
-      .finally(() => setLoading(false));
+      .finally(() => setIsAssigning(false)); // <--- Apagamos solo este
   };
 
   const handleCopy = () => {
@@ -117,12 +119,16 @@ export default function CaseResolutionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 1. Validaciones previas
     if (!accionAuto || !subaccion || !observacion) {
       error('Acción, Subacción y Observación son campos requeridos.');
       return;
     }
 
-    setLoading(true);
+    // 2. Activamos la carga solo para este botón
+    setIsSubmitting(true);
+
     const payload = {
       oferta: formData.oferta,
       accion_id: accionAuto,
@@ -131,11 +137,11 @@ export default function CaseResolutionPage() {
     };
 
     try {
-      // 1. Intentamos enviar la gestión
+      // 3. Intentamos enviar la gestión
       await offerService.manageOffer(payload);
       
       // Si funciona, mostramos éxito y limpiamos todo
-      success(`Pedido ${payload.oferta} cerrado exitosamente.`);
+      success(`Pedido ${payload.oferta} cerrado exitosamente`);
       setFormData(INITIAL_FORM_DATA);
       setAccionAuto("");
       setSubaccion("");
@@ -144,16 +150,18 @@ export default function CaseResolutionPage() {
     } catch (err) {
       console.error("Error al gestionar el pedido:", err);
 
-      // 2. Si falla, verificamos si el caso SIGUE siendo tuyo en base de datos
+      // 4. Si falla el envío, verificamos si el caso SIGUE siendo del asesor
       try {
         await offerService.getMyOffer();
         
-        // Si responde bien, el caso sigue siendo tuyo. NO borramos lo que escribiste.
-        error('Ocurrió un error al enviar, pero el pedido sigue asignado. Por favor, intenta de nuevo');
+        // Si responde bien, el caso sigue siendo del asesor. No borramos lo escrito.
+        error('Ocurrió un error al enviar. Por favor, intente de nuevo');
         
       } catch (verifyErr) {
-        // Si falla, significa que te quitaron el caso. AQUÍ SÍ limpiamos la pantalla.
-        error('El pedido fue liberado o ya  no se encuentra asignado');
+        // Si falla, significa que el pedido ya no está asignado.
+        error('El pedido ya no se encuentra asignado a su usuario');
+        
+        // Limpiamos la pantalla para evitar gestiones sobre un caso perdido
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
@@ -161,8 +169,8 @@ export default function CaseResolutionPage() {
       }
 
     } finally {
-      // 3. Apagamos el botón de carga siempre
-      setLoading(false);
+      // 5. Apagamos el estado de carga del botón independientemente del resultado
+      setIsSubmitting(false);
     }
   };
 
@@ -188,13 +196,6 @@ export default function CaseResolutionPage() {
           Espacio de trabajo para la gestión de pedidos.
         </p>
       </header>
-      
-      {loading && (
-        <div className="d-flex justify-content-center align-items-center mb-3">
-          <span className="spinner-border text-primary" role="status" aria-hidden="true"></span>
-          <span className="ms-2">Cargando...</span>
-        </div>
-      )}
       
       <div className="row">
         <div className="col-md-3">
@@ -228,10 +229,16 @@ export default function CaseResolutionPage() {
                       className="button button-blue w-100"
                       type="button"
                       onClick={handleDemePedido}
-                      disabled={!!formData.oferta || loading}
-                      style={!!formData.oferta || loading ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
+                      disabled={!!formData.oferta || isAssigning} // Ahora depende de isAssigning
                     >
-                      Deme pedido
+                      {isAssigning ? (
+                        <>
+                          Asignando...
+                          <span className="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                        </>
+                      ) : (
+                        'Deme pedido'
+                      )}
                     </button>
                   </div>
                   {/* <hr className="my-4"/>
@@ -389,13 +396,23 @@ export default function CaseResolutionPage() {
                         <span className="ms-2 text-success small">¡Copiado!</span>
                       )}
                     </div>
+                    
                     <button
                       className="button button-blue"
                       type="submit"
-                      disabled={loading || !formData.oferta}
+                      disabled={isSubmitting || !formData.oferta} // Ahora depende de isSubmitting
                     >
-                      Enviar
-                      <Icon name="send" size="lg" className="ms-3" />
+                      {isSubmitting ? (
+                        <>
+                          Procesando...
+                          <span className="spinner-border spinner-border-sm ms-3" role="status" aria-hidden="true"></span>
+                        </>
+                      ) : (
+                        <>
+                          Enviar
+                          <Icon name="send" size="lg" className="ms-3" />
+                        </>
+                      )}
                     </button>
                   </div>
               </form>

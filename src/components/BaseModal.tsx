@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-/**
- * Props para el componente BaseModal.
- * @param isOpen - Controla si el modal está abierto.
- * @param onClose - Función que se llama para cerrar el modal.
- * @param title - Título que se mostrará en la cabecera del modal.
- * @param children - Contenido a renderizar dentro del cuerpo del modal.
- * @param size - Tamaño opcional del modal ('modal-sm', 'modal-lg', 'modal-xl').
- */
 interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,90 +9,72 @@ interface BaseModalProps {
   size?: 'modal-sm' | 'modal-lg' | 'modal-xl';
 }
 
-// Es una buena práctica tener un elemento raíz dedicado para los modales en tu index.html.
-// Si no existe, usamos document.body como fallback.
 const modalRoot = document.getElementById('modal-root') || document.body;
 
-/**
- * Un componente de modal base reutilizable y controlado por estado de React,
- * que utiliza las clases de Bootstrap 5 para el estilo pero sin su JavaScript.
- * Implementa animaciones de apertura/cierre y se renderiza en un portal.
- */
 export default function BaseModal({ isOpen, onClose, title, children, size }: BaseModalProps) {
-  // Estado para controlar el montaje/desmontaje del componente y permitir la animación de salida.
   const [isMounted, setIsMounted] = useState(false);
+  const [isAnimateIn, setIsAnimateIn] = useState(false);
 
   useEffect(() => {
     let timeoutId: number;
 
     if (isOpen) {
-      // Si se abre, se monta inmediatamente para que esté en el DOM.
       setIsMounted(true);
+      // El pequeño delay permite que el navegador registre el montaje antes de aplicar la clase de animación
+      timeoutId = window.setTimeout(() => setIsAnimateIn(true), 10);
     } else {
-      // Al cerrar, esperamos que la animación de 'fade-out' de Bootstrap termine (.15s) antes de desmontar.
-      timeoutId = window.setTimeout(() => setIsMounted(false), 150);
+      setIsAnimateIn(false); // Inicia animación de salida
+      // Esperamos a que la transición termine (300ms según el SCSS que te daré) antes de desmontar
+      timeoutId = window.setTimeout(() => setIsMounted(false), 300);
     }
 
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    return () => window.clearTimeout(timeoutId);
   }, [isOpen]);
 
-  // Efecto para manejar el cierre con la tecla 'Escape'.
+  // Manejo de tecla Escape
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+      if (event.key === 'Escape') onClose();
     };
-    if (isOpen) {
-      document.addEventListener('keydown', handleEsc);
-    }
-    return () => {
-      document.removeEventListener('keydown', handleEsc);
-    };
+    if (isOpen) document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose]);
 
-  // Efecto para evitar el scroll del body cuando el modal está abierto.
+  // Bloqueo de scroll
   useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('modal-open');
-    } else {
-      // Aseguramos que la clase se quite cuando el modal se cierra.
-      document.body.classList.remove('modal-open');
-    }
-    // Limpieza al desmontar el componente.
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
+    if (isOpen) document.body.classList.add('modal-open');
+    else document.body.classList.remove('modal-open');
+    return () => document.body.classList.remove('modal-open');
   }, [isOpen]);
 
-  // No renderizar nada si el componente no está montado.
-  if (!isMounted) {
-    return null;
-  }
+  if (!isMounted) return null;
 
-  const modalContent = (
+  return ReactDOM.createPortal(
     <>
-      {/* El fondo oscuro (backdrop) */}
-      <div className={`modal-backdrop fade ${isOpen ? 'show' : ''}`} />
+      {/* Backdrop con transición suave */}
+      <div 
+        className={`modal-backdrop fade ${isAnimateIn ? 'show' : ''}`} 
+        style={{ transition: 'opacity 0.3s ease' }}
+      />
 
-      {/* Contenedor principal del modal */}
       <div
-        className={`modal fade ${isOpen ? 'show' : ''}`}
+        className={`modal fade ${isAnimateIn ? 'show' : ''}`}
         role="dialog"
         tabIndex={-1}
-        style={{ display: 'block' }}
-        onClick={onClose} // Cierra el modal al hacer clic en el fondo.
+        style={{ 
+          display: 'block', 
+          pointerEvents: isAnimateIn ? 'all' : 'none' 
+        }}
+        onClick={onClose}
       >
         <div
           className={`modal-dialog ${size || ''} modal-dialog-centered`}
           role="document"
-          onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal lo cierre.
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="modal-content">
+          <div className="modal-content shadow-lg">
             <div className="modal-header">
-              <h5 className="modal-title">{title}</h5>
+              <h5 className="modal-title fw-bold text-primary">{title}</h5>
               <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
             </div>
             <div className="modal-body">
@@ -109,8 +83,7 @@ export default function BaseModal({ isOpen, onClose, title, children, size }: Ba
           </div>
         </div>
       </div>
-    </>
+    </>,
+    modalRoot
   );
-
-  return ReactDOM.createPortal(modalContent, modalRoot);
 }

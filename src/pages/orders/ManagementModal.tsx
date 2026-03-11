@@ -84,7 +84,7 @@ const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementMod
       <form onSubmit={handleSubmit}>
         {actionType === 'reasignar' && (
           <div className="mb-3">
-            <label htmlFor="asesorLogin" className="form-label">Asesor (Login)</label>
+            <label htmlFor="asesorLogin" className="form-label">Asesor (Login)*</label>
             <input
               type="text"
               className="form-control"
@@ -97,7 +97,7 @@ const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementMod
         )}
 
         <div className="mb-3">
-          <label htmlFor="motivo" className="form-label">Motivo</label>
+          <label htmlFor="motivo" className="form-label">Motivo*</label>
           <textarea
             className="form-control"
             id="motivo"

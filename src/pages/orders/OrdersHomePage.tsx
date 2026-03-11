@@ -89,8 +89,7 @@ export default function OrdersHomePage() {
         totalPages={totalPages ?? 1}
         loading={loading}
         renderRow={(row: any) => {
-          const { cleanedAddress, paginacion } = processRuralAddress(row.campos_dinamicos?.direccion)
-          const processedAddress = cleanedAddress
+          const { paginacion } = processRuralAddress(row.campos_dinamicos?.direccion)
           const processedPaginacion = paginacion || row.campos_dinamicos?.paginacion || '-'
           return (
             <Fragment key={row.hash_registro}>
@@ -200,7 +199,7 @@ export default function OrdersHomePage() {
         searchPlaceholder="Buscar por oferta"
         tableId={tableId}
       />
-      {isModalOpen && (
+      { (
         <ManagementModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
