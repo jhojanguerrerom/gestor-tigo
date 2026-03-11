@@ -56,7 +56,7 @@ export default function CaseResolutionPage() {
         setFormData(extractFormData(res.data.campos_dinamicos));
       } catch (err) {
         if (!isMounted.current) return;
-        info('Solicite un pedido para comenzar a gestionar.', 'Sin pedido asignado');
+        info('Solicite un pedido para comenzar a gestionar', 'Sin pedido asignado');
         setFormData(INITIAL_FORM_DATA);
       } finally {
         if (isMounted.current) setLoading(false);
@@ -97,7 +97,7 @@ export default function CaseResolutionPage() {
       .then(res => {
         const campos = res.data.campos_dinamicos || {};
         setFormData(extractFormData(campos));
-        info(`Pedido ${campos.oferta || ''} asignado exitosamente.`);
+        info(`Pedido ${campos.oferta || ''} asignado exitosamente`);
       })
       .catch(() => error('No se pudo asignar pedido'))
       .finally(() => setLoading(false));
@@ -115,7 +115,13 @@ export default function CaseResolutionPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accionAuto || !subaccion || !observacion) {
+      error('Acción, Subacción y Observación son campos requeridos.');
+      return;
+    }
+
     setLoading(true);
     const payload = {
       oferta: formData.oferta,
@@ -143,11 +149,11 @@ export default function CaseResolutionPage() {
         await offerService.getMyOffer();
         
         // Si responde bien, el caso sigue siendo tuyo. NO borramos lo que escribiste.
-        error('Ocurrió un error al enviar, pero el pedido sigue asignado. Por favor, intenta de nuevo.');
+        error('Ocurrió un error al enviar, pero el pedido sigue asignado. Por favor, intenta de nuevo');
         
       } catch (verifyErr) {
         // Si falla, significa que te quitaron el caso. AQUÍ SÍ limpiamos la pantalla.
-        error('El pedido fue liberado o ya  no se encuentra asignado.');
+        error('El pedido fue liberado o ya  no se encuentra asignado');
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
@@ -186,7 +192,7 @@ export default function CaseResolutionPage() {
       {loading && (
         <div className="d-flex justify-content-center align-items-center mb-3">
           <span className="spinner-border text-primary" role="status" aria-hidden="true"></span>
-          <span className="ms-2">Cargando oferta...</span>
+          <span className="ms-2">Cargando...</span>
         </div>
       )}
       
@@ -296,7 +302,7 @@ export default function CaseResolutionPage() {
                 </div>
               </div>
 
-              <form className="row g-3">
+              <form className="row g-3" onSubmit={handleSubmit}>
                   {/* Renderizado dinámico de los campos de solo lectura */}
                   {readOnlyFields.map(field => (
                     <div className="col-md-3" key={field.id}>
@@ -322,6 +328,7 @@ export default function CaseResolutionPage() {
                       id="Accion"
                       value={accionAuto}
                       onChange={e => setAccionAuto(e.target.value)}
+                      required
                     >
                       <option value="">Seleccionar</option>
                       {acciones.map((accion) => (
@@ -342,6 +349,7 @@ export default function CaseResolutionPage() {
                       value={subaccion}
                       onChange={e => setSubaccion(e.target.value)}
                       disabled={!accionAuto}
+                      required
                     >
                       <option value="">Seleccionar</option>
                       {subacciones.map((sub) => (
@@ -362,6 +370,7 @@ export default function CaseResolutionPage() {
                       rows={4} 
                       value={observacion} 
                       onChange={e => setObservacion(e.target.value)} 
+                      required 
                     />
                   </div>
                   
@@ -382,9 +391,8 @@ export default function CaseResolutionPage() {
                     </div>
                     <button
                       className="button button-blue"
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={loading || !formData.oferta || !accionAuto || !subaccion || !observacion}
+                      type="submit"
+                      disabled={loading || !formData.oferta}
                     >
                       Enviar
                       <Icon name="send" size="lg" className="ms-3" />

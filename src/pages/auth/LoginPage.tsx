@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   // Redirigir si la sesión está activa
   useEffect(() => {
-    //console.log('user:', user, 'error:', error, 'loading:', loading)
+
     if (user && user.profile_id && error === null && loading === false) {
       switch (user.profile_id) {
         case UserRole.SUPER_USER:

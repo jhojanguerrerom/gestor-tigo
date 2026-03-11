@@ -1,9 +1,10 @@
 import { Fragment, useState, useCallback } from 'react'
 import { useEffect } from 'react'
 import { useEnlistmentTable } from '@/hooks/useEnlistmentTable'
-import { Link } from 'react-router-dom'
 import DataTable from '../../components/tables/DataTable'
 import { Icon } from '@/icons/Icon'
+import ManagementModal from './ManagementModal'
+
 /**
  * Admin home page.
  */
@@ -20,15 +21,31 @@ export default function OrdersHomePage() {
     setCurrentPage,
     loading,
   } = useEnlistmentTable({ pageSize, searchQuery, refreshKey })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedOfertaId, setSelectedOfertaId] = useState('')
 
   // Resetear página a 1 cuando cambia el searchQuery
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
+    setCurrentPage(1)
+  }, [searchQuery])
 
   const handleRefresh = useCallback(() => {
     setRefreshKey(prev => prev + 1)
   }, [])
+
+  const handleOpenModal = (ofertaId: string) => {
+    setSelectedOfertaId(ofertaId)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedOfertaId('')
+  }
+
+  const handleSuccess = () => {
+    handleRefresh()
+  }
 
   const columns = [
     { header: 'Asesor' },
@@ -40,24 +57,6 @@ export default function OrdersHomePage() {
     { header: 'Detalles' },
     { header: 'Gestión' },
   ]
-
-  const getSearchText = (row: any) =>
-    [
-      row.campos_dinamicos?.usuario,
-      row.campos_dinamicos?.oferta,
-      row.campos_dinamicos?.pedido_id,
-      row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto,
-      row.campos_dinamicos?.uen,
-      row.campos_dinamicos?.direccion,
-      row.campos_dinamicos?.fecha_creado,
-      row.campos_dinamicos?.accion,
-      row.campos_dinamicos?.subaccion,
-      row.campos_dinamicos?.observacion,
-      row.campos_dinamicos?.coordenadas || '',
-      row.campos_dinamicos?.paginacion,
-      row.campos_dinamicos?.nodo_id,
-      row.campos_dinamicos?.megagold,
-    ].join(' ')
 
   return (
     <section className="container py-4">
@@ -127,9 +126,9 @@ export default function OrdersHomePage() {
                 />
               </td>
               <td>
-                <Link className="badge rounded-pill text-bg-bluelight text-decoration-none p-2" to="/cases/resolve">
+                <button className="badge rounded-pill text-bg-bluelight text-decoration-none p-2 border-0" onClick={() => handleOpenModal(row.campos_dinamicos?.oferta)}>
                   Gestionar
-                </Link>
+                </button>
               </td>
             </tr>
             <tr className="data-details-row">
@@ -184,6 +183,14 @@ export default function OrdersHomePage() {
         searchPlaceholder="Buscar por oferta"
         tableId={tableId}
       />
+      {isModalOpen && (
+        <ManagementModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          ofertaId={selectedOfertaId}
+          onSuccess={handleSuccess}
+        />
+      )}
     </section>
   )
 }

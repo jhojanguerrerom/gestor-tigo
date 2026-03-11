@@ -16,6 +16,8 @@ export const ENDPOINTS = {
     MANAGE: '/v1/ofertas/gestionar',
     HISTORY: (oferta: string) => `/v1/ofertas/historico/${oferta}`,
     MANAGEMENT_DETAIL: (oferta: string) => `/v1/ofertas/gestion-detalle/${oferta}`,
+    UNFREEZE: '/v1/ofertas/descongelar',
+    REASSIGN: '/v1/ofertas/reasignar',
   },
   ACTIONS: {
     CATALOG: '/v1/ofertas/catalogo/acciones',

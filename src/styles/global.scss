@@ -442,6 +442,40 @@ nav ul.pagination{
    BUTTONS
 ================================= */
 
+.btn {
+  &-outline {
+    &-primary {
+      border-color: $color-blue-primary;
+      color: $color-blue-primary;
+      // Estado Hover
+      &:hover {
+        background-color: $color-blue-primary;
+        border-color: $color-blue-primary;
+        color: #ffffff;
+      }
+      // Estados de activación (Active, Checked, Show)
+      // Usamos @at-root o simplemente anidamos con la referencia del padre
+      &:active,
+      &.active,
+      &.show,
+      &:first-child:active,
+      :not(.btn-check) + & {
+        &:active {
+          background-color: $color-blue-primary;
+          border-color: $color-blue-primary;
+          color: #ffffff;
+        }
+      }
+      // Caso específico para el checkbox de Bootstrap
+      .btn-check:checked + & {
+        background-color: $color-blue-primary;
+        border-color: $color-blue-primary;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
 .button {
   border-radius: 30px;
   border: 1px solid;

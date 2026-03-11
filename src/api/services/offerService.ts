@@ -20,4 +20,12 @@ export const offerService = {
   }) => {
     return httpClient.post(ENDPOINTS.OFFERS.MANAGE, data);
   },
+
+  unfreezeOffer: (payload: { oferta: string, motivo: string }) => {
+    return httpClient.post(ENDPOINTS.OFFERS.UNFREEZE, payload);
+  },
+
+  reassignOffer: (payload: { oferta: string, asesor_login: string, motivo: string }) => {
+    return httpClient.post(ENDPOINTS.OFFERS.REASSIGN, payload);
+  },
 };
