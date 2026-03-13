@@ -120,8 +120,14 @@ export default function LoginPage() {
                     type="submit"
                     disabled={loading}
                   >
-                      {loading && <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>}
-                      Entrar
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Cargando...
+                      </>
+                    ) : (
+                      'Entrar'
+                    )}
                   </button>
                 </div>
               </form>

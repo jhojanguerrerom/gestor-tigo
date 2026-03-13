@@ -110,9 +110,19 @@ const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementMod
 
         <div className="d-flex justify-content-end">
           <button type="button" className="button button-gray me-2" onClick={onClose}>Cancelar</button>
-          <button type="submit" className="button button-blue" disabled={isLoading}>
-            {isLoading && <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>}
-            Confirmar gestión
+          <button 
+            type="submit" 
+            className="button button-blue" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Procesando...
+              </>
+            ) : (
+              'Confirmar gestión'
+            )}
           </button>
         </div>
       </form>

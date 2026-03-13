@@ -159,7 +159,7 @@ export default function CaseResolutionPage() {
         
       } catch (verifyErr) {
         // Si falla, significa que el pedido ya no está asignado.
-        error('El pedido ya no se encuentra asignado a su usuario');
+        error('El pedido ya no se encuentra asignado');
         
         // Limpiamos la pantalla para evitar gestiones sobre un caso perdido
         setFormData(INITIAL_FORM_DATA);

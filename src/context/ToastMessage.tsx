@@ -9,7 +9,7 @@ export interface ToastMessageProps {
   onClose: (id: string) => void;
 }
 
-export default function ToastMessage({ id, message, type, title, delay = 5000, onClose }: ToastMessageProps) {
+export default function ToastMessage({ id, message, type, title, delay = 7000, onClose }: ToastMessageProps) {
   const [isRendered, setIsRendered] = useState(false);
   const [isHiding, setIsHiding] = useState(false);
 
