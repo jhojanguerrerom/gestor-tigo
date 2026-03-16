@@ -21,5 +21,6 @@ export const ENDPOINTS = {
   },
   ACTIONS: {
     CATALOG: '/v1/ofertas/catalogo/acciones',
+    SUBACTIONS: '/v1/ofertas/catalogo/subacciones',
   }
 } as const;

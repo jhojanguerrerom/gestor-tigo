@@ -590,3 +590,72 @@ $toast-transition: 0.4s;
     opacity: 0.5;
   }
 }
+
+.app-nav {
+  display: flex;
+  align-items: center;
+
+  // Contenedor del item con submenú
+  &__item--dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    // Mostrar el submenú al hacer hover
+    &:hover {
+      .app-nav__submenu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+
+    .dropdown-toggle {
+      display: flex;
+      align-items: center;
+      user-select: none;
+    }
+  }
+
+  // El submenú (el panel flotante)
+  &__submenu {
+    position: absolute;
+    top: 100%; // Se posiciona justo debajo del header
+    left: 0;
+    min-width: 200px;
+    background-color: $color-blue-primary;
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    z-index: 1000;
+    
+    // Transición suave
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+
+    // Los links dentro del submenú
+    .submenu-item {
+      color: $color-bg-app;
+      padding: 10px 16px !important;
+      font-size: 0.9rem;
+      text-decoration: none;
+      //width: 100%;
+      display: block;
+      transition: background 0.2s;
+
+      &:hover {
+        //background-color: $dropdown-hover-bg;
+        color: inherit; // Mantiene su color o el de tu variable de hover
+      }
+
+      // Si el NavLink está activo dentro del submenú
+      &.active {
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.03);
+      }
+    }
+  }
+}

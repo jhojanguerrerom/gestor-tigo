@@ -1,18 +1,30 @@
 import { UserRole } from '../types/auth.types'
 
-type MenuItem = { label: string; path: string; icon?: string };
+// 1. Actualizamos la interfaz MenuItem
+export interface MenuItem {
+  label: string;
+  path?: string;      // Ahora es opcional (?) porque los menús con hijos a veces no tienen link
+  icon?: string;
+  subItems?: MenuItem[]; // Añadimos la propiedad opcional para submenús
+}
+
 type MenuByRole = { [key in typeof UserRole[keyof typeof UserRole]]: MenuItem[] };
 
 export const MENU_BY_ROLE: MenuByRole = {
   [UserRole.SUPER_USER]: [
     { label: 'Pedidos', path: '/orders/home'},
     { label: 'Deme pedido', path: '/advisor/home'},
-    //{ label: 'Pedidos gestionados', path: '/offers/managed'},
+    { 
+      label: 'Configuración', // <-- Añadida la coma que faltaba aquí
+      subItems: [
+        { label: 'Acción y Subacción', path: '/config/actions' },
+        { label: 'Opción 2', path: '/config/actionss' },
+        { label: 'Opción 3', path: '/config/actionss' }
+      ]
+    },
   ],
   [UserRole.SUPERVISOR]: [
     { label: 'Pedidos', path: '/orders/home'},
-    //{ label: 'Deme pedido', path: '/advisor/home'},
-    //{ label: 'Pedidos gestionados', path: '/offers/managed'},
   ],
   [UserRole.VIEWER]: [
     { label: 'Pedidos', path: '/orders/home'},
@@ -21,6 +33,5 @@ export const MENU_BY_ROLE: MenuByRole = {
   ],
   [UserRole.ASESOR]: [
     { label: 'Deme pedido', path: '/advisor/home'},
-    //{ label: 'Pedidos gestionados', path: '/offers/managed'},
   ],
 };

@@ -4,6 +4,7 @@ import LoginPage from '../pages/auth/LoginPage'
 import OrdersHomePage from '../pages/orders/OrdersHomePage'
 import CaseResolutionPage from '../pages/cases/CaseResolutionPage'
 import OffersManagedPage from '../pages/offers/OffersManagedPage'
+import ActionsPage from '../pages/admin/actions/ActionsPage' // <-- 1. Importamos tu nueva vista
 import NotFoundPage from '../pages/common/NotFoundPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <AppLayout />,
+    element: <AppLayout />, // Este layout envuelve tu Sidebar/Navbar
     children: [
       {
         path: '/orders/home',
@@ -46,6 +47,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <OffersManagedPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: '/config/actions',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
+            <ActionsPage />
           </PrivateRoute>
         ),
       },

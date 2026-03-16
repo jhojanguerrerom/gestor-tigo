@@ -6,7 +6,7 @@ interface BaseModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  size?: 'modal-sm' | 'modal-lg' | 'modal-xl';
+  size?: 'modal-sm' | 'modal-md' | 'modal-lg' | 'modal-xl';
 }
 
 const modalRoot = document.getElementById('modal-root') || document.body;
