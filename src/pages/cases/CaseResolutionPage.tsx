@@ -106,14 +106,21 @@ export default function CaseResolutionPage() {
   };
 
   const handleCopy = () => {
-    const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre || "";
-    const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre || "";
-    const texto = [accionNombre, subaccionNombre, observacion].filter(Boolean).join(" / ");
+    // Buscamos los nombres basados en los IDs seleccionados
+    const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre;
+    const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre;
     
-    if (texto) {
+    // Construimos la estructura requerida
+    const texto = `Gestión: ${accionNombre} / Tipificación: ${subaccionNombre} / Observación: ${observacion}`;
+    
+    // Validamos que haya algo que copiar (al menos la observación)
+    if (observacion.trim() && accionNombre && subaccionNombre) {
       navigator.clipboard.writeText(texto);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
+      info('Texto copiado en el portapapeles');
+    } else {
+      error('Complete la información antes de copiar');
     }
   };
 
@@ -335,6 +342,7 @@ export default function CaseResolutionPage() {
                       id="Accion"
                       value={accionAuto}
                       onChange={e => setAccionAuto(e.target.value)}
+                      disabled={!formData.oferta}
                       required
                     >
                       <option value="">Seleccionar</option>
@@ -377,6 +385,7 @@ export default function CaseResolutionPage() {
                       rows={4} 
                       value={observacion} 
                       onChange={e => setObservacion(e.target.value)} 
+                      disabled={!formData.oferta}
                       required 
                     />
                   </div>
@@ -392,9 +401,6 @@ export default function CaseResolutionPage() {
                         Copiar texto
                         <Icon name="copy" size="md" className="ms-2" />
                       </button>
-                      {copied && (
-                        <span className="ms-2 text-success small">¡Copiado!</span>
-                      )}
                     </div>
                     
                     <button
