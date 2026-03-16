@@ -4,6 +4,7 @@ import { useEnlistmentTable } from '@/hooks/useEnlistmentTable'
 import DataTable from '../../components/tables/DataTable'
 import { Icon } from '@/icons/Icon'
 import ManagementModal from './ManagementModal'
+import Loading from '@/components/Loading';
 
 /**
  * Admin home page.
@@ -30,8 +31,9 @@ export default function OrdersHomePage() {
   }, [searchQuery])
 
   const handleRefresh = useCallback(() => {
-    setRefreshKey(prev => prev + 1)
-  }, [])
+    setCurrentPage(1); // Añadimos esto para volver a la página 1
+    setRefreshKey(prev => prev + 1);
+  }, [setCurrentPage]); // Añadimos la dependencia de setCurrentPage
 
   const handleOpenModal = (ofertaId: string) => {
     setSelectedOfertaId(ofertaId)
@@ -72,6 +74,7 @@ export default function OrdersHomePage() {
 
   return (
     <section className="container py-4">
+      {loading && <Loading fullScreen text="Cargando información..." />}
       <header className="mb-4 d-flex align-items-center justify-content-between">
         <h1 className="h3 font-dm-bold mb-2 mb-0">Estado de trabajo</h1>
         <button type="button" className="btn btn-link p-0 ms-2" onClick={handleRefresh} data-bs-toggle="tooltip" data-bs-placement="left" title="Actualizar tabla">

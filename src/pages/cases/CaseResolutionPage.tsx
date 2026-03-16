@@ -9,6 +9,7 @@ import { offerService } from '@/api/services/offerService';
 //import { offerManagementService } from '@/api/services/offerManagementService';
 import { useToast } from '@/context/ToastContext';
 import OrderHistoryModal from '@/pages/cases/OrderHistoryModal';
+import Loading from '@/components/Loading';
 
 const INITIAL_FORM_DATA = {
   oferta: '',
@@ -197,6 +198,7 @@ export default function CaseResolutionPage() {
 
   return (
     <section className="container py-4">
+      {isPageLoading && <Loading fullScreen text="Cargando información..." />}
       <header className="mb-4">
         <h1 className="h3 font-dm-bold mb-2">Pedidos de trabajo</h1>
         <p className="text-body-secondary mb-0">

@@ -75,7 +75,6 @@ export default function ManageCatalogModal({
       onSuccess?.();
       onClose();
     } catch (err) {
-      console.error(err);
       error(`Ocurrió un error al crear la ${creationType}`);
     } finally {
       setIsLoading(false);
@@ -84,7 +83,7 @@ export default function ManageCatalogModal({
 
   return (
     <BaseModal 
-      title={creationType === 'accion' ? "Crear Nueva Acción" : "Crear Nueva Subacción"}
+      title={creationType === 'accion' ? "Crear nueva Acción" : "Crear nueva Subacción"}
       isOpen={isOpen} 
       onClose={onClose}
       size="modal-md"
@@ -143,7 +142,6 @@ export default function ManageCatalogModal({
             id="nombreItem"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder={`Nombre de la ${creationType}`}
             required
           />
         </div>
@@ -158,7 +156,6 @@ export default function ManageCatalogModal({
               rows={3}
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Breve descripción..."
               required
             ></textarea>
           </div>
@@ -179,7 +176,7 @@ export default function ManageCatalogModal({
 
         {/* Botones de acción */}
         <div className="d-flex justify-content-end gap-2">
-          <button type="button" className="btn btn-light border" onClick={onClose} disabled={isLoading}>
+          <button type="button" className="button button-gray me-2" onClick={onClose} disabled={isLoading}>
             Cancelar
           </button>
           <button 
@@ -193,7 +190,7 @@ export default function ManageCatalogModal({
                 Guardando...
               </>
             ) : (
-              <>Guardar <Icon name="save" size="md" className="ms-2" /></>
+              <>Guardar</>
             )}
           </button>
         </div>

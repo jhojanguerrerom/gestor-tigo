@@ -3,6 +3,7 @@ import DataTable from '@/components/tables/DataTable';
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import ManageCatalogModal from '@/pages/admin/actions/ManageCatalogModal';
+import Loading from '@/components/Loading';
 
 export default function ActionsPage() {
   const [acciones, setAcciones] = useState<any[]>([]);
@@ -51,8 +52,11 @@ export default function ActionsPage() {
 
   return (
     <section className="container py-4">
+      {/* 2. Componente de Carga Global */}
+      {loading && <Loading fullScreen text="Cargando catálogo..." />}
+
       <header className="mb-4 d-flex align-items-center justify-content-between">
-        <h1 className="h3 font-dm-bold mb-0">Catálogo de Acciones</h1>
+        <h1 className="h3 font-dm-bold mb-0">Lista de Acciones y Subacciones</h1>
         <div className="d-flex align-items-center gap-2">
           {/* Botón superior: Abre el modal en modo 'Acción' */}
           <Icon name="plus" size="lg" className="me-2" />
@@ -115,13 +119,16 @@ export default function ActionsPage() {
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <h6 className="fw-bold text-secondary mb-0">Subacciones de "{row.nombre}"</h6>
                           
-                          {/* Botón interno: Abre el modal en modo 'Subacción' y le pasa el ID del padre */}
-                          <button 
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => setModalConfig({ isOpen: true, type: 'subaccion', accionId: row.id })}
-                          >
-                            <Icon name="plus" size="sm" className="me-1" /> Añadir Subacción
-                          </button>
+                          <div>
+                            {/* Botón interno: Abre el modal en modo 'Subacción' y le pasa el ID del padre */}
+                            <Icon name="plus" size="lg" className="me-1" />
+                            <button 
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => setModalConfig({ isOpen: true, type: 'subaccion', accionId: row.id })}
+                            >
+                              Añadir Subacción
+                            </button>
+                          </div>
                         </div>
                         
                         {(row.subacciones && row.subacciones.length > 0) ? (

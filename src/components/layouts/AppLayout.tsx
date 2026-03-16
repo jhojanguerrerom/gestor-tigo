@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom' // <-- Usamos Link en lugar de NavLink
 import logoTigo from '../../assets/logo-tigo-blanco.png'
 import { Icon } from '@/icons/Icon'
 import { useAuth } from '@/auth/hooks/useAuth'
@@ -8,7 +8,7 @@ export default function AppLayout() {
   const { user, logout } = useAuth()
   const menu = user && user.profile_id ? MENU_BY_ROLE[user.profile_id] : []
   const navigate = useNavigate()
-  const location = useLocation() // <-- Hook para leer la URL actual exacta
+  const location = useLocation()
 
   const handleLogout = () => {
     logout()
@@ -29,32 +29,35 @@ export default function AppLayout() {
 
           <nav className="app-nav d-flex flex-wrap gap-2">
             {menu.map((item: any) => {
-              // Verificamos si tiene subItems
               const hasSubItems = item.subItems && item.subItems.length > 0;
 
               if (hasSubItems) {
+                // Validamos si alguno de los hijos está activo para iluminar al Padre
+                const isDropdownActive = item.subItems.some((sub: any) => location.pathname === sub.path);
+
                 return (
                   <div key={item.label} className="app-nav__item--dropdown">
-                    {/* El padre mantiene la clase app-nav__link para que se vea igual */}
-                    <span className="app-nav__link dropdown-toggle" style={{ cursor: 'pointer' }}>
+                    <span 
+                      className={`app-nav__link dropdown-toggle ${isDropdownActive ? 'active' : ''}`} 
+                      style={{ cursor: 'pointer' }}
+                    >
                       {item.label}
                       <Icon name="arrow-down" size="xs" className="ms-1" />
                     </span>
                     
-                    {/* Lista de subopciones */}
                     <div className="app-nav__submenu">
                       {item.subItems.map((sub: any) => {
-                        // VALIDACIÓN MANUAL ESTRICTA
+                        // Validación exacta y manual
                         const isActive = location.pathname === sub.path;
                         
                         return (
-                          <NavLink 
+                          <Link 
                             key={sub.path} 
                             to={sub.path} 
                             className={`app-nav__link submenu-item ${isActive ? 'active' : ''}`}
                           >
                             {sub.label}
-                          </NavLink>
+                          </Link>
                         );
                       })}
                     </div>
@@ -62,17 +65,17 @@ export default function AppLayout() {
                 );
               }
 
-              // Link normal si no tiene hijos
+              // Links normales sin hijos
               const isParentActive = location.pathname === item.path;
               
               return (
-                <NavLink 
+                <Link 
                   key={item.path} 
-                  className={`app-nav__link ${isParentActive ? 'active' : ''}`} 
                   to={item.path}
+                  className={`app-nav__link ${isParentActive ? 'active' : ''}`} 
                 >
                   {item.label}
-                </NavLink>
+                </Link>
               );
             })}
           </nav>
