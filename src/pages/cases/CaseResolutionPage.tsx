@@ -57,7 +57,7 @@ export default function CaseResolutionPage() {
   const [observacion, setObservacion] = useState("");
   
   // Estados Nuevos para los Conceptos
-  const [conceptos, setConceptos] = useState<any[]>([]);
+  const [conceptos, setConcepts] = useState<any[]>([]);
   const [selectedConcepto, setSelectedConcepto] = useState("");
 
   // Estados de UI
@@ -70,11 +70,11 @@ export default function CaseResolutionPage() {
   const { success, info, error } = useToast();
 
   // Función para cargar o refrescar los conceptos disponibles
-  const fetchConceptos = useCallback(async () => {
+  const fetchConcepts = useCallback(async () => {
     try {
-      const res = await offerService.getConceptos();
+      const res = await offerService.getConcepts();
       if (isMounted.current) {
-        setConceptos(res.data || []);
+        setConcepts(res.data || []);
       }
     } catch (err) {
       console.error("Error al cargar conceptos", err);
@@ -87,7 +87,7 @@ export default function CaseResolutionPage() {
 
     const initData = async () => {
       try {
-        await fetchConceptos(); // Cargamos conceptos primero
+        await fetchConcepts(); // Cargamos conceptos primero
         const res = await offerService.getMyOffer();
         if (!isMounted.current) return;
         setFormData(extractFormData(res.data.campos_dinamicos));
@@ -104,7 +104,7 @@ export default function CaseResolutionPage() {
     return () => {
       isMounted.current = false;
     };
-  }, [location.pathname, location.key, info, fetchConceptos]);
+  }, [location.pathname, location.key, info, fetchConcepts]);
 
   // Cargar acciones
   useEffect(() => {
@@ -139,7 +139,7 @@ export default function CaseResolutionPage() {
         const campos = res.data.campos_dinamicos || {};
         setFormData(extractFormData(campos));
         info(`Pedido ${campos.oferta || ''} asignado exitosamente`);
-        fetchConceptos(); // Refrescamos las cantidades después de tomar un caso
+        fetchConcepts(); // Refrescamos las cantidades después de tomar un caso
       })
       .catch(() => error('No se pudo asignar pedido. Intente con otro concepto o aleatorio.'))
       .finally(() => setIsAssigning(false));
@@ -178,11 +178,15 @@ export default function CaseResolutionPage() {
     try {
       await offerService.manageOffer(payload);
       success(`Pedido ${payload.oferta} cerrado exitosamente`);
+      
+      // LIMPIEZA TOTAL DE ESTADOS
       setFormData(INITIAL_FORM_DATA);
       setAccionAuto("");
       setSubaccion("");
       setObservacion("");
-      fetchConceptos(); // Refrescamos las cantidades tras cerrar el caso exitosamente
+      setSelectedConcepto(""); // <-- AQUÍ ESTÁ LA MAGIA (Devuelve el select a Aleatorio)
+      
+      fetchConcepts(); // Refrescamos las cantidades
     } catch (err) {
       console.error("Error al gestionar el pedido:", err);
       try {
@@ -190,11 +194,15 @@ export default function CaseResolutionPage() {
         error('Ocurrió un error al enviar. Por favor, intente de nuevo');
       } catch (verifyErr) {
         error('El pedido ya no se encuentra asignado');
+        
+        // LIMPIEZA TOTAL DE ESTADOS
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
         setObservacion("");
-        fetchConceptos(); // Refrescamos si el caso ya no es nuestro
+        setSelectedConcepto(""); // <-- AQUÍ TAMBIÉN
+        
+        fetchConcepts();
       }
     } finally {
       setIsSubmitting(false);
