@@ -74,7 +74,7 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
           <div className="row">
             <div className="col-md-6">
               {/* Sección Histórico de Cambios */}
-              <div className="mb-4">
+              <div className="mb-4 sticky-top">
                 <h6 className="fw-bold mb-4 text-primary">Histórico de cambios</h6>
                 
                 {history.length > 0 ? (

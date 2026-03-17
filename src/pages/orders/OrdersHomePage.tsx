@@ -1,5 +1,4 @@
-import { Fragment, useState, useCallback } from 'react'
-import { useEffect } from 'react'
+import { Fragment, useState, useCallback, useEffect } from 'react'
 import { useEnlistmentTable } from '@/hooks/useEnlistmentTable'
 import DataTable from '../../components/tables/DataTable'
 import { Icon } from '@/icons/Icon'
@@ -31,9 +30,9 @@ export default function OrdersHomePage() {
   }, [searchQuery])
 
   const handleRefresh = useCallback(() => {
-    setCurrentPage(1); // Añadimos esto para volver a la página 1
+    setCurrentPage(1); 
     setRefreshKey(prev => prev + 1);
-  }, [setCurrentPage]); // Añadimos la dependencia de setCurrentPage
+  }, [setCurrentPage]); 
 
   const handleOpenModal = (ofertaId: string) => {
     setSelectedOfertaId(ofertaId)
@@ -47,18 +46,6 @@ export default function OrdersHomePage() {
 
   const handleSuccess = () => {
     handleRefresh()
-  }
-
-  const processRuralAddress = (address: string) => {
-    if (address?.toUpperCase().includes('RURAL')) {
-      const match = address.match(/(\d{5,})/)
-      if (match) {
-        const numericString = match[0]
-        const cleanedAddress = address.replace(numericString, '').trim()
-        return { cleanedAddress, paginacion: numericString }
-      }
-    }
-    return { cleanedAddress: address, paginacion: null }
   }
 
   const columns = [
@@ -92,16 +79,29 @@ export default function OrdersHomePage() {
         totalPages={totalPages ?? 1}
         loading={loading}
         renderRow={(row: any) => {
-          const { paginacion } = processRuralAddress(row.campos_dinamicos?.direccion)
-          const processedPaginacion = paginacion || row.campos_dinamicos?.paginacion || '-'
+          const campos = row.campos_dinamicos || {};
+
+          // 1. Limpiamos la paginación directamente del backend
+          const paginacionLimpia = (campos.paginacion || '').trim() || '-';
+
+          // 2. Concatenamos latitud y longitud de forma segura
+          const lat = campos.latitude;
+          const lng = campos.longitude;
+          const coordenadas = lat && lng 
+            ? `${lat}, ${lng}`.trim() 
+            : (lat || lng || '').trim() || '-';
+
+          // 3. Limpiamos Megagold
+          const megagold = (campos.megagold || '').trim() || '-';
+
           return (
             <Fragment key={row.hash_registro}>
               <tr>
                 <td>
                   <Icon name="user-call" size="lg" className="me-2" />
-                  {row.campos_dinamicos?.usuario ? (
-                    <span className="badge text-bg-blue" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.usuario}>
-                      {row.campos_dinamicos?.usuario}
+                  {campos.usuario ? (
+                    <span className="badge text-bg-blue" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.usuario}>
+                      {campos.usuario}
                     </span>
                   ) : (
                     <span className="badge text-bg-warning text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Sin asignar">
@@ -110,28 +110,28 @@ export default function OrdersHomePage() {
                   )}
                 </td>
                 <td>
-                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.oferta}>
-                    {row.campos_dinamicos?.oferta}
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.oferta}>
+                    {campos.oferta}
                   </span>
                 </td>
                 <td>
-                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.pedido_id}>
-                    {row.campos_dinamicos?.pedido_id || '-'}
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.pedido_id}>
+                    {campos.pedido_id || '-'}
                   </span>
                 </td>
                 <td>
-                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto}>
-                    {row.campos_dinamicos?.concepto_id || row.campos_dinamicos?.concepto || '-'}
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.concepto_id || campos.concepto}>
+                    {campos.concepto_id || campos.concepto || '-'}
                   </span>
                 </td>
                 <td>
-                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.uen}>
-                    {row.campos_dinamicos?.uen}
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.uen}>
+                    {campos.uen}
                   </span>
                 </td>
                 <td>
-                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}>
-                    {row.campos_dinamicos?.fecha_creado ? new Date(row.campos_dinamicos.fecha_creado).toLocaleString('es-CO') : ''}
+                  <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.fecha_creado ? new Date(campos.fecha_creado).toLocaleString('es-CO') : ''}>
+                    {campos.fecha_creado ? new Date(campos.fecha_creado).toLocaleString('es-CO') : ''}
                   </span>
                 </td>
                 <td className="text-center">
@@ -144,7 +144,7 @@ export default function OrdersHomePage() {
                   />
                 </td>
                 <td>
-                  <button className="badge rounded-pill text-bg-bluelight text-decoration-none p-2 border-0" onClick={() => handleOpenModal(row.campos_dinamicos?.oferta)}>
+                  <button className="badge rounded-pill text-bg-bluelight text-decoration-none p-2 border-0" onClick={() => handleOpenModal(campos.oferta)}>
                     Gestionar
                   </button>
                 </td>
@@ -159,30 +159,36 @@ export default function OrdersHomePage() {
                             <tr>
                               <th scope="col">Dirección</th>
                               <th scope="col">Página</th>
-                              <th scope="col">Coordenadas</th>
+                              <th scope="col">Coordenadas (latitud y longitud)</th>
                               <th scope="col">Nodo ID TAP</th>
+                              <th scope="col">Megagold</th> {/* Nueva columna añadida */}
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
                               <td>
-                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.direccion}>
-                                  {row.campos_dinamicos?.direccion || '-' }
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.direccion}>
+                                  {campos.direccion || '-' }
                                 </span>
                               </td>
                               <td>
-                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={processedPaginacion}>
-                                  {processedPaginacion}
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={paginacionLimpia}>
+                                  {paginacionLimpia}
                                 </span>
                               </td>
                               <td>
-                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.coordenadas}>
-                                  {row.campos_dinamicos?.coordenadas || '-'}
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={coordenadas}>
+                                  {coordenadas}
                                 </span>
                               </td>
                               <td>
-                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={row.campos_dinamicos?.nodo_id}>
-                                  {row.campos_dinamicos?.nodo_id || '-'}
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={campos.nodo_id}>
+                                  {campos.nodo_id || '-'}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="cell-text" data-bs-toggle="tooltip" data-bs-placement="top" title={megagold}>
+                                  {megagold}
                                 </span>
                               </td>
                             </tr>

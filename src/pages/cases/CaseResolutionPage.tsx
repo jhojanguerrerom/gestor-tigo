@@ -1,12 +1,11 @@
 /**
  * Shared case resolution view for all roles.
  */
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import { offerService } from '@/api/services/offerService';
-//import { offerManagementService } from '@/api/services/offerManagementService';
 import { useToast } from '@/context/ToastContext';
 import OrderHistoryModal from '@/pages/cases/OrderHistoryModal';
 import Loading from '@/components/Loading';
@@ -18,42 +17,77 @@ const INITIAL_FORM_DATA = {
   concepto: '',
   direccion: '',
   fecha_creado: '',
+  segmento: '',
+  coordenadas: '',
+  pagina: '',
+  nodo_id: '',
+  megagold: '',
 };
 
-const extractFormData = (campos: any = {}) => ({
-  oferta: campos.oferta || '',
-  pedido_id: campos.pedido_id || '',
-  concepto_id: campos.concepto_id || '',
-  concepto: campos.concepto || '',
-  direccion: campos.direccion || '',
-  fecha_creado: campos.fecha_creado || '',
-});
+const extractFormData = (campos: any = {}) => {
+  const lat = campos.latitude;
+  const lng = campos.longitude;
+  const coordenadasUnidas = lat && lng ? `${lat}, ${lng}` : lat || lng || '';
+
+  return {
+    oferta: campos.oferta || '',
+    pedido_id: campos.pedido_id || '',
+    concepto_id: campos.concepto_id || '',
+    concepto: campos.concepto || '',
+    direccion: campos.direccion || '',
+    fecha_creado: campos.fecha_creado || '',
+    segmento: campos.uen || '',
+    coordenadas: coordenadasUnidas,
+    pagina: campos.paginacion || '',
+    nodo_id: campos.nodo_id || '',
+    megagold: campos.megagold || '',
+  };
+};
 
 export default function CaseResolutionPage() {
   const location = useLocation();
   const isMounted = useRef(true);
 
-  // Estados
+  // Estados del Formulario
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [acciones, setAcciones] = useState<any[]>([]);
   const [accionAuto, setAccionAuto] = useState(""); 
   const [subacciones, setSubacciones] = useState<any[]>([]);
   const [subaccion, setSubaccion] = useState(""); 
   const [observacion, setObservacion] = useState("");
+  
+  // Estados Nuevos para los Conceptos
+  const [conceptos, setConceptos] = useState<any[]>([]);
+  const [selectedConcepto, setSelectedConcepto] = useState("");
+
+  // Estados de UI
   const [copied, setCopied] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(false); // Carga inicial
-  const [isAssigning, setIsAssigning] = useState(false);  // Para el botón "Deme pedido"
-  const [isSubmitting, setIsSubmitting] = useState(false); // Para el botón "Enviar"
+  const [isPageLoading, setIsPageLoading] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   
   const { success, info, error } = useToast();
+
+  // Función para cargar o refrescar los conceptos disponibles
+  const fetchConceptos = useCallback(async () => {
+    try {
+      const res = await offerService.getConceptos();
+      if (isMounted.current) {
+        setConceptos(res.data || []);
+      }
+    } catch (err) {
+      console.error("Error al cargar conceptos", err);
+    }
+  }, []);
 
   useEffect(() => {
     isMounted.current = true;
     setIsPageLoading(true);
 
-    const fetchOffer = async () => {
+    const initData = async () => {
       try {
+        await fetchConceptos(); // Cargamos conceptos primero
         const res = await offerService.getMyOffer();
         if (!isMounted.current) return;
         setFormData(extractFormData(res.data.campos_dinamicos));
@@ -66,11 +100,11 @@ export default function CaseResolutionPage() {
       }
     };
 
-    fetchOffer();
+    initData();
     return () => {
       isMounted.current = false;
     };
-  }, [location.pathname, location.key, info]);
+  }, [location.pathname, location.key, info, fetchConceptos]);
 
   // Cargar acciones
   useEffect(() => {
@@ -95,26 +129,27 @@ export default function CaseResolutionPage() {
   }, [accionAuto, acciones]);
 
   const handleDemePedido = () => {
-    setIsAssigning(true); // <--- Solo este botón entra en carga
-    offerService.freezeOffer()
+    setIsAssigning(true);
+    
+    // Armamos el payload. Si seleccionó un concepto, lo enviamos. Si no, mandamos vacío.
+    const payload = selectedConcepto ? { concepto: selectedConcepto } : {};
+
+    offerService.freezeOffer(payload)
       .then(res => {
         const campos = res.data.campos_dinamicos || {};
         setFormData(extractFormData(campos));
         info(`Pedido ${campos.oferta || ''} asignado exitosamente`);
+        fetchConceptos(); // Refrescamos las cantidades después de tomar un caso
       })
-      .catch(() => error('No se pudo asignar pedido'))
-      .finally(() => setIsAssigning(false)); // <--- Apagamos solo este
+      .catch(() => error('No se pudo asignar pedido. Intente con otro concepto o aleatorio.'))
+      .finally(() => setIsAssigning(false));
   };
 
   const handleCopy = () => {
-    // Buscamos los nombres basados en los IDs seleccionados
     const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre;
     const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre;
-    
-    // Construimos la estructura requerida
     const texto = `Gestión: ${accionNombre} / Tipificación: ${subaccionNombre} / Observación: ${observacion}`;
     
-    // Validamos que haya algo que copiar (al menos la observación)
     if (observacion.trim() && accionNombre && subaccionNombre) {
       navigator.clipboard.writeText(texto);
       setCopied(true);
@@ -127,16 +162,12 @@ export default function CaseResolutionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 1. Validaciones previas
     if (!accionAuto || !subaccion || !observacion) {
       error('Acción, Subacción y Observación son campos requeridos.');
       return;
     }
 
-    // 2. Activamos la carga solo para este botón
     setIsSubmitting(true);
-
     const payload = {
       oferta: formData.oferta,
       accion_id: accionAuto,
@@ -145,56 +176,30 @@ export default function CaseResolutionPage() {
     };
 
     try {
-      // 3. Intentamos enviar la gestión
       await offerService.manageOffer(payload);
-      
-      // Si funciona, mostramos éxito y limpiamos todo
       success(`Pedido ${payload.oferta} cerrado exitosamente`);
       setFormData(INITIAL_FORM_DATA);
       setAccionAuto("");
       setSubaccion("");
       setObservacion("");
-
+      fetchConceptos(); // Refrescamos las cantidades tras cerrar el caso exitosamente
     } catch (err) {
       console.error("Error al gestionar el pedido:", err);
-
-      // 4. Si falla el envío, verificamos si el caso SIGUE siendo del asesor
       try {
         await offerService.getMyOffer();
-        
-        // Si responde bien, el caso sigue siendo del asesor. No borramos lo escrito.
         error('Ocurrió un error al enviar. Por favor, intente de nuevo');
-        
       } catch (verifyErr) {
-        // Si falla, significa que el pedido ya no está asignado.
         error('El pedido ya no se encuentra asignado');
-        
-        // Limpiamos la pantalla para evitar gestiones sobre un caso perdido
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
         setObservacion("");
+        fetchConceptos(); // Refrescamos si el caso ya no es nuestro
       }
-
     } finally {
-      // 5. Apagamos el estado de carga del botón independientemente del resultado
       setIsSubmitting(false);
     }
   };
-
-  // Configuración de los campos de solo lectura para evitar repetición en el JSX
-  const readOnlyFields = [
-    { id: 'OfertaSiebel', label: 'Oferta Siebel', value: formData.oferta },
-    { id: 'PedidoFenix', label: 'Pedido Fenix', value: formData.pedido_id },
-    { id: 'ConceptoCola', label: 'Concepto o cola', value: formData.concepto_id || formData.concepto },
-    { id: 'Segmento', label: 'Segmento', value: '' },
-    { id: 'Direccion', label: 'Dirección', value: formData.direccion },
-    { id: 'Coordenadas', label: 'Coordenadas', value: '' },
-    { id: 'Pagina', label: 'Página', value: '' },
-    { id: 'NodoIdTap', label: 'Nodo ID TAP', value: '' },
-    { id: 'Megagold', label: 'Megagold', value: '' },
-    { id: 'FechaIngreso', label: 'Fecha y hora de ingreso', value: formData.fecha_creado ? new Date(formData.fecha_creado).toLocaleString('es-CO') : '' },
-  ];
 
   return (
     <section className="container py-4">
@@ -224,11 +229,21 @@ export default function CaseResolutionPage() {
                 <div className="row g-3 align-items-end">
                   <div className="col-md-12">
                     <label className="form-label" htmlFor="TipoServicio">
-                      Conceptos
+                      Conceptos disponibles
                     </label>
-                    {/* <select className="form-select" id="TipoServicio" disabled={!!formData.oferta} style={formData.oferta ? { cursor: 'not-allowed' } : {}}> */}
-                    <select className="form-select" id="TipoServicio" disabled>
-                      <option>Seleccionar</option>
+                    <select 
+                      className="form-select" 
+                      id="TipoServicio" 
+                      disabled={!!formData.oferta || isAssigning}
+                      value={selectedConcepto}
+                      onChange={(e) => setSelectedConcepto(e.target.value)}
+                    >
+                      <option value="">Cualquiera (Aleatorio)</option>
+                      {conceptos.map((c) => (
+                        <option key={c.concepto} value={c.concepto}>
+                          {c.concepto} ({c.cantidad})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -238,7 +253,7 @@ export default function CaseResolutionPage() {
                       className="button button-blue w-100"
                       type="button"
                       onClick={handleDemePedido}
-                      disabled={!!formData.oferta || isAssigning} // Ahora depende de isAssigning
+                      disabled={!!formData.oferta || isAssigning}
                     >
                       {isAssigning ? (
                         <>
@@ -250,43 +265,6 @@ export default function CaseResolutionPage() {
                       )}
                     </button>
                   </div>
-                  {/* <hr className="my-4"/>
-                  <div className="col-md-12 mt-0">
-                    <label className="form-label" htmlFor="oferta">
-                      Buscar oferta
-                    </label>
-                    <input
-                      className="form-control"
-                      id="oferta"
-                      disabled={!!formData.oferta || loading}
-                      type="text"
-                      placeholder="Ingresar oferta"
-                      style={formData.oferta ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
-                    />
-                  </div>
-                  <div className="col-md-12 d-flex justify-content-md-end align-items-center">
-                    <Icon name="look-for" size="xl" className="me-2" />
-                    <button
-                      className="button button-blue w-100"
-                      type="button"
-                      disabled={!!formData.oferta}
-                      style={formData.oferta ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
-                    >
-                      Buscar
-                    </button>
-                  </div> */}
-                  {/* <hr className="my-4"/>
-                  <div className="col-md-12 d-flex justify-content-md-end mt-0 mb-2 align-items-center">
-                    <Icon name="edit" size="xl" className="me-2" />
-                    <button
-                      className="button button-blue w-100"
-                      type="button"
-                      disabled={!!formData.oferta}
-                      style={formData.oferta ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
-                    >
-                      Ingreso manual
-                    </button>
-                  </div> */}
                 </div>
               </div>
             </div>
@@ -319,107 +297,96 @@ export default function CaseResolutionPage() {
               </div>
 
               <form className="row g-3" onSubmit={handleSubmit}>
-                  {/* Renderizado dinámico de los campos de solo lectura */}
-                  {readOnlyFields.map(field => (
-                    <div className="col-md-3" key={field.id}>
-                      <label className="form-label" htmlFor={field.id}>
-                        {field.label}
-                      </label>
-                      <input 
-                        className="form-control" 
-                        id={field.id} 
-                        type="text" 
-                        value={field.value} 
-                        disabled 
-                      />
-                    </div>
-                  ))}
+                  {/* CAMPOS DE SOLO LECTURA */}
+                  <div className="col-md-3">
+                    <label className="form-label">Oferta Siebel</label>
+                    <input className="form-control" type="text" value={formData.oferta || '-'} disabled />
+                  </div>
 
                   <div className="col-md-3">
-                    <label className="form-label" htmlFor="Accion">
-                      Acción*
-                    </label>
-                    <select
-                      className="form-select"
-                      id="Accion"
-                      value={accionAuto}
-                      onChange={e => setAccionAuto(e.target.value)}
-                      disabled={!formData.oferta}
-                      required
-                    >
+                    <label className="form-label">Pedido Fenix</label>
+                    <input className="form-control" type="text" value={formData.pedido_id || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label">Concepto o cola</label>
+                    <input className="form-control" type="text" value={formData.concepto_id || formData.concepto || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label">Segmento</label>
+                    <input className="form-control" type="text" value={formData.segmento || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-5">
+                    <label className="form-label">Dirección</label>
+                    <input className="form-control" type="text" value={formData.direccion || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label">Página</label>
+                    <input className="form-control" type="text" value={formData.pagina || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label">Coordenadas (latitud y longitud)</label>
+                    <input className="form-control" type="text" value={formData.coordenadas || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-2">
+                    <label className="form-label">Nodo ID TAP</label>
+                    <input className="form-control" type="text" value={formData.nodo_id || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-2">
+                    <label className="form-label">Megagold</label>
+                    <input className="form-control" type="text" value={formData.megagold || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label">Fecha y hora de ingreso</label>
+                    <input className="form-control" type="text" value={formData.fecha_creado ? new Date(formData.fecha_creado).toLocaleString('es-CO') : '-'} disabled />
+                  </div>
+
+                  {/* FORMULARIO DE GESTIÓN */}
+                  <div className="col-md-2">
+                    <label className="form-label" htmlFor="Accion">Acción*</label>
+                    <select className="form-select" id="Accion" value={accionAuto} onChange={e => setAccionAuto(e.target.value)} disabled={!formData.oferta} required>
                       <option value="">Seleccionar</option>
                       {acciones.map((accion) => (
-                        <option key={accion.id} value={accion.id}>
-                          {accion.nombre}
-                        </option>
+                        <option key={accion.id} value={accion.id}>{accion.nombre}</option>
                       ))}
                     </select>
                   </div>
                   
                   <div className="col-md-3">
-                    <label className="form-label" htmlFor="SubAccion">
-                      Subacción*
-                    </label>
-                    <select
-                      className="form-select"
-                      id="SubAccion"
-                      value={subaccion}
-                      onChange={e => setSubaccion(e.target.value)}
-                      disabled={!accionAuto}
-                      required
-                    >
+                    <label className="form-label" htmlFor="SubAccion">Subacción*</label>
+                    <select className="form-select" id="SubAccion" value={subaccion} onChange={e => setSubaccion(e.target.value)} disabled={!accionAuto} required>
                       <option value="">Seleccionar</option>
                       {subacciones.map((sub) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.nombre}
-                        </option>
+                        <option key={sub.id} value={sub.id}>{sub.nombre}</option>
                       ))}
                     </select>
                   </div>
                   
                   <div className="col-12">
-                    <label className="form-label" htmlFor="Observacion">
-                      Observación*
-                    </label>
-                    <textarea 
-                      className="form-control" 
-                      id="Observacion" 
-                      rows={4} 
-                      value={observacion} 
-                      onChange={e => setObservacion(e.target.value)} 
-                      disabled={!formData.oferta}
-                      required 
-                    />
+                    <label className="form-label" htmlFor="Observacion">Observación*</label>
+                    <textarea className="form-control" id="Observacion" rows={4} value={observacion} onChange={e => setObservacion(e.target.value)} disabled={!formData.oferta} required />
                   </div>
                   
                   <div className="col-12 d-flex justify-content-between align-items-center gap-2">
                     <div>
-                      <button
-                        className="button button-gray button-small"
-                        type="button"
-                        onClick={handleCopy}
-                        title="Copiar acción/subacción/observación"
-                      >
+                      <button className="button button-gray button-small" type="button" onClick={handleCopy} title="Copiar acción/subacción/observación" disabled={!formData.oferta}>
                         Copiar texto
                         <Icon name="copy" size="md" className="ms-2" />
                       </button>
                     </div>
                     
-                    <button
-                      className="button button-blue"
-                      type="submit"
-                      disabled={isSubmitting || !formData.oferta} // Ahora depende de isSubmitting
-                    >
+                    <button className="button button-blue" type="submit" disabled={isSubmitting || !formData.oferta}>
                       {isSubmitting ? (
-                        <>
-                          Procesando...
-                          <span className="spinner-border spinner-border-sm ms-3" role="status" aria-hidden="true"></span>
-                        </>
+                        <>Procesando... <span className="spinner-border spinner-border-sm ms-3" role="status" aria-hidden="true"></span></>
                       ) : (
-                        <>
-                          Enviar
-                          <Icon name="send" size="lg" className="ms-3" />
-                        </>
+                        <>Enviar <Icon name="send" size="lg" className="ms-3" /></>
                       )}
                     </button>
                   </div>

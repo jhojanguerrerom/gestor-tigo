@@ -68,7 +68,7 @@ export default function BaseModal({ isOpen, onClose, title, children, size }: Ba
         onClick={onClose}
       >
         <div
-          className={`modal-dialog ${size || ''} modal-dialog-centered`}
+          className={`modal-dialog ${size || ''} modal-dialog-centered modal-dialog-scrollable`}
           role="document"
           onClick={(e) => e.stopPropagation()}
         >

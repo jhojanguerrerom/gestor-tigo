@@ -6,7 +6,11 @@ export const offerService = {
   
   getMyOffer: () => httpClient.get(ENDPOINTS.OFFERS.MY_OFFER),
   
-  freezeOffer: () => httpClient.post(ENDPOINTS.OFFERS.FREEZE),
+  freezeOffer: (data?: { concepto?: string }) => {
+    return httpClient.post(ENDPOINTS.OFFERS.FREEZE, data);
+  },
+  
+  getConceptos: () => httpClient.get(ENDPOINTS.OFFERS.CONCEPTOS),
   
   getHistory: (oferta: string) => httpClient.get(ENDPOINTS.OFFERS.HISTORY(oferta)),
   
