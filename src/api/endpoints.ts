@@ -13,7 +13,7 @@ export const ENDPOINTS = {
     BASE: '/offers',
     MY_OFFER: '/v1/ofertas/mi-oferta',
     FREEZE: '/v1/ofertas/congelar',
-    CONCEPTOS: '/v1/ofertas/conceptos',
+    CONCEPTS: '/v1/ofertas/conceptos',
     MANAGE: '/v1/ofertas/gestionar',
     HISTORY: (oferta: string) => `/v1/ofertas/historico/${oferta}`,
     MANAGEMENT_DETAIL: (oferta: string) => `/v1/ofertas/gestion-detalle/${oferta}`,

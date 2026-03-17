@@ -10,7 +10,7 @@ export const offerService = {
     return httpClient.post(ENDPOINTS.OFFERS.FREEZE, data);
   },
   
-  getConceptos: () => httpClient.get(ENDPOINTS.OFFERS.CONCEPTOS),
+  getConceptos: () => httpClient.get(ENDPOINTS.OFFERS.CONCEPTS),
   
   getHistory: (oferta: string) => httpClient.get(ENDPOINTS.OFFERS.HISTORY(oferta)),
   
