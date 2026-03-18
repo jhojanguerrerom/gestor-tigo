@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import BaseModal from '@/components/BaseModal';
 import { actionService } from '@/api/services/actionService';
 import { useToast } from '@/context/ToastContext';
-import { Icon } from '@/icons/Icon';
+//import { Icon } from '@/icons/Icon';
 
 type CreationType = 'accion' | 'subaccion';
 

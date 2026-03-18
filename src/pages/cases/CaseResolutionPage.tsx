@@ -61,7 +61,6 @@ export default function CaseResolutionPage() {
   const [selectedConcepto, setSelectedConcepto] = useState("");
 
   // Estados de UI
-  const [copied, setCopied] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,10 +150,39 @@ export default function CaseResolutionPage() {
     const texto = `Gestión: ${accionNombre} / Tipificación: ${subaccionNombre} / Observación: ${observacion}`;
     
     if (observacion.trim() && accionNombre && subaccionNombre) {
-      navigator.clipboard.writeText(texto);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-      info('Texto copiado en el portapapeles');
+      
+      // 1. Verificamos si estamos en un entorno seguro (HTTPS/localhost)
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto)
+          .then(() => info('Texto copiado en el portapapeles'))
+          .catch(() => error('Error al copiar texto'));
+      } else {
+        // 2. Fallback para entornos HTTP (IPs sin SSL como 10.100.82.19)
+        const textArea = document.createElement("textarea");
+        textArea.value = texto;
+        
+        // Escondemos el textarea para que el usuario no lo vea parpadear
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          // Ejecutamos la copia a la antigua
+          document.execCommand('copy');
+          info('Texto copiado en el portapapeles (Modo compatibilidad)');
+        } catch (err) {
+          console.error('Fallback copy falló', err);
+          error('Tu navegador bloqueó la copia automática');
+        }
+        
+        // Limpiamos la basura del DOM
+        document.body.removeChild(textArea);
+      }
+      
     } else {
       error('Complete la información antes de copiar');
     }
@@ -230,7 +258,7 @@ export default function CaseResolutionPage() {
                 <div>
                   <h2 className="h5 mb-1">Asignación de trabajo</h2>
                   <p className="text-body-secondary mb-0">
-                    Selecciona el tipo de servicio o ingresa el ID de forma manual.
+                    Seleccione un concepto o permita que se asigne uno de forma aleatoria.
                   </p>
                 </div>
 
