@@ -15,6 +15,7 @@ const INITIAL_FORM_DATA = {
   pedido_id: '',
   concepto_id: '',
   concepto: '',
+  municipio: '',
   direccion: '',
   fecha_creado: '',
   segmento: '',
@@ -34,6 +35,7 @@ const extractFormData = (campos: any = {}) => {
     pedido_id: campos.pedido_id || '',
     concepto_id: campos.concepto_id || '',
     concepto: campos.concepto || '',
+    municipio: campos.municipio || '',
     direccion: campos.direccion || '',
     fecha_creado: campos.fecha_creado || '',
     segmento: campos.uen || '',
@@ -173,9 +175,8 @@ export default function CaseResolutionPage() {
         try {
           // Ejecutamos la copia a la antigua
           document.execCommand('copy');
-          info('Texto copiado en el portapapeles (Modo compatibilidad)');
+          info('Texto copiado en el portapapeles');
         } catch (err) {
-          console.error('Fallback copy falló', err);
           error('Tu navegador bloqueó la copia automática');
         }
         
@@ -212,7 +213,7 @@ export default function CaseResolutionPage() {
       setAccionAuto("");
       setSubaccion("");
       setObservacion("");
-      setSelectedConcepto(""); // <-- AQUÍ ESTÁ LA MAGIA (Devuelve el select a Aleatorio)
+      setSelectedConcepto(""); // Devuelve el select a Aleatorio
       
       fetchConcepts(); // Refrescamos las cantidades
     } catch (err) {
@@ -334,12 +335,12 @@ export default function CaseResolutionPage() {
 
               <form className="row g-3" onSubmit={handleSubmit}>
                   {/* CAMPOS DE SOLO LECTURA */}
-                  <div className="col-md-3">
+                  <div className="col-md-2">
                     <label className="form-label">Oferta Siebel</label>
                     <input className="form-control" type="text" value={formData.oferta || '-'} disabled />
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-2">
                     <label className="form-label">Pedido Fenix</label>
                     <input className="form-control" type="text" value={formData.pedido_id || '-'} disabled />
                   </div>
@@ -349,9 +350,14 @@ export default function CaseResolutionPage() {
                     <input className="form-control" type="text" value={formData.concepto_id || formData.concepto || '-'} disabled />
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-2">
                     <label className="form-label">Segmento</label>
                     <input className="form-control" type="text" value={formData.segmento || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label">Municipio</label>
+                    <input className="form-control" type="text" value={formData.municipio || '-'} disabled />
                   </div>
 
                   <div className="col-md-5">
