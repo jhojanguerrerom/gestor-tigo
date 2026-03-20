@@ -9,6 +9,7 @@ import { offerService } from '@/api/services/offerService';
 import { useToast } from '@/context/ToastContext';
 import OrderHistoryModal from '@/pages/cases/OrderHistoryModal';
 import Loading from '@/components/Loading';
+import { useBootstrapTooltips } from '@/hooks/useBootstrapTooltips';
 
 const INITIAL_FORM_DATA = {
   oferta: '',
@@ -70,12 +71,27 @@ export default function CaseResolutionPage() {
   
   const { success, info, error } = useToast();
 
+  // 1. Inicializamos los tooltips reaccionando a la data de la oferta
+  useBootstrapTooltips([formData]);
+
   // Función para cargar o refrescar los conceptos disponibles
   const fetchConcepts = useCallback(async () => {
     try {
       const res = await offerService.getConcepts();
       if (isMounted.current) {
-        setConcepts(res.data || []);
+        const fetchedConcepts = res.data || [];
+        setConcepts(fetchedConcepts);
+        
+        // Evaluamos si el concepto seleccionado todavía existe en la nueva data
+        setSelectedConcepto(prevSelected => {
+          if (!prevSelected) return prevSelected; // Si ya estaba en Aleatorio, lo dejamos así
+          
+          // Buscamos si el concepto que el usuario tenía seleccionado sigue teniendo ofertas
+          const exists = fetchedConcepts.some((c: any) => c.concepto === prevSelected);
+          
+          // Si existe lo mantenemos, si no (porque llegó a 0), lo devolvemos a Aleatorio ("")
+          return exists ? prevSelected : "";
+        });
       }
     } catch (err) {
       console.error("Error al cargar conceptos", err);
@@ -88,7 +104,7 @@ export default function CaseResolutionPage() {
 
     const initData = async () => {
       try {
-        await fetchConcepts(); // Cargamos conceptos primero
+        await fetchConcepts(); 
         const res = await offerService.getMyOffer();
         if (!isMounted.current) return;
         setFormData(extractFormData(res.data.campos_dinamicos));
@@ -131,8 +147,6 @@ export default function CaseResolutionPage() {
 
   const handleDemePedido = () => {
     setIsAssigning(true);
-    
-    // Armamos el payload. Si seleccionó un concepto, lo enviamos. Si no, mandamos vacío.
     const payload = selectedConcepto ? { concepto: selectedConcepto } : {};
 
     offerService.freezeOffer(payload)
@@ -140,50 +154,46 @@ export default function CaseResolutionPage() {
         const campos = res.data.campos_dinamicos || {};
         setFormData(extractFormData(campos));
         info(`Pedido ${campos.oferta || ''} asignado exitosamente`);
-        fetchConcepts(); // Refrescamos las cantidades después de tomar un caso
+        fetchConcepts(); 
       })
-      .catch(() => error('No se pudo asignar pedido. Intente con otro concepto o aleatorio.'))
+      .catch(() => error('No se pudo asignar pedido'))
       .finally(() => setIsAssigning(false));
   };
 
-  const handleCopy = () => {
+  // Función genérica y segura para copiar al portapapeles
+  const safeCopyText = (text: string, successMsg: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text)
+        .then(() => info(successMsg))
+        .catch(() => error('Error al copiar texto'));
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        info(successMsg);
+      } catch (err) {
+        error('Tu navegador bloqueó la copia automática');
+      }
+      
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const handleCopyGestión = () => {
     const accionNombre = acciones.find(a => a.id === accionAuto)?.nombre;
     const subaccionNombre = subacciones.find(s => s.id === subaccion)?.nombre;
     const texto = `Gestión: ${accionNombre} / Tipificación: ${subaccionNombre} / Observación: ${observacion}`;
     
     if (observacion.trim() && accionNombre && subaccionNombre) {
-      
-      // 1. Verificamos si estamos en un entorno seguro (HTTPS/localhost)
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(texto)
-          .then(() => info('Texto copiado en el portapapeles'))
-          .catch(() => error('Error al copiar texto'));
-      } else {
-        // 2. Fallback para entornos HTTP (IPs sin SSL como 10.100.82.19)
-        const textArea = document.createElement("textarea");
-        textArea.value = texto;
-        
-        // Escondemos el textarea para que el usuario no lo vea parpadear
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        textArea.style.top = "-9999px";
-        document.body.appendChild(textArea);
-        
-        textArea.focus();
-        textArea.select();
-        
-        try {
-          // Ejecutamos la copia a la antigua
-          document.execCommand('copy');
-          info('Texto copiado en el portapapeles');
-        } catch (err) {
-          error('Tu navegador bloqueó la copia automática');
-        }
-        
-        // Limpiamos la basura del DOM
-        document.body.removeChild(textArea);
-      }
-      
+      safeCopyText(texto, 'Texto copiado en el portapapeles');
     } else {
       error('Complete la información antes de copiar');
     }
@@ -208,14 +218,14 @@ export default function CaseResolutionPage() {
       await offerService.manageOffer(payload);
       success(`Pedido ${payload.oferta} cerrado exitosamente`);
       
-      // LIMPIEZA TOTAL DE ESTADOS
       setFormData(INITIAL_FORM_DATA);
       setAccionAuto("");
       setSubaccion("");
       setObservacion("");
-      setSelectedConcepto(""); // Devuelve el select a Aleatorio
       
-      fetchConcepts(); // Refrescamos las cantidades
+      // YA NO BORRAMOS EL selectedConcepto AQUÍ
+      
+      fetchConcepts(); // La lógica inteligente de fetchConcepts decidirá si se queda o se borra
     } catch (err) {
       console.error("Error al gestionar el pedido:", err);
       try {
@@ -224,12 +234,10 @@ export default function CaseResolutionPage() {
       } catch (verifyErr) {
         error('El pedido ya no se encuentra asignado');
         
-        // LIMPIEZA TOTAL DE ESTADOS
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
         setObservacion("");
-        setSelectedConcepto(""); // <-- AQUÍ TAMBIÉN
         
         fetchConcepts();
       }
@@ -335,9 +343,22 @@ export default function CaseResolutionPage() {
 
               <form className="row g-3" onSubmit={handleSubmit}>
                   {/* CAMPOS DE SOLO LECTURA */}
-                  <div className="col-md-2">
+                  <div className="col-md-3">
                     <label className="form-label">Oferta Siebel</label>
-                    <input className="form-control" type="text" value={formData.oferta || '-'} disabled />
+                    <div className="d-flex align-items-center">
+                      <input className="form-control" type="text" value={formData.oferta || '-'} disabled />
+                      {/* Icono de Copiar Oferta Funcional con Tooltip */}
+                      {formData.oferta && (<span className={`ms-2 ${formData.oferta ? 'cursor-pointer text-primary' : 'text-muted'}`} 
+                        data-bs-toggle="tooltip" 
+                        data-bs-placement="top" 
+                        title="Copiar oferta"
+                        onClick={() => {
+                          if (formData.oferta) safeCopyText(formData.oferta, 'Oferta copiada al portapapeles');
+                        }}>
+                        <Icon name="copy" size="xl" />
+                      </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="col-md-2">
@@ -345,7 +366,7 @@ export default function CaseResolutionPage() {
                     <input className="form-control" type="text" value={formData.pedido_id || '-'} disabled />
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-2">
                     <label className="form-label">Concepto o cola</label>
                     <input className="form-control" type="text" value={formData.concepto_id || formData.concepto || '-'} disabled />
                   </div>
@@ -415,23 +436,24 @@ export default function CaseResolutionPage() {
                     <label className="form-label" htmlFor="Observacion">Observación*</label>
                     <textarea className="form-control" id="Observacion" rows={4} value={observacion} onChange={e => setObservacion(e.target.value)} disabled={!formData.oferta} required />
                   </div>
-                  
-                  <div className="col-12 d-flex justify-content-between align-items-center gap-2">
-                    <div>
-                      <button className="button button-gray button-small" type="button" onClick={handleCopy} title="Copiar acción/subacción/observación" disabled={!formData.oferta}>
-                        Copiar texto
-                        <Icon name="copy" size="md" className="ms-2" />
+                  {formData.oferta && (
+                    <div className="col-12 d-flex justify-content-between align-items-center gap-2">
+                      <div>
+                        <button className="button button-gray button-small" type="button" onClick={handleCopyGestión} title="Copiar acción/subacción/observación" disabled={!formData.oferta}>
+                          Copiar texto   
+                        </button>
+                        <Icon name="copy" size="lg" className="ms-2" />
+                      </div>
+                      
+                      <button className="button button-blue" type="submit" disabled={isSubmitting || !formData.oferta}>
+                        {isSubmitting ? (
+                          <>Procesando... <span className="spinner-border spinner-border-sm ms-3" role="status" aria-hidden="true"></span></>
+                        ) : (
+                          <>Enviar <Icon name="send" size="lg" className="ms-3" /></>
+                        )}
                       </button>
                     </div>
-                    
-                    <button className="button button-blue" type="submit" disabled={isSubmitting || !formData.oferta}>
-                      {isSubmitting ? (
-                        <>Procesando... <span className="spinner-border spinner-border-sm ms-3" role="status" aria-hidden="true"></span></>
-                      ) : (
-                        <>Enviar <Icon name="send" size="lg" className="ms-3" /></>
-                      )}
-                    </button>
-                  </div>
+                  )}
               </form>
             </div>
           </div>
