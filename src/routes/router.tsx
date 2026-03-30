@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
       {
         path: '/offers/managed',
         element: (
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
             <OffersManagedPage />
           </PrivateRoute>
         ),

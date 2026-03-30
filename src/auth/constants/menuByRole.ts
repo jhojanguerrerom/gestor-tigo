@@ -16,15 +16,13 @@ export const MENU_BY_ROLE: MenuByRole = {
       label: 'Pedidos',
       subItems: [
         { label: 'Estado de trabajo', path: '/orders/home' },
-        { label: 'Historico de pedidos', path: '/config/actionss' }
+        { label: 'Historico de pedidos', path: '/offers/managed' }
       ]
     },
     { 
       label: 'Configuración',
       subItems: [
-        { label: 'Acción y Subacción', path: '/config/actions' },
-        { label: 'Opción 2', path: '/config/actionss' },
-        { label: 'Opción 3', path: '/config/actionss' }
+        { label: 'Acción y Subacción', path: '/config/actions' }
       ]
     },
   ],
