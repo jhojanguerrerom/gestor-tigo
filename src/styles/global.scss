@@ -591,6 +591,14 @@ $toast-transition: 0.4s;
   }
 }
 
+.modal-xxl{
+  min-width: 95% !important;
+  .badge.bg-secondary{
+    display: block;
+    margin-top: 5px;
+  }
+}
+
 .app-nav {
   display: flex;
   align-items: center;
