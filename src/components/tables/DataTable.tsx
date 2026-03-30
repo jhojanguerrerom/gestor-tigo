@@ -97,20 +97,22 @@ export default function DataTable<T>({
     <div className="card shadow-sm">
       <div className="card-body">
         <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3">
-          <div className="input-group" style={{ maxWidth: '420px' }}>
-            <span className="input-group-text" id={searchLabelId}>
-              {searchLabel}
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder={searchPlaceholder}
-              aria-label={searchLabel}
-              aria-describedby={searchLabelId}
-              value={searchQuery}
-              onChange={(event) => onSearchChange(event.target.value)}
-            />
-          </div>
+          {onSearchChange && (
+            <div className="input-group" style={{ maxWidth: '420px' }}>
+              <span className="input-group-text" id={searchLabelId}>
+                {searchLabel}
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder={searchPlaceholder}
+                aria-label={searchLabel}
+                aria-describedby={searchLabelId}
+                value={searchQuery}
+                onChange={(event) => onSearchChange(event.target.value)}
+              />
+            </div>
+          )}
           <div className="text-body-secondary">{summary}</div>
         </div>
 

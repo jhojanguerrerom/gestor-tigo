@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BaseModal from '@/components/BaseModal';
 import { offerService } from '@/api/services/offerService';
 import { useToast } from '@/context/ToastContext';
@@ -8,16 +8,24 @@ interface ManagementModalProps {
   onClose: () => void;
   ofertaId: string;
   onSuccess?: () => void;
+  isInTransit?: boolean; // Prop para saber si viene de la pestaña "En trámite"
 }
 
 type ActionType = 'liberar' | 'reasignar';
 
-const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementModalProps) => {
-  const [actionType, setActionType] = useState<ActionType>('liberar');
+const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess, isInTransit }: ManagementModalProps) => {
+  // Por defecto, si no está en trámite, forzamos a 'reasignar'
+  const [actionType, setActionType] = useState<ActionType>(isInTransit ? 'liberar' : 'reasignar');
   const [motivo, setMotivo] = useState('');
   const [asesorLogin, setAsesorLogin] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { success, error } = useToast();
+
+  useEffect(() => {
+    if (isOpen) {
+      setActionType(isInTransit ? 'liberar' : 'reasignar');
+    }
+  }, [isOpen, isInTransit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +65,7 @@ const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementMod
       onClose={onClose}
     >
 
-      <div className="btn-group mb-3">
+      <div className="btn-group mb-3 w-100">
         <input
           type="radio"
           className="btn-check"
@@ -66,8 +74,14 @@ const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementMod
           autoComplete="off"
           checked={actionType === 'liberar'}
           onChange={() => setActionType('liberar')}
+          disabled={!isInTransit} // Deshabilitado si no está en trámite
         />
-        <label className="btn btn-outline-primary" htmlFor="liberar">Liberar pedido</label>
+        <label 
+          className={`btn btn-outline-primary ${!isInTransit ? 'disabled opacity-50' : ''}`} 
+          htmlFor="liberar"
+        >
+          Liberar pedido
+        </label>
 
         <input
           type="radio"
@@ -78,7 +92,9 @@ const ManagementModal = ({ isOpen, onClose, ofertaId, onSuccess }: ManagementMod
           checked={actionType === 'reasignar'}
           onChange={() => setActionType('reasignar')}
         />
-        <label className="btn btn-outline-primary" htmlFor="reasignar">Reasignar pedido</label>
+        <label className="btn btn-outline-primary" htmlFor="reasignar">
+          {isInTransit ? 'Reasignar pedido' : 'Asignar pedido'}
+        </label>
       </div>
 
       <form onSubmit={handleSubmit}>

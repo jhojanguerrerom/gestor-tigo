@@ -12,8 +12,13 @@ type MenuByRole = { [key in typeof UserRole[keyof typeof UserRole]]: MenuItem[] 
 
 export const MENU_BY_ROLE: MenuByRole = {
   [UserRole.SUPER_USER]: [
-    { label: 'Pedidos', path: '/orders/home'},
-    // { label: 'Deme pedido', path: '/advisor/home'},
+    { 
+      label: 'Pedidos',
+      subItems: [
+        { label: 'Estado de trabajo', path: '/orders/home' },
+        { label: 'Historico de pedidos', path: '/config/actionss' }
+      ]
+    },
     { 
       label: 'Configuración',
       subItems: [

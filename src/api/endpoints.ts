@@ -11,6 +11,7 @@ export const ENDPOINTS = {
   },
   OFFERS: {
     BASE: '/offers',
+    IN_TRANSIT: '/v1/ofertas/en-tramite',
     MY_OFFER: '/v1/ofertas/mi-oferta',
     FREEZE: '/v1/ofertas/congelar',
     CONCEPTS: '/v1/ofertas/conceptos',
