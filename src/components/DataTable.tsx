@@ -18,6 +18,7 @@ interface DataTableProps<T> {
   columns: DataTableColumn[];
   renderRow: (row: T) => ReactNode;
   getSearchText?: (row: T) => string; // Es opcional en la interfaz
+  showSearch?: boolean; // <-- prop opcional
   searchQuery: string;
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
@@ -44,6 +45,7 @@ export default function DataTable<T>({
   getSearchText = () => '', // <--- SOLUCIÓN: Valor por defecto para evitar error de undefined
   searchQuery,
   onSearchChange,
+  showSearch = true,// <-- Valor por defecto: true
   searchPlaceholder = 'Buscar',
   searchLabel = 'Buscar',
   searchLabelId = 'data-table-search-label',
@@ -97,8 +99,11 @@ export default function DataTable<T>({
   return (
     <div className="card shadow-sm">
       <div className="card-body">
+        {/* Usamos d-flex para que si el buscador desaparece, el resumen se alinee a la derecha */}
         <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3">
-          {onSearchChange && (
+          
+          {/* Solo renderiza el buscador si showSearch es true Y existe la función onSearchChange */}
+          {showSearch && onSearchChange ? (
             <div className="input-group" style={{ maxWidth: '420px' }}>
               <span className="input-group-text" id={searchLabelId}>
                 {searchLabel}
@@ -107,13 +112,14 @@ export default function DataTable<T>({
                 type="text"
                 className="form-control"
                 placeholder={searchPlaceholder}
-                aria-label={searchLabel}
-                aria-describedby={searchLabelId}
                 value={searchQuery}
                 onChange={(event) => onSearchChange(event.target.value)}
               />
             </div>
+          ) : (
+            <div></div> // Espaciador vacío para mantener el resumen a la derecha
           )}
+          
           <div className="text-body-secondary">{summary}</div>
         </div>
 

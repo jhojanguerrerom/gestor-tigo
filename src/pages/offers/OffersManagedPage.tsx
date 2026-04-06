@@ -12,6 +12,8 @@ interface RowType {
   hash_registro?: string;
   id?: string;
   oferta?: string;
+  usuario_asignado_login?: string;
+  usuario_asignado_nombre?: string;
   campos_dinamicos?: Record<string, any>;
 }
 
@@ -105,6 +107,7 @@ export default function OffersManagedPage() {
             className="btn btn-link p-0 ms-2"
             onClick={handleRefresh}
             data-bs-toggle="tooltip"
+            data-bs-placement="right"
             title="Actualizar tabla"
           >
             <Icon name="refresh" size="xl" />
@@ -137,15 +140,18 @@ export default function OffersManagedPage() {
         renderRow={(row) => {
           const campos = row.campos_dinamicos || {};
           const oferta = row.oferta || campos.oferta || '-';
+          const usuarioLogin = row.usuario_asignado_login || '-';
+          const usuarioLoginName = row.usuario_asignado_nombre || '-';
           const rowKey = row.hash_registro || row.id || oferta;
+          
 
           return (
             <Fragment key={rowKey}>
               <tr>
                 <td><CellText value={oferta} /></td>
                 <td>
-                  <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={campos.usuario}>
-                    {campos.usuario || '-'}
+                  <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={usuarioLoginName}>
+                    {usuarioLogin || '-'}
                   </span>
                 </td>
                 <td><CellText value={campos.concepto} /></td>

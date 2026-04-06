@@ -1,10 +1,11 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import AppLayout from '../components/layouts/AppLayout'
 import LoginPage from '../pages/auth/LoginPage'
-import OrdersHomePage from '../pages/orders/OrdersHomePage'
+import OrdersHomePage from '../pages/orders/index'
 import CaseResolutionPage from '../pages/cases/CaseResolutionPage'
 import OffersManagedPage from '../pages/offers/OffersManagedPage'
-import ActionsPage from '../pages/admin/actions/ActionsPage' // <-- 1. Importamos tu nueva vista
+import ActionsPage from '../pages/admin/actions/ActionsPage'
+import ManagementByHourPage from '../pages/reports/Productivity/index';
 import NotFoundPage from '../pages/common/NotFoundPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'
@@ -47,6 +48,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
             <OffersManagedPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: '/reports/management-by-hour',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
+            <ManagementByHourPage />
           </PrivateRoute>
         ),
       },

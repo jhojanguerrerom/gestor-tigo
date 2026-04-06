@@ -24,5 +24,9 @@ export const ENDPOINTS = {
   ACTIONS: {
     CATALOG: '/v1/ofertas/catalogo/acciones',
     SUBACTIONS: '/v1/ofertas/catalogo/subacciones',
+  },
+  REPORTS: {
+    MANAGED_BY_HOUR: '/v1/reports/managed-by-hour',
+    DAILY_PRODUCTIVITY: "/v1/reports/daily-productivity",
   }
 } as const;
