@@ -1,7 +1,7 @@
 import { Fragment, useState, useCallback, useEffect, useMemo } from 'react';
 import { useEnlistmentTable } from '@/hooks/useEnlistmentTable';
 import { enlistmentService } from '@/api/services/enlistmentService';
-import DataTable from '@/components/tables/DataTable';
+import DataTable from '@/components/DataTable';
 import { Icon } from '@/icons/Icon';
 import ManagementModal from './ManagementModal';
 import Loading from '@/components/Loading';

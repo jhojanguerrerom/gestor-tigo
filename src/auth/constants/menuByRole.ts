@@ -20,6 +20,12 @@ export const MENU_BY_ROLE: MenuByRole = {
       ]
     },
     { 
+      label: 'Indicadores',
+      subItems: [
+        { label: 'Productividad', path: '#' }
+      ]
+    },
+    { 
       label: 'Configuración',
       subItems: [
         { label: 'Acción y Subacción', path: '/config/actions' }

@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useCallback } from 'react';
-import DataTable from '@/components/tables/DataTable'; 
+import DataTable from '@/components/DataTable'; 
 import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import ManageCatalogModal from '@/pages/admin/actions/ManageCatalogModal';

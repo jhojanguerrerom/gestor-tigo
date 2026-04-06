@@ -35,7 +35,7 @@ interface ChangeHistoryItem {
 
     // --- HELPERS ---
     const formatValue = useCallback((value: any) => {
-      if (value === null || value === undefined || value === '') return 'vacío';
+      if (value === null || value === undefined || value === '') return 'Vacío';
       if (typeof value === 'string') {
         const date = new Date(value);
         if (!isNaN(date.getTime()) && value.includes('T')) return date.toLocaleString('es-CO');
