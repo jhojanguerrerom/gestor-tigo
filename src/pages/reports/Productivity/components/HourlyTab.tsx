@@ -72,7 +72,7 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         getSearchText={(row) => `${row.user_login} ${row.user_name}`}
-        pageSize={10}
+        pageSize={20}
         renderRow={(row) => (
           <Fragment key={row.user_login}>
             <tr>
@@ -90,7 +90,7 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
                   </td>
                 );
               })}
-              <td className="table-active fw-bold">{row.total_user}</td>
+              <td className="table-active fw-bold text-primary" data-bs-toggle="tooltip" title={`${row.total_user}`}>{row.total_user}</td>
             </tr>
           </Fragment>
         )}

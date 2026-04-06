@@ -22,7 +22,7 @@ export const MENU_BY_ROLE: MenuByRole = {
     { 
       label: 'Indicadores',
       subItems: [
-        { label: 'Gestión por horas', path: 'reports/management-by-hour' }
+        { label: 'Pruductividad', path: 'reports/management-by-hour' }
       ]
     },
     { 

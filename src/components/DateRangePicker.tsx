@@ -7,6 +7,7 @@ interface DateRangePickerProps {
   onChange: (from: string, to: string) => void;
   labelStart?: string;
   labelEnd?: string;
+  showToday?: boolean; // <-- Nueva prop opcional
 }
 
 export default function DateRangePicker({ 
@@ -14,16 +15,12 @@ export default function DateRangePicker({
   toDate, 
   onChange,
   labelStart = "Fecha inicio",
-  labelEnd = "Fecha fin"
+  labelEnd = "Fecha fin",
+  showToday = true // <-- Valor por defecto
 }: DateRangePickerProps) {
-
-  // Eliminamos los useState y useEffect internos. 
-  // Ahora el componente lee directamente de las props.
 
   const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrom = e.target.value;
-    // Si la nueva fecha de inicio es mayor o igual a la de fin, 
-    // sugerimos un día después para evitar rangos inválidos antes de la validación del padre.
     if (newFrom >= toDate) {
       const newTo = formatDate(getNextDay(new Date(newFrom)));
       onChange(newFrom, newTo);
@@ -48,8 +45,8 @@ export default function DateRangePicker({
         <label className="form-label mb-1 small fw-bold">{labelStart}</label>
         <input 
           type="date" 
-          className="form-control form-control-sm" 
-          value={fromDate} // Fuente de verdad única
+          className="form-control form-control-sm shadow-sm" 
+          value={fromDate} 
           onChange={handleFromChange} 
         />
       </div>
@@ -57,19 +54,23 @@ export default function DateRangePicker({
         <label className="form-label mb-1 small fw-bold">{labelEnd}</label>
         <input 
           type="date" 
-          className="form-control form-control-sm" 
-          value={toDate} // Fuente de verdad única
+          className="form-control form-control-sm shadow-sm" 
+          value={toDate} 
           onChange={handleToChange} 
         />
       </div>
-      <button 
-        type="button" 
-        className="btn btn-outline-primary btn-sm px-3" 
-        onClick={handleToday} 
-        title="Ir a hoy"
-      >
-        Hoy
-      </button>
+      
+      {/* Solo se muestra si showToday es true */}
+      {showToday && (
+        <button 
+          type="button" 
+          className="btn btn-outline-primary btn-sm px-3 shadow-sm" 
+          onClick={handleToday} 
+          title="Ir a hoy"
+        >
+          Hoy
+        </button>
+      )}
     </div>
   );
 }
