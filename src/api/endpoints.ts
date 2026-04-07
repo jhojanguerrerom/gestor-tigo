@@ -28,5 +28,6 @@ export const ENDPOINTS = {
   REPORTS: {
     MANAGED_BY_HOUR: '/v1/reports/managed-by-hour',
     DAILY_PRODUCTIVITY: "/v1/reports/daily-productivity",
+    HISTORICAL_INCOME: "/v1/reports/historical-income-vs-managed",
   }
 } as const;

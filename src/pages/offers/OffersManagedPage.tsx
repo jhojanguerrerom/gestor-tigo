@@ -117,6 +117,7 @@ export default function OffersManagedPage() {
         <DateRangePicker
           fromDate={fromDate}
           toDate={toDate}
+          forceNextDay={true} // <-- Solo aquí "forzará" el +1 día automáticamente
           onChange={(from, to) => {
             setFromDate(from);
             setToDate(to);

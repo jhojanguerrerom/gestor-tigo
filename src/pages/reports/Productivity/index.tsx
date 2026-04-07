@@ -9,49 +9,37 @@ import DailyProductivityTab from './components/DailyProductivityTab';
 type ViewMode = 'HOURLY' | 'DAILY';
 
 export default function ManagementByHourPage() {
-  const { error } = useToast();
+  const { warning, error } = useToast(); // Usamos warning para el rango
   const today = useMemo(() => new Date(), []);
   
   const [viewMode, setViewMode] = useState<ViewMode>('HOURLY');
-  // Inicializamos con hoy y mañana
   const [fromDate, setFromDate] = useState(formatDate(today));
   const [toDate, setToDate] = useState(formatDate(addDays(today, 1)));
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleRefresh = useCallback(() => setRefreshKey(prev => prev + 1), []);
 
-  /**
-   * Maneja el cambio de fechas con dos reglas:
-   * 1. No permite que la fecha inicial sea mayor a la final.
-   * 2. Si el rango supera los 31 días, ajusta la fecha INICIAL basándose en la final.
-   */
   const handleDateChange = (from: string, to: string) => {
     const start = new Date(from);
     const end = new Date(to);
     
     // 1. Validación: Fecha inicio mayor a fin
     if (start > end) {
-      error("La fecha inicial no puede ser posterior a la final.");
-      const correctedFrom = formatDate(addDays(end, -1));
-      setFromDate(correctedFrom);
-      setToDate(to);
-      return;
+      error("La fecha inicial no puede ser posterior a la final");
+      return; // Bloqueamos el cambio
     }
 
     // Calcular diferencia
-    const diffTime = end.getTime() - start.getTime();
+    const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    // 2. Validación: Máximo 31 días (ajusta la fecha inicial)
-    if (diffDays > 31) {
-      error("El rango máximo es de 31 días. La fecha inicial se ajustó automáticamente.");
-      const newMinFrom = formatDate(addDays(end, -31));
-      setFromDate(newMinFrom);
-      setToDate(to);
-      return;
+    // 2. Validación: Máximo 90 días (Sin ajuste automático)
+    if (diffDays > 90) {
+      warning("Seleccione un rango máximo de 90 días");
+      return; // Bloqueamos el cambio
     }
 
-    // Si todo está correcto
+    // Si todo está correcto, actualizamos
     setFromDate(from);
     setToDate(to);
   };

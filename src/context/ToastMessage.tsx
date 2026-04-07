@@ -46,7 +46,7 @@ export default function ToastMessage({ id, message, type, title, delay = 7000, o
       role="alert"
     >
       <div className="d-flex">
-        <div className="toast-body">
+        <div className="toast-body" style={{ whiteSpace: 'pre-line' }}>
           {title && <div className="fw-bold mb-1">{title}</div>}
           {message}
         </div>

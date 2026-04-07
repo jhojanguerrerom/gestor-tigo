@@ -72,7 +72,7 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         getSearchText={(row) => `${row.user_login} ${row.user_name}`}
-        pageSize={20}
+        pageSize={10}
         renderRow={(row) => (
           <Fragment key={row.user_login}>
             <tr>

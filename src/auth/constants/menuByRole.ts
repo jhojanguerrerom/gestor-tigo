@@ -22,7 +22,8 @@ export const MENU_BY_ROLE: MenuByRole = {
     { 
       label: 'Indicadores',
       subItems: [
-        { label: 'Pruductividad', path: 'reports/management-by-hour' }
+        { label: 'Pruductividad', path: 'reports/management-by-hour' },
+        { label: 'Historico de ingresos', path: 'reports/historical-income' }
       ]
     },
     { 

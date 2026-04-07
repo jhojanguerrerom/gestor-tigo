@@ -6,6 +6,7 @@ import CaseResolutionPage from '../pages/cases/CaseResolutionPage'
 import OffersManagedPage from '../pages/offers/OffersManagedPage'
 import ActionsPage from '../pages/admin/actions/ActionsPage'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
+import HistoricalIncomePage from '../pages/reports/HistoricalIncome/HistoricalIncomePage'
 import NotFoundPage from '../pages/common/NotFoundPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'
@@ -64,6 +65,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
             <ActionsPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: '/reports/historical-income',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
+            <HistoricalIncomePage />
           </PrivateRoute>
         ),
       },

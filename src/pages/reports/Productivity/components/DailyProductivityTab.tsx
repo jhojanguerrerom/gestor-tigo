@@ -2,6 +2,7 @@ import { Fragment, useState, useMemo, useEffect, useCallback, useRef } from 'rea
 import DataTable, { type DataTableColumn } from '@/components/DataTable';
 import { reportService } from '@/api/services/reportService';
 import Loading from '@/components/Loading';
+import { useToast } from '@/context/ToastContext'; // Importación necesaria
 
 // --- Interfaces ---
 interface ManagedByDay {
@@ -42,14 +43,28 @@ export default function DailyProductivityTab({ fromDate, toDate, refreshKey }: D
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { warning } = useToast(); // Hook para alertas
   const cacheRef = useRef<Record<string, DailyData[]>>({});
-  const abortRef = useRef<AbortController | null>(null);
   const lastRefreshKey = useRef(refreshKey);
 
+  // Validación de rango máximo 90 días
+  const isRangeValid = useCallback((start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 90;
+  }, []);
+
   const loadData = useCallback(async (forceRefresh = false) => {
+    // 1. Verificación de seguridad antes de llamar a la API
+    if (!isRangeValid(fromDate, toDate)) {
+      warning('Seleccione un rango máximo de 90 días');
+      setData([]); // Limpiamos para evitar inconsistencias
+      return;
+    }
+
     const cacheKey = `${fromDate}_${toDate}`;
-    
-    if (abortRef.current) abortRef.current.abort();
 
     if (!forceRefresh && cacheRef.current[cacheKey]) {
       setData(cacheRef.current[cacheKey]);
@@ -61,32 +76,25 @@ export default function DailyProductivityTab({ fromDate, toDate, refreshKey }: D
     }
 
     setLoading(true);
-    const controller = new AbortController();
-    abortRef.current = controller;
 
     try {
-      const res = await reportService.getDailyProductivity(fromDate, toDate, {
-        signal: controller.signal
-      });
+      const res = await reportService.getDailyProductivity(fromDate, toDate);
       const result = res.data?.data || [];
       cacheRef.current[cacheKey] = result;
       setData(result);
     } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      // Eliminada la notificación de error por Toast
+      console.error("Error cargando productividad diaria:", err);
       setData([]);
     } finally {
       setLoading(false);
     }
-  }, [fromDate, toDate]); // Eliminado error de las dependencias
+  }, [fromDate, toDate, isRangeValid, warning]);
 
   useEffect(() => {
     const isManualRefresh = refreshKey !== lastRefreshKey.current;
     lastRefreshKey.current = refreshKey;
 
     loadData(isManualRefresh);
-
-    return () => abortRef.current?.abort();
   }, [loadData, refreshKey]);
 
   const allDates = useMemo(() => {
@@ -120,7 +128,7 @@ export default function DailyProductivityTab({ fromDate, toDate, refreshKey }: D
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         getSearchText={(row) => `${row.user_login} ${row.user_name}`}
-        pageSize={20}
+        pageSize={10}
         renderRow={(row) => (
           <Fragment key={row.user_login}>
             <tr>

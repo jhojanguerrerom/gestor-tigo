@@ -8,6 +8,7 @@ const httpClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 5000, // 5 segundos de timeout global
 });
 
 // Función para validar expiración de token
@@ -28,27 +29,45 @@ httpClient.interceptors.request.use(
 );
 
 // Interceptor de Respuesta: Manejo de errores y Refresh Token
+// Reintentos automáticos para errores de red y timeout
+const MAX_RETRIES = 3;
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 httpClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _retryCount?: number };
 
     // Si estamos en la página de login, no intentamos refrescar el token para evitar bucles de recarga
     if (window.location.pathname === '/login') {
       return Promise.reject(error);
     }
 
+    // Reintentos automáticos para errores de red y timeout
+    const shouldRetry =
+      (!error.response && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) ||
+      (error.response && error.response.status >= 500 && error.response.status < 600);
+
+    if (shouldRetry) {
+      originalRequest._retryCount = originalRequest._retryCount || 0;
+      if (originalRequest._retryCount < MAX_RETRIES) {
+        originalRequest._retryCount += 1;
+        // Backoff exponencial: 500ms, 1000ms, 2000ms
+        await sleep(500 * Math.pow(2, originalRequest._retryCount - 1));
+        return httpClient(originalRequest);
+      }
+    }
+
     // Si el error es 401 (Unauthorized) y no es un reintento
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
-
-
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
-
         // Usamos una instancia nueva de axios para evitar bucles infinitos en los interceptores
         const response = await axios.post(
           `${BASE_URL}${ENDPOINTS.AUTH.REFRESH_TOKEN}`,
@@ -59,19 +78,16 @@ httpClient.interceptors.response.use(
             }
           }
         );
-
         // Extraer los datos directamente desde response.data (ajustado a tu backend)
         const { access_token, refresh_token: newRefreshToken, access_expires_at, refresh_expires_at } = response.data;
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', newRefreshToken);
         localStorage.setItem('access_expires_at', access_expires_at.toString());
         localStorage.setItem('refresh_expires_at', refresh_expires_at.toString());
-
         // Actualizamos el header de la petición original y reintentamos
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
         }
-
         // Validar expiración local del refresh token antes de reintentar
         const refreshExpiresAt = localStorage.getItem('refresh_expires_at');
         if (!newRefreshToken || !refreshExpiresAt) {
@@ -85,14 +101,14 @@ httpClient.interceptors.response.use(
         }
         // Si el refresh fue exitoso, reintenta la petición original con el nuevo access token
         return httpClient(originalRequest);
-
       } catch (refreshError) {
         // Si falla el refresh, limpiamos y redirigimos al login
         localStorage.clear();
-        window.location.href = '/login'; 
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   }
 );
