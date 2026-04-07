@@ -474,6 +474,15 @@ nav ul.pagination{
       }
     }
   }
+  &-search-custom{
+    background-color: transparent;
+    border-color: $color-blue-primary;
+
+    &:hover {
+      background-color: $color-blue-light;
+      border-color: $color-blue-light;
+    }
+  }
 }
 
 .button {

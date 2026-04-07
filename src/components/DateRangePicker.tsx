@@ -1,5 +1,6 @@
-// src/pages/common/components/DateRangePicker.tsx
+import { useState } from 'react';
 import { formatDate, getNextDay, addDays } from '@/utils/dateUtils';
+import { Icon } from '@/icons/Icon';
 
 interface DateRangePickerProps {
   fromDate: string;
@@ -7,8 +8,8 @@ interface DateRangePickerProps {
   onChange: (from: string, to: string) => void;
   labelStart?: string;
   labelEnd?: string;
-  showToday?: boolean; // <-- Nueva prop opcional
-  forceNextDay?: boolean; // <-- Solo sumará el día si esta prop es TRUE
+  showToday?: boolean;
+  forceNextDay?: boolean;
 }
 
 export default function DateRangePicker({ 
@@ -18,40 +19,52 @@ export default function DateRangePicker({
   labelStart = "Fecha inicio",
   labelEnd = "Fecha fin",
   showToday = true,
-  forceNextDay = false // <-- Por defecto NO fuerza nada
+  forceNextDay = false 
 }: DateRangePickerProps) {
+
+  // Estado interno para las fechas "borrador"
+  const [internalFrom, setInternalFrom] = useState(fromDate);
+  const [internalTo, setInternalTo] = useState(toDate);
+
+  // Sincronizar si las props cambian externamente (ej. al presionar "Hoy")
+  const updateInternal = (from: string, to: string) => {
+    setInternalFrom(from);
+    setInternalTo(to);
+  };
 
   const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrom = e.target.value;
-
-    // Solo si forceNextDay es true y el inicio alcanza al fin, empujamos el fin
-    if (forceNextDay && newFrom >= toDate) {
+    if (forceNextDay && newFrom >= internalTo) {
       const newTo = formatDate(getNextDay(new Date(newFrom)));
-      onChange(newFrom, newTo);
+      updateInternal(newFrom, newTo);
     } else {
-      // Comportamiento normal: solo validamos que no sea mayor (opcional)
-      onChange(newFrom, newFrom > toDate ? newFrom : toDate);
+      updateInternal(newFrom, newFrom > internalTo ? newFrom : internalTo);
     }
   };
 
   const handleToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTo = e.target.value;
-
-    // Solo si forceNextDay es true y el fin retrocede al inicio, empujamos inicio
-    if (forceNextDay && newTo <= fromDate) {
+    if (forceNextDay && newTo <= internalFrom) {
       const newFrom = formatDate(addDays(new Date(newTo), -1));
-      onChange(newFrom, newTo);
+      updateInternal(newFrom, newTo);
     } else {
-      // Comportamiento normal: solo validamos que el fin no sea menor al inicio
-      onChange(newTo < fromDate ? newTo : fromDate, newTo);
+      updateInternal(newTo < internalFrom ? newTo : internalFrom, newTo);
     }
   };
 
   const handleToday = () => {
     const today = new Date();
-    // Si forzamos día siguiente, hoy a mañana. Si no, hoy a hoy.
     const endValue = forceNextDay ? getNextDay(today) : today;
-    onChange(formatDate(today), formatDate(endValue));
+    const start = formatDate(today);
+    const end = formatDate(endValue);
+    updateInternal(start, end);
+    // Opcional: Si quieres que "Hoy" ejecute la búsqueda de inmediato
+    onChange(start, end); 
+  };
+
+  // Esta función es la que realmente dispara la petición en el padre
+  const handleSearch = () => {
+    onChange(internalFrom, internalTo);
   };
 
   return (
@@ -61,7 +74,7 @@ export default function DateRangePicker({
         <input 
           type="date" 
           className="form-control" 
-          value={fromDate} 
+          value={internalFrom} 
           onChange={handleFromChange} 
         />
       </div>
@@ -70,15 +83,25 @@ export default function DateRangePicker({
         <input 
           type="date" 
           className="form-control" 
-          value={toDate} 
+          value={internalTo} 
           onChange={handleToChange} 
         />
       </div>
+      
       {showToday && (
         <button type="button" className="btn btn-outline-primary" onClick={handleToday}>
           Hoy
         </button>
       )}
+
+      {/* Botón de búsqueda con tus estilos de Icon */}
+      <button 
+        type="button" 
+        className="btn btn-search-custom d-flex align-items-center" 
+        onClick={handleSearch}
+      >
+        <Icon name="look-for" size="lg" />
+      </button>
     </div>
   );
 }
