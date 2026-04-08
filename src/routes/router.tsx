@@ -6,7 +6,7 @@ import CaseResolutionPage from '../pages/cases/CaseResolutionPage'
 import OffersManagedPage from '../pages/offers/OffersManagedPage'
 import ActionsPage from '../pages/admin/actions/ActionsPage'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
-import HistoricalIncomePage from '../pages/reports/HistoricalIncome/HistoricalIncomePage'
+import HistoricalIncomePage from '../pages/reports/HistoricalIncome/index'
 import NotFoundPage from '../pages/common/NotFoundPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'

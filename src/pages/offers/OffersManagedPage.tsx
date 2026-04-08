@@ -78,8 +78,8 @@ export default function OffersManagedPage() {
 
   const columns = useMemo(
     () => [
-      { header: 'Oferta' },
       { header: 'Asesor' },
+      { header: 'Oferta' },
       { header: 'Concepto' },
       { header: 'Producto' },
       { header: 'UEN' },
@@ -149,12 +149,12 @@ export default function OffersManagedPage() {
           return (
             <Fragment key={rowKey}>
               <tr>
-                <td><CellText value={oferta} /></td>
                 <td>
                   <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={usuarioLoginName}>
                     {usuarioLogin || '-'}
                   </span>
                 </td>
+                <td><CellText value={oferta} /></td>
                 <td><CellText value={campos.concepto} /></td>
                 <td><CellText value={campos.producto} /></td>
                 <td><CellText value={campos.uen} /></td>

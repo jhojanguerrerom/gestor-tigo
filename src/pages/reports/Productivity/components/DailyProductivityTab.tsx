@@ -2,9 +2,10 @@ import { Fragment, useState, useMemo, useEffect, useCallback, useRef } from 'rea
 import DataTable, { type DataTableColumn } from '@/components/DataTable';
 import { reportService } from '@/api/services/reportService';
 import Loading from '@/components/Loading';
-import { useToast } from '@/context/ToastContext'; // Importación necesaria
+import DateRangePicker from '@/components/DateRangePicker';
+import { formatDate } from '@/utils/dateUtils';
+import { useToast } from '@/context/ToastContext';
 
-// --- Interfaces ---
 interface ManagedByDay {
   date: string;
   quantity: number;
@@ -18,9 +19,7 @@ interface DailyData {
   managed_by_day: ManagedByDay[];
 }
 
-interface DailyProductivityTabProps {
-  fromDate: string;
-  toDate: string;
+interface TabProps {
   refreshKey: number;
 }
 
@@ -38,12 +37,19 @@ const CellText = ({ value, className = '' }: { value?: string | number; classNam
   );
 };
 
-export default function DailyProductivityTab({ fromDate, toDate, refreshKey }: DailyProductivityTabProps) {
+export default function DailyProductivityTab({ refreshKey }: TabProps) {
+  const { warning } = useToast();
+  
+  // --- Filtros Internos (Copiado de la estructura de referencia) ---
+  const [dates, setDates] = useState({ 
+    from: formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
+    to: formatDate(new Date()) 
+  });
+  
   const [data, setData] = useState<DailyData[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const { warning } = useToast(); // Hook para alertas
+  
   const cacheRef = useRef<Record<string, DailyData[]>>({});
   const lastRefreshKey = useRef(refreshKey);
 
@@ -57,50 +63,44 @@ export default function DailyProductivityTab({ fromDate, toDate, refreshKey }: D
   }, []);
 
   const loadData = useCallback(async (forceRefresh = false) => {
-    // 1. Verificación de seguridad antes de llamar a la API
-    if (!isRangeValid(fromDate, toDate)) {
+    if (!isRangeValid(dates.from, dates.to)) {
       warning('Seleccione un rango máximo de 90 días');
-      setData([]); // Limpiamos para evitar inconsistencias
+      setData([]);
       return;
     }
 
-    const cacheKey = `${fromDate}_${toDate}`;
-
+    const cacheKey = `${dates.from}_${dates.to}`;
     if (!forceRefresh && cacheRef.current[cacheKey]) {
       setData(cacheRef.current[cacheKey]);
       return;
     }
 
-    if (forceRefresh) {
-      delete cacheRef.current[cacheKey];
-    }
+    if (forceRefresh) delete cacheRef.current[cacheKey];
 
     setLoading(true);
-
     try {
-      const res = await reportService.getDailyProductivity(fromDate, toDate);
+      const res = await reportService.getDailyProductivity(dates.from, dates.to);
       const result = res.data?.data || [];
       cacheRef.current[cacheKey] = result;
       setData(result);
     } catch (err: any) {
-      console.error("Error cargando productividad diaria:", err);
       setData([]);
     } finally {
       setLoading(false);
     }
-  }, [fromDate, toDate, isRangeValid, warning]);
+  }, [dates, isRangeValid, warning]);
 
   useEffect(() => {
     const isManualRefresh = refreshKey !== lastRefreshKey.current;
     lastRefreshKey.current = refreshKey;
-
     loadData(isManualRefresh);
   }, [loadData, refreshKey]);
 
+  // --- Lógica de Columnas Dinámicas ---
   const allDates = useMemo(() => {
-    const dates = new Set<string>();
-    data.forEach(u => u.managed_by_day?.forEach(d => dates.add(d.date)));
-    return Array.from(dates).sort();
+    const datesSet = new Set<string>();
+    data.forEach(u => u.managed_by_day?.forEach(d => datesSet.add(d.date)));
+    return Array.from(datesSet).sort();
   }, [data]);
 
   const columns: DataTableColumn[] = useMemo(() => {
@@ -108,64 +108,76 @@ export default function DailyProductivityTab({ fromDate, toDate, refreshKey }: D
     const dateCols = allDates.map(date => ({
       header: date.split('-').reverse().slice(0, 2).join('/')
     }));
-
-    return [
-      ...base, 
-      ...dateCols, 
-      { header: 'Promedio' }, 
-      { header: 'Total' }
-    ];
+    return [...base, ...dateCols, { header: 'Promedio' }, { header: 'Total' }];
   }, [allDates]);
 
   return (
     <div className="position-relative">
-      {loading && <Loading fullScreen text="Cargando reporte de productividad..." />}
-      
-      <DataTable<DailyData>
-        rows={data}
-        columns={columns}
-        tooltipDeps={[data, searchQuery, allDates]}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        getSearchText={(row) => `${row.user_login} ${row.user_name}`}
-        pageSize={10}
-        renderRow={(row) => (
-          <Fragment key={row.user_login}>
-            <tr>
-              <td className="text-start ps-3">
-                <span 
-                  className="badge text-bg-blue" 
-                  data-bs-toggle="tooltip" 
-                  title={row.user_name}
-                >
-                  {row.user_login || '-'}
-                </span>
-              </td>
-              
-              {allDates.map(date => {
-                const dayData = row.managed_by_day?.find(d => d.date === date);
-                const val = dayData ? dayData.quantity : 0;
-                return (
-                  <td key={date}>
-                    <CellText value={val} className="text-muted" />
-                  </td>
-                );
-              })}
+      {/* SECCIÓN DE FILTROS: Idéntica a tu referencia */}
+      <div className="d-flex flex-wrap justify-content-end align-items-center mb-4 gap-3">
 
-              <td className="fw-bold" data-bs-toggle="tooltip" title={`${row.daily_average}`}>
-                {row.daily_average.toFixed(1)}
-              </td>
-              <td 
-                className="table-active text-primary fw-bold text-center" 
-                data-bs-toggle="tooltip" 
-                title={`${row.total_managed}`}
-              >
-                {row.total_managed}
-              </td>
-            </tr>
-          </Fragment>
-        )}
-      />
+        <div>
+           <DateRangePicker 
+             fromDate={dates.from} 
+             toDate={dates.to} 
+             showToday={false}
+             onChange={(from, to) => setDates({ from: from, to: to })} 
+           />
+        </div>
+      </div>
+
+      {loading && <Loading fullScreen text="Cargando reporte..." />}
+      
+      <div className="card shadow-sm border-0">
+        <div className="card-header bg-white border-0 py-3">
+            <h5 className="mb-0 font-dm-bold text-secondary">
+                Tabla de Productividad <span className="text-muted fw-normal small">({dates.from} a {dates.to})</span>
+            </h5>
+        </div>
+        <div className="card-body p-0"> {/* p-0 para que la tabla ocupe todo el ancho del card */}
+            <DataTable<DailyData>
+                rows={data}
+                columns={columns}
+                tooltipDeps={[data, searchQuery, allDates]}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                getSearchText={(row) => `${row.user_login} ${row.user_name}`}
+                pageSize={10}
+                renderRow={(row) => (
+                <Fragment key={row.user_login}>
+                    <tr>
+                    <td className="text-start ps-3">
+                        <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={row.user_name}>
+                            {row.user_login || '-'}
+                        </span>
+                    </td>
+                    
+                    {allDates.map(date => {
+                        const dayData = row.managed_by_day?.find(d => d.date === date);
+                        const val = dayData ? dayData.quantity : 0;
+                        return (
+                        <td key={date}>
+                            <CellText value={val} className="text-muted" />
+                        </td>
+                        );
+                    })}
+
+                    <td className="fw-bold" data-bs-toggle="tooltip" title={`${row.daily_average}`}>
+                      {row.daily_average.toFixed(1)}
+                    </td>
+                    <td 
+                      className="table-active text-primary fw-bold text-center" 
+                      data-bs-toggle="tooltip" 
+                      title={`${row.total_managed}`}
+                    >
+                      {row.total_managed}
+                    </td>
+                    </tr>
+                </Fragment>
+                )}
+            />
+        </div>
+      </div>
     </div>
   );
 }

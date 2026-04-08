@@ -10,13 +10,13 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-// Definimos cómo se ve cada "Serie" de datos (ej: Ingresos, Gestiones)
 export interface ChartSeries {
   key: string;
   label: string;
   type: 'line' | 'bar';
   color: string;
   yAxisId?: 'left' | 'right';
+  showColorInAxis?: boolean;
 }
 
 interface CustomChartProps {
@@ -24,7 +24,8 @@ interface CustomChartProps {
   series: ChartSeries[];
   xAxisKey: string;
   height?: number;
-  onlyDays?: boolean; // <-- Nueva prop
+  onlyDays?: boolean;
+  isHourly?: boolean; // Nueva prop para activar formato AM/PM
 }
 
 export default function CustomChart({ 
@@ -32,17 +33,35 @@ export default function CustomChart({
   series, 
   xAxisKey, 
   height = 400,
-  onlyDays = false 
+  onlyDays = false,
+  isHourly = false 
 }: CustomChartProps) {
   
-  // Función para transformar "2026-04-07" -> "7"
-  const formatXAxis = (tickItem: string) => {
-    if (!onlyDays || !tickItem) return tickItem;
-    // Dividimos por '-' y tomamos el último elemento (el día)
-    // Convertimos a Number y de nuevo a String para quitar ceros a la izquierda (07 -> 7)
-    const parts = tickItem.split('-');
-    return parts.length === 3 ? String(Number(parts[2])) : tickItem;
+  /**
+   * Formateador dinámico para el eje X
+   */
+  const formatXAxis = (tickItem: any) => {
+    // Si es una gráfica por horas (0 a 23)
+    if (isHourly) {
+      const hour = Number(tickItem);
+      if (isNaN(hour)) return tickItem;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      return `${hour12} ${ampm}`;
+    }
+
+    // Si solo queremos mostrar el número del día (para fechas YYYY-MM-DD)
+    if (onlyDays && tickItem && typeof tickItem === 'string') {
+      const parts = tickItem.split('-');
+      return parts.length === 3 ? String(Number(parts[2])) : tickItem;
+    }
+
+    return tickItem;
   };
+
+  // Buscamos dinámicamente si algún eje debe tener un color específico basado en las series
+  const leftAxisColor = series.find(s => (s.yAxisId === 'left' || !s.yAxisId) && s.showColorInAxis)?.color || '#6c757d';
+  const rightAxisColor = series.find(s => s.yAxisId === 'right' && s.showColorInAxis)?.color || '#6c757d';
 
   return (
     <div className="card shadow-sm border-0 p-3" style={{ width: '100%', height }}>
@@ -56,18 +75,42 @@ export default function CustomChart({
             tickLine={false} 
             axisLine={false}
             tick={{ fill: '#6c757d' }}
-            tickFormatter={formatXAxis} // <-- Aplicamos el formateador aquí
-            interval={0} // Muestra todos los números si hay espacio
+            tickFormatter={formatXAxis}
+            interval={isHourly ? 'preserveStartEnd' : 0}
           />
           
-          <YAxis yAxisId="left" fontSize={11} tickLine={false} axisLine={false} />
-          <YAxis yAxisId="right" orientation="right" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis 
+            yAxisId="left" 
+            fontSize={11} 
+            tickLine={false} 
+            axisLine={false} 
+            tick={{ fill: leftAxisColor }}
+          />
+          
+          <YAxis 
+            yAxisId="right" 
+            orientation="right" 
+            fontSize={11} 
+            tickLine={false} 
+            axisLine={false} 
+            tick={{ fill: rightAxisColor }}
+          />
 
           <Tooltip 
-            labelFormatter={(value) => `Fecha: ${value}`} // El tooltip sigue mostrando la fecha completa
-            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+            labelFormatter={(value) => isHourly ? `Hora: ${formatXAxis(value)}` : `Fecha: ${value}`}
+            contentStyle={{ 
+              borderRadius: '8px', 
+              border: 'none', 
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+            }} 
           />
-          <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px', fontSize: '12px' }} />
+          
+          <Legend 
+            verticalAlign="top" 
+            align="right" 
+            iconType="circle" 
+            wrapperStyle={{ paddingBottom: '20px', fontSize: '12px' }} 
+          />
 
           {series.map((s) => {
             const CommonProps = {
@@ -87,7 +130,11 @@ export default function CustomChart({
                 dot={data.length === 1 ? { r: 6, strokeWidth: 2, fill: s.color, stroke: '#fff' } : { r: 4, strokeWidth: 2, stroke: '#fff' }} 
               />
             ) : (
-              <Bar {...CommonProps} radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar 
+                {...CommonProps} 
+                radius={[4, 4, 0, 0]} 
+                barSize={isHourly ? 30 : 20} // Un poco más ancha si es por horas
+              />
             );
           })}
         </ComposedChart>
