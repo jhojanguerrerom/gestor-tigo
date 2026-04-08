@@ -52,7 +52,7 @@ export default function HistoricalIncomePage() {
 
   const chartConfig: ChartSeries[] = [
     { key: 'income', label: 'Ingresos', type: 'line', color: '#0d6efd', yAxisId: 'left' },
-    { key: 'managed', label: 'Gestiones', type: 'line', color: '#ffc107', yAxisId: 'right' }
+    { key: 'managed', label: 'Gestiones', type: 'line', color: '#FFBE00', yAxisId: 'right' }
   ];
 
   return (
