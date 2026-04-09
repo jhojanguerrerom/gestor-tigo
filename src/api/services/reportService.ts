@@ -74,9 +74,16 @@ export const reportService = {
    * Obtiene los ingresos distribuidos por hora para el día actual (Vista En Vivo).
    */
   getLiveIncome: () => {
-    const today = formatDate(new Date());
+    // Creamos una fecha formateada específicamente para la zona horaria de Bogotá
+    const todayColombia = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Bogota',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+
     return httpClient.get<LiveIncomeResponse>(
-      `${ENDPOINTS.REPORTS.INCOME_BY_HOUR}?date=${today}`
+      `${ENDPOINTS.REPORTS.INCOME_BY_HOUR}?date=${todayColombia}`
     );
   },
 };

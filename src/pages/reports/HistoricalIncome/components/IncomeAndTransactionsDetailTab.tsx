@@ -28,19 +28,19 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
   const cacheRef = useRef<Record<string, HistoricalDataPoint[]>>({});
   const lastRefreshKey = useRef(refreshKey);
 
-  // Validación de rango máximo 90 días (Igual a tu referencia)
+  // Validación de rango máximo 60 días (Igual a tu referencia)
   const isRangeValid = useCallback((start: string, end: string) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 90;
+    return diffDays <= 60;
   }, []);
 
   const fetchReport = useCallback(async (forceRefresh = false) => {
     // Verificación de seguridad antes de llamar a la API
     if (!isRangeValid(dates.from, dates.to)) {
-      warning('Seleccione un rango máximo de 90 días');
+      warning('Seleccione un rango máximo de 60 días');
       setData([]); 
       return;
     }
