@@ -22,7 +22,7 @@ export default function ManagementByHourPage() {
       <header className="mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div className="d-flex align-items-center">
           <h1 className="h3 font-dm-bold mb-0 text-primary">
-            {viewMode === 'HOURLY' ? 'Gestión por horas' : 'Gestión por fechas'}
+            {viewMode === 'HOURLY' ? 'Gestión por horas de hoy' : 'Gestión por fechas'}
           </h1>
           <button 
             type="button" 

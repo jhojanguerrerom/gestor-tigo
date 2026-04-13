@@ -3,7 +3,6 @@ export const ENDPOINTS = {
     LOGIN: '/login',
     LOGOUT: '/logout',
     REFRESH_TOKEN: '/refresh-token',
-    SESSIONS: '/sessions',
   },
   ENLISTMENT: {
     BASE: '/v1/enlistment',

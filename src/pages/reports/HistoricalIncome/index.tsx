@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Icon } from '@/icons/Icon';
 import { useBootstrapTooltips } from '@/hooks/useBootstrapTooltips'; 
-
 import TendencyTab from './components/IncomeAndTransactionsMonthTab';
 import ComparativeTab from './components/IncomeAndTransactionsDetailTab';
 import LiveTab from './components/IncomeDayTab';
@@ -14,6 +13,12 @@ export default function IncomeAnalysisPage() {
 
   useBootstrapTooltips([viewMode, refreshKey]);
 
+  const TITLES: Record<IncomeViewMode, string> = {
+    TENDENCY: 'Ingresos y Gestiones por mes',
+    COMPARATIVE: 'Ingresos y Gestiones por rango personalizado',
+    LIVE: 'Ingresos por horas de hoy'
+  };
+
   const handleRefresh = useCallback(() => {
     setRefreshKey(prev => prev + 1);
   }, []);
@@ -22,7 +27,9 @@ export default function IncomeAnalysisPage() {
     <section className="container py-4">
       <header className="mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div className="d-flex align-items-center">
-          <h1 className="h3 font-dm-bold mb-0 text-primary">Ingresos y Gestiones</h1>
+          <h1 className="h3 font-dm-bold mb-0 text-primary">
+            {TITLES[viewMode]}
+          </h1>
           <button 
             type="button" 
             className="btn btn-link p-0 ms-2 text-decoration-none shadow-none" 

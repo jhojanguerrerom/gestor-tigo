@@ -37,7 +37,7 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
       <div className="card shadow-sm">
         <div className="card-header bg-white border-0 py-3">
           <h5 className="mb-0 font-dm-bold text-secondary">
-            Ingresos por Hora
+            Ingresos por hora
           </h5>
         </div>
         <div className="card-body p-4">
