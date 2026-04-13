@@ -1,3 +1,4 @@
+// router.tsx
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import AppLayout from '../components/layouts/AppLayout'
 import LoginPage from '../pages/auth/LoginPage'
@@ -7,14 +8,9 @@ import OffersManagedPage from '../pages/offers/OffersManagedPage'
 import ActionsPage from '../pages/admin/actions/ActionsPage'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
 import HistoricalIncomePage from '../pages/reports/HistoricalIncome/index'
-import NotFoundPage from '../pages/common/NotFoundPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'
 
-/**
- * Router principal de la aplicación.
- * Solo define rutas hacia páginas, sin lógica adicional.
- */
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -22,36 +18,40 @@ export const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <Navigate to="/login" replace />,
-  },
-  {
-    path: '/',
-    element: <AppLayout />, // Este layout envuelve tu Sidebar/Navbar
+    element: <AppLayout />, 
     children: [
+      {
+        path: '',
+        element: <Navigate to="/orders/home" replace />,
+      },
+      // ACCESO: SUPER_USER, SUPERVISOR
       {
         path: '/orders/home',
         element: (
-          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR]}>
             <OrdersHomePage />
           </PrivateRoute>
         ),
       },
+      // ACCESO: SOLO ASESOR
       {
         path: '/advisor/home',
         element: (
-          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER, UserRole.ASESOR]}>
+          <PrivateRoute allowedRoles={[UserRole.ASESOR]}>
             <CaseResolutionPage />
           </PrivateRoute>
         ),
       },
+      // ACCESO: SUPER_USER, SUPERVISOR
       {
         path: '/offers/managed',
         element: (
-          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR]}>
             <OffersManagedPage />
           </PrivateRoute>
         ),
       },
+      // ACCESO: SUPER_USER, SUPERVISOR, VIEWER
       {
         path: '/reports/management-by-hour',
         element: (
@@ -60,6 +60,7 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      // ACCESO: SOLO SUPER_USER
       {
         path: '/config/actions',
         element: (
@@ -68,10 +69,11 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      // ACCESO: SUPER_USER, SUPERVISOR, VIEWER
       {
         path: '/reports/historical-income',
         element: (
-          <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
             <HistoricalIncomePage />
           </PrivateRoute>
         ),
@@ -80,6 +82,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: <Navigate to="/login" replace />,
   },
 ])

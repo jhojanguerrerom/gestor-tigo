@@ -5,7 +5,7 @@ import { enlistmentService } from '@/api/services/enlistmentService';
 import { Icon } from '@/icons/Icon';
 import Loading from '@/components/Loading';
 import { downloadCSV } from '@/utils/csvUtils';
-import { useToast } from '@/context/ToastContext'; // 1. Importar el hook
+import { useToast } from '@/context/ToastContext';
 
 interface OpenOrdersTabProps {
   refreshKey: number;
@@ -17,7 +17,6 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
   const [isExporting, setIsExporting] = useState(false);
   const tableId = 'openOrdersTable';
 
-  // 2. Extraer funciones del toast
   const { success, info, error } = useToast();
 
   const fetchFn = useCallback((page: number, limit: number, search: string) => {
@@ -47,7 +46,7 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
       .toLowerCase();
   };
 
-  // --- FUNCIÓN DE EXPORTACIÓN MASIVA CON TOASTS ---
+  // --- FUNCIÓN DE EXPORTACIÓN POR LOTES (MAX 1000) ---
   const handleExportAll = async () => {
     if (total === 0) {
       info('No hay registros disponibles para exportar');
@@ -55,12 +54,18 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
     }
 
     setIsExporting(true);
-    //info('Iniciando la descarga de todos los registros...');
 
     try {
-      const limit = total || 10000; 
-      const response = await enlistmentService.getEnlistments(1, limit, 'ABIERTO');
-      const allRecords = response.data?.data || [];
+      const MAX_LIMIT = 1000;
+      const allRecords: any[] = [];
+      // Calculamos cuántas páginas de 1000 necesitamos
+      const callsNeeded = Math.ceil(total / MAX_LIMIT);
+
+      for (let i = 1; i <= callsNeeded; i++) {
+        const response = await enlistmentService.getEnlistments(i, MAX_LIMIT, 'ABIERTO');
+        const batch = response.data?.data || [];
+        allRecords.push(...batch);
+      }
 
       if (allRecords.length === 0) {
         info('La consulta no retornó datos');
@@ -133,7 +138,7 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
       {(loading || isExporting) && (
         <Loading 
           fullScreen 
-          text={isExporting ? "Procesando informe completo..." : "Cargando pedidos abiertos..."} 
+          text={isExporting ? "Obteniendo registros en lotes de 1000..." : "Cargando pedidos abiertos..."} 
         />
       )}
       

@@ -18,19 +18,22 @@ export default function LoginPage() {
 
   // Redirigir si la sesión está activa
   useEffect(() => {
-
     if (user && user.profile_id && error === null && loading === false) {
       switch (user.profile_id) {
         case UserRole.SUPER_USER:
-        case UserRole.SUPERVISOR:
-        case UserRole.VIEWER:
           navigate('/orders/home')
+          break
+        case UserRole.SUPERVISOR:
+          navigate('/orders/home')
+          break
+        case UserRole.VIEWER:
+          navigate('/reports/historical-income')
           break
         case UserRole.ASESOR:
           navigate('/advisor/home')
           break
-        default:
-          navigate('/orders/home')
+        /*default:
+          navigate('/orders/home')*/
       }
     }
   }, [user, error, loading, navigate])
@@ -40,7 +43,9 @@ export default function LoginPage() {
     if (!username || !password) return
 
     const result = await login({ username, password })
-    if (result.success) {
+    
+    // Validación de 'result' para evitar ts(18048)
+    if (result && result.success) {
       // Redirección basada en rol
       switch (result.role) {
         case UserRole.SUPER_USER:

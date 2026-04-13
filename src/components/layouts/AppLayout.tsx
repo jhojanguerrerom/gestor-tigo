@@ -2,11 +2,13 @@ import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom' // <--
 import logoTigo from '../../assets/logo-tigo-blanco.png'
 import { Icon } from '@/icons/Icon'
 import { useAuth } from '@/auth/hooks/useAuth'
-import { MENU_BY_ROLE } from '@/auth/constants/menuByRole'
+//import { MENU_BY_ROLE } from '@/auth/constants/menuByRole'
 
 export default function AppLayout() {
   const { user, logout } = useAuth()
-  const menu = user && user.profile_id ? MENU_BY_ROLE[user.profile_id] : []
+  // Esto usará el del backend si existe, o el fallback si no.
+  const menu = user?.menu || [] 
+  
   const navigate = useNavigate()
   const location = useLocation()
 

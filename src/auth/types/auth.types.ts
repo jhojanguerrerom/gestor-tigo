@@ -1,4 +1,5 @@
 // Tipos y enums para autenticación y roles
+import type { MenuItem } from '../constants/menuByRole';
 
 export const UserRole = {
   SUPER_USER: 1,
@@ -23,7 +24,7 @@ export interface User {
   user_identify: number;
   profile_id: UserRole;
   email: string;
-  menu: any[]; // Ajustar tipo cuando el backend lo defina
+  menu: MenuItem[];
 }
 
 export interface LoginResponse extends User {

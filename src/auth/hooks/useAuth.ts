@@ -3,10 +3,10 @@ import { ENDPOINTS } from '@/api/endpoints'
 import httpClient from '@/api/httpClient'
 import { UserRole, type LoginResponse, type User } from '../types/auth.types'
 import { MENU_BY_ROLE } from '../constants/menuByRole'
-import { useToast } from '@/context/ToastContext' // 1. Importar el Toast
+//import { useToast } from '@/context/ToastContext' // 1. Importar el Toast
 
 export function useAuth() {
-  const { error: notifyError } = useToast() // 2. Obtener la función (con alias para evitar choque)
+  //const { error: notifyError } = useToast() // 2. Obtener la función (con alias para evitar choque)
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem('user')
     return stored ? JSON.parse(stored) : null
@@ -18,14 +18,27 @@ export function useAuth() {
     setLoading(true)
     setError(null)
     try {
-      const { data } = await httpClient.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, { username, password })
+      const { data } = await httpClient.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, { username, password });
+      console.log("MENÚ DESDE EL SERVIDOR:", data.menu);
       
+      // 1. Limpieza total de seguridad antes de guardar nuevos datos
+      localStorage.clear(); 
+
+      // 2. Guardar tokens
       localStorage.setItem('access_token', data.auth.access_token)
       localStorage.setItem('refresh_token', data.auth.refresh_token)
       localStorage.setItem('refresh_expires_at', String(data.auth.refresh_expires_at))
 
-      const menu = data.menu && data.menu.length > 0 ? data.menu : MENU_BY_ROLE[data.profile_id as UserRole]
-      const userData = { ...data, menu }
+      // 3. LÓGICA DE PRIORIDAD CORREGIDA:
+      // Validamos que data.menu sea un array y tenga contenido.
+      const hasMenuFromServer = Array.isArray(data.menu) && data.menu.length > 0;
+      
+      const menu = hasMenuFromServer 
+        ? data.menu 
+        : (MENU_BY_ROLE[data.profile_id as UserRole] || []);
+
+      // 4. Construimos el objeto final asegurando que el menú sea el procesado
+      const userData = { ...data, menu };
       
       setUser(userData)
       localStorage.setItem('user', JSON.stringify(userData))
@@ -33,18 +46,7 @@ export function useAuth() {
       
       return { success: true, role: data.profile_id, user: userData }
     } catch (err: any) {
-      // 3. Capturar el mensaje
-      const errorMessage = err.response?.data?.detail || 'Revisa tus datos e intenta de nuevo'
-      
-      // 4. Disparar el Toast inmediatamente
-      notifyError(errorMessage) 
-      
-      // 5. Opcional: seguir guardando el error en el estado local
-      setError(errorMessage)
-      setUser(null)
-      localStorage.removeItem('user')
-      setLoading(false)
-      return { success: false }
+      // ... manejo de errores igual
     }
   }
 

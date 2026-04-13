@@ -3,7 +3,7 @@ import { UserRole } from '../types/auth.types'
 // 1. Actualizamos la interfaz MenuItem
 export interface MenuItem {
   label: string;
-  path?: string;      // Ahora es opcional (?) porque los menús con hijos a veces no tienen link
+  path?: string;      // Es opcional (?) porque los menús con hijos a veces no tienen link
   icon?: string;
   subItems?: MenuItem[]; // Añadimos la propiedad opcional para submenús
 }
@@ -13,35 +13,58 @@ type MenuByRole = { [key in typeof UserRole[keyof typeof UserRole]]: MenuItem[] 
 export const MENU_BY_ROLE: MenuByRole = {
   [UserRole.SUPER_USER]: [
     { 
-      label: 'Pedidos',
+      label: '(e) Pedidos',
       subItems: [
         { label: 'Estado de trabajo', path: '/orders/home' },
         { label: 'Historico de pedidos', path: '/offers/managed' }
       ]
     },
     { 
-      label: 'Indicadores',
+      label: '(e) Indicadores',
       subItems: [
         { label: 'Pruductividad', path: '/reports/management-by-hour' },
         { label: 'Ingresos y Gestiones', path: '/reports/historical-income' }
       ]
     },
     { 
-      label: 'Configuración',
+      label: '(e) Configuración',
       subItems: [
         { label: 'Acción y Subacción', path: '/config/actions' }
       ]
     },
   ],
   [UserRole.SUPERVISOR]: [
-    { label: 'Pedidos', path: '/orders/home'},
+    { 
+      label: '(e) Pedidos',
+      subItems: [
+        { label: 'Estado de trabajo', path: '/orders/home' },
+        { label: 'Historico de pedidos', path: '/offers/managed' }
+      ]
+    },
+    { 
+      label: '(e) Indicadores',
+      subItems: [
+        { label: 'Pruductividad', path: '/reports/management-by-hour' },
+        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' }
+      ]
+    },
+    { 
+      label: '(e) Configuración',
+      subItems: [
+        { label: 'Acción y Subacción', path: '/config/actions' }
+      ]
+    },
   ],
   [UserRole.VIEWER]: [
-    { label: 'Pedidos', path: '/orders/home'},
-    { label: 'Deme pedido', path: '/advisor/home'},
-    { label: 'Pedidos gestionados', path: '/offers/managed'},
+    { 
+      label: '(e) Indicadores',
+      subItems: [
+        { label: 'Pruductividad', path: '/reports/management-by-hour' },
+        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' }
+      ]
+    },
   ],
   [UserRole.ASESOR]: [
-    { label: 'Deme pedido', path: '/advisor/home'},
+    { label: '(e) Deme pedido', path: '/advisor/home'},
   ],
 };
