@@ -6,108 +6,122 @@ Este es un proyecto de frontend para una aplicación de gestión interna de Tigo
 
 ## Características
 
-- **Autenticación de usuarios:** Sistema de inicio de sesión para acceder a las funcionalidades de la aplicación.
-- **Enrutamiento protegido:** Rutas privadas que solo permiten el acceso a usuarios autenticados y con roles específicos.
-- **Gestión de pedidos:** Visualización y gestión de pedidos.
-- **Resolución de casos:** Interfaz para la resolución de casos de clientes.
-- **Gestión de ofertas:** Administración de ofertas.
-- **Panel de administración:** Configuración de acciones y otros catálogos del sistema.
+- **Autenticación de usuarios:** Sistema de inicio de sesión y control de acceso basado en roles.
+- **Enrutamiento protegido:** Rutas privadas para usuarios autenticados y con permisos según su rol.
+- **Gestión de pedidos:** Visualización, gestión y reasignación/liberación de pedidos abiertos y en tránsito.
+- **Resolución de casos:** Interfaz para la gestión y resolución de casos, con historial y acciones asociadas.
+- **Gestión de ofertas:** Administración y consulta de ofertas cerradas, con filtros por fecha y búsqueda avanzada.
+- **Panel de administración:** Gestión de acciones y subacciones del sistema mediante un catálogo editable.
+- **Reportes de productividad:** Visualización de métricas de gestión por hora y por día, con gráficos interactivos.
+- **Reportes de ingresos históricos:** Análisis de ingresos y gestiones por mes, rango personalizado y en tiempo real.
+- **Notificaciones y feedback:** Sistema de notificaciones contextuales para acciones exitosas o con error.
 
 ## Tecnologías Utilizadas
 
-- **React:** Biblioteca de JavaScript para construir interfaces de usuario.
-- **Vite:** Herramienta de frontend para un desarrollo y construcción rápidos.
-- **TypeScript:** Superset de JavaScript que añade tipado estático.
-- **React Router:** Para el enrutamiento en la aplicación.
-- **Axios:** Cliente HTTP para realizar peticiones a la API.
-- **Bootstrap:** Framework de CSS para el diseño de la interfaz.
-- **Sass:** Preprocesador de CSS para un código más mantenible.
-- **ESLint:** Para el análisis de código estático y la identificación de problemas.
-- **Prettier:** Para el formateo de código.
+- **React 19** y **TypeScript**: UI moderna y tipado estático.
+- **Vite**: Bundler rápido para desarrollo y producción.
+- **React Router v7**: Enrutamiento avanzado y protección de rutas.
+- **Axios**: Cliente HTTP para comunicación con APIs.
+- **Bootstrap 5** y **Sass**: Estilos responsivos y personalizables.
+- **Recharts**: Gráficas interactivas para reportes.
+- **ESLint** y **Prettier**: Calidad y formato de código.
 
 ## Empezando
 
-Sigue estas instrucciones para tener una copia del proyecto funcionando en tu máquina local para desarrollo y pruebas.
+Sigue estos pasos para tener una copia local del proyecto:
 
 ### Prerrequisitos
 
-Necesitarás tener Node.js y npm (o yarn/pnpm) instalados en tu sistema.
-
-- [Node.js](https://nodejs.org/) (versión 18 o superior recomendada)
+- [Node.js](https://nodejs.org/) (v18 o superior recomendado)
+- npm, yarn o pnpm
 
 ### Instalación
 
-1.  Clona el repositorio:
-    ```sh
-    git clone <URL_DEL_REPOSITORIO>
-    ```
-2.  Navega al directorio del proyecto:
-    ```sh
-    cd gestor-tigo
-    ```
-3.  Instala las dependencias:
-    ```sh
-    npm install
-    ```
+1. Clona el repositorio:
+   ```sh
+   git clone <URL_DEL_REPOSITORIO>
+   ```
+2. Entra al directorio del proyecto:
+   ```sh
+   cd gestor-tigo
+   ```
+3. Instala las dependencias:
+   ```sh
+   npm install
+   ```
 
 ### Ejecutando la aplicación
 
-Para iniciar el servidor de desarrollo, ejecuta:
+Para iniciar el servidor de desarrollo:
 
 ```sh
 npm run dev
 ```
 
+La app estará disponible en `http://localhost:5173` (o el puerto que asigne Vite).
+
 La aplicación estará disponible en `http://localhost:5173` (o el puerto que Vite asigne).
 
 ## Scripts Disponibles
 
-En el directorio del proyecto, puedes ejecutar:
+En el directorio del proyecto puedes ejecutar:
 
-- `npm run dev`: Inicia la aplicación en modo de desarrollo.
-- `npm run build`: Compila la aplicación para producción en la carpeta `dist`.
-- `npm run lint`: Ejecuta ESLint para analizar el código en busca de errores y advertencias.
-- `npm run format`: Formatea todos los archivos del proyecto con Prettier.
-- `npm run preview`: Sirve la build de producción localmente para previsualizarla.
+- `npm run dev`: Inicia la app en modo desarrollo (`localhost:5173`).
+- `npm run build`: Compila la app para producción en la carpeta `dist`.
+- `npm run lint`: Analiza el código con ESLint.
+- `npm run format`: Formatea el código con Prettier.
+- `npm run preview`: Previsualiza la build de producción localmente.
 
 ## Estructura del Proyecto
 
-El código fuente de la aplicación se encuentra en la carpeta `src` y sigue una estructura modular:
+El código fuente está en la carpeta `src` y sigue una estructura modular y escalable:
 
 ```
 src/
 ├── api/            # Lógica para peticiones HTTP (axios, endpoints, servicios)
-├── assets/         # Archivos estáticos como imágenes, fuentes e iconos
-├── auth/           # Lógica relacionada con la autenticación y autorización
-├── components/     # Componentes de React reutilizables
-├── context/        # Contextos de React (ej. para notificaciones)
-├── hooks/          # Hooks de React personalizados
-├── icons/          # Componente para renderizar iconos SVG
-├── pages/          # Componentes que representan las páginas de la aplicación
-├── routes/         # Configuración del enrutamiento y rutas protegidas
-├── styles/         # Estilos globales y de la aplicación (SCSS)
-├── App.tsx         # Componente raíz de la aplicación
-└── main.tsx        # Punto de entrada de la aplicación
+│   └── services/   # Servicios para dominios: pedidos, ofertas, reportes, acciones...
+├── assets/         # Imágenes, fuentes e iconos
+├── auth/           # Autenticación, roles y menús por rol
+├── components/     # Componentes reutilizables (modales, tablas, gráficos...)
+├── context/        # Contextos globales (notificaciones, toast)
+├── hooks/          # Hooks personalizados para lógica de UI y datos
+├── icons/          # Componente y mapeo de iconos SVG
+├── pages/          # Páginas principales y submódulos (pedidos, casos, ofertas, reportes, admin)
+│   ├── orders/     # Gestión de pedidos abiertos/en tránsito
+│   ├── cases/      # Resolución de casos y su historial
+│   ├── offers/     # Consulta de ofertas cerradas
+│   ├── admin/      # Catálogo de acciones y subacciones
+│   └── reports/    # Reportes de productividad e ingresos
+├── routes/         # Configuración de rutas y protección por rol
+├── styles/         # Estilos globales y variables SCSS
+├── App.tsx         # Componente raíz
+└── main.tsx        # Punto de entrada
 ```
 
 ## Enrutamiento
 
-La aplicación utiliza `react-router-dom` para gestionar la navegación. Las rutas principales son:
+La aplicación utiliza `react-router-dom` para la navegación y protección de rutas según el rol del usuario. Las rutas principales y sus permisos son:
 
 - `/login`: Página de inicio de sesión.
-- `/`: Redirige a `/login`.
-- Rutas protegidas que requieren autenticación:
-    - `/orders/home`: Página de inicio de pedidos.
-    - `/advisor/home`: Página de inicio para asesores.
-    - `/offers/managed`: Página de gestión de ofertas.
-    - `/config/actions`: Página de configuración de acciones (solo para administradores).
+- `/`: Redirige a `/orders/home` si el usuario está autenticado.
+- Rutas protegidas:
+    - `/orders/home`: Gestión de pedidos abiertos y en tránsito (**SUPER_USER**, **SUPERVISOR**)
+    - `/advisor/home`: Resolución de casos (**ASESOR**)
+    - `/offers/managed`: Consulta de ofertas cerradas (**SUPER_USER**, **SUPERVISOR**)
+    - `/reports/management-by-hour`: Reporte de productividad por hora y día (**SUPER_USER**, **SUPERVISOR**, **VIEWER**)
+    - `/reports/historical-income`: Reporte de ingresos históricos y en tiempo real (**SUPER_USER**, **SUPERVISOR**, **VIEWER**)
+    - `/config/actions`: Gestión de catálogo de acciones y subacciones (**SUPER_USER**)
+- Rutas no encontradas redirigen a `/login`.
 
 ## Autenticación y Autorización
 
-La aplicación cuenta con un sistema de autenticación y autorización basado en roles. Las rutas están protegidas mediante el componente `PrivateRoute`, que verifica si el usuario tiene los permisos necesarios para acceder a una página.
+El sistema de autenticación y autorización está basado en roles y tokens JWT. El componente `PrivateRoute` protege las rutas y verifica los permisos del usuario.
 
-Los roles de usuario definidos son:
-- `SUPER_USER`
-- `SUPERVISOR`
-- `VIEWER`
-- `ASESOR`
+**Roles de usuario definidos:**
+
+- `SUPER_USER`: Acceso total a todas las funcionalidades y administración.
+- `SUPERVISOR`: Acceso a gestión de pedidos, ofertas y reportes.
+- `VIEWER`: Acceso de solo lectura a reportes.
+- `ASESOR`: Acceso a la resolución de casos asignados.
+
+Cada usuario ve un menú y funcionalidades adaptadas a su rol.
