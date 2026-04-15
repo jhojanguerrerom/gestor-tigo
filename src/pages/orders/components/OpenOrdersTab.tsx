@@ -173,14 +173,30 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
           const ofertaIdActual = row.oferta || campos.oferta || '-';
           const fechaIngreso = campos.fecha_creado ? new Date(campos.fecha_creado).toLocaleString('es-CO') : '-';
           const coordenadas = campos.latitude && campos.longitude ? `${campos.latitude}, ${campos.longitude}` : '-';
-
+          const asesorUser = row.usuario_asignado_login;
+          const asesorName = row.usuario_asignado_nombre;
           return (
             <Fragment key={row.id || ofertaIdActual}>
               <tr>
                 <td>
-                  <span className="badge text-bg-warning text-dark w-100" data-bs-toggle="tooltip" title="Sin asignar">
-                    Sin asignar
-                  </span>
+                  {asesorUser ? (
+                    <span 
+                      className='badge text-bg-blue w-100' 
+                      data-bs-toggle="tooltip" 
+                      title={asesorName || asesorUser}
+                    >
+                      {asesorUser}
+                    </span>
+                  ) : (
+                    /* Si no hay asesor (null o undefined), mostramos el badge amarillo */
+                    <span 
+                      className="badge text-bg-warning text-dark w-100" 
+                      data-bs-toggle="tooltip" 
+                      title="Sin asignar"
+                    >
+                      Sin asignar 
+                    </span>
+                  )}
                 </td>
                 <td><span className="cell-text" data-bs-toggle="tooltip" title={ofertaIdActual}>{ofertaIdActual}</span></td>
                 <td><span className="cell-text" data-bs-toggle="tooltip" title={campos.pedido_id}>{campos.pedido_id || '-'}</span></td>

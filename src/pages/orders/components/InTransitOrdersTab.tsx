@@ -62,7 +62,8 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
         getSearchText={() => ''}
         renderRow={(row: any) => {
           const campos = row.campos_dinamicos || {};
-          const asesorName = row.usuario_asignado || row.usuario_nombre || row.usuario_asignado_login || row.usuario_asignado_nombre || '-';
+          const asesorUser = row.usuario_asignado ||  '-';
+          const asesorName = row.usuario_nombre || '-';
           const ofertaIdActual = row.oferta || campos.oferta || '-';
           const fechaIngreso = campos.fecha_creado ? new Date(campos.fecha_creado).toLocaleString('es-CO') : '-';
           const coordenadas = campos.latitude && campos.longitude ? `${campos.latitude}, ${campos.longitude}` : '-';
@@ -73,7 +74,7 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
                 <td>
                   <div className="d-flex align-items-center">
                     <Icon name="user-call" size="lg" className="me-2" />
-                    <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={asesorName}>{asesorName}</span>
+                    <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={asesorName}>{asesorUser}</span>
                   </div>
                 </td>
                 <td><span className="cell-text" data-bs-toggle="tooltip" title={ofertaIdActual}>{ofertaIdActual}</span></td>
@@ -119,7 +120,7 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
                           <tr>
                             <td><span className="cell-text" data-bs-toggle="tooltip" title={campos.direccion}>{campos.direccion || '-'}</span></td>
                             <td><span className="cell-text" data-bs-toggle="tooltip" title={coordenadas}>{coordenadas}</span></td>
-                            <td><span className="cell-text" data-bs-toggle="tooltip" title={row.fecha_asignacion}>{row.fecha_asignacion ? new Date(row.fecha_asignacion).toLocaleString('es-CO') : '-'}</span></td>
+                            <td><span className="cell-text" data-bs-toggle="tooltip" title={row.fecha_asignacion ? new Date(row.fecha_asignacion).toLocaleString('es-CO') : '-'}>{row.fecha_asignacion ? new Date(row.fecha_asignacion).toLocaleString('es-CO') : '-'}</span></td>
                             <td><span className="cell-text" data-bs-toggle="tooltip" title={campos.nodo_id}>{campos.nodo_id || '-'}</span></td>
                           </tr>
                         </tbody>
