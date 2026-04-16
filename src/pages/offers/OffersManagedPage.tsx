@@ -150,6 +150,7 @@ export default function OffersManagedPage() {
             <Fragment key={rowKey}>
               <tr>
                 <td>
+                  <Icon name="user-call" size="lg" className="me-0" />
                   <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={usuarioLoginName}>
                     {usuarioLogin || '-'}
                   </span>

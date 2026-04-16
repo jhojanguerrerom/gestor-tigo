@@ -2,6 +2,7 @@ import { Fragment, useState, useMemo, useEffect, useCallback } from 'react';
 import DataTable, { type DataTableColumn } from '@/components/DataTable';
 import { reportService } from '@/api/services/reportService';
 import Loading from '@/components/Loading';
+import { Icon } from '@/icons/Icon';
 
 interface UserHourData {
   user_login: string;
@@ -31,6 +32,7 @@ interface HourlyTabProps {
 
 export default function HourlyTab({ refreshKey }: HourlyTabProps) {
   const [rawData, setRawData] = useState<UserHourData[]>([]);
+  const [totalOffers, setTotalOffers] = useState(0); 
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -39,6 +41,8 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
       setLoading(true);
       const res = await reportService.getManagedByHour();
       setRawData(res.data?.data || []);
+      // Este es el 161 que viene directo del backend
+      setTotalOffers(res.data?.total_offers || 0); 
     } catch (error) {
       console.error(error);
       setRawData([]);
@@ -50,6 +54,18 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
   useEffect(() => {
     fetchReport();
   }, [fetchReport, refreshKey]);
+
+  // Totales por hora (solo para las columnas de en medio)
+  const hourlyTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (let i = 6; i <= 21; i++) totals[i] = 0;
+    rawData.forEach(user => {
+      Object.entries(user.hours).forEach(([hour, count]) => {
+        if (totals[hour] !== undefined) totals[hour] += count;
+      });
+    });
+    return totals;
+  }, [rawData]);
 
   const columns: DataTableColumn[] = useMemo(() => {
     const base: DataTableColumn[] = [{ header: 'Asesor' }];
@@ -65,18 +81,21 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
   return (
     <>
       {loading && <Loading fullScreen text="Cargando..." />}
+      
       <DataTable<UserHourData>
         rows={rawData}
         columns={columns}
-        tooltipDeps={[rawData, searchQuery, refreshKey]}
+        // Agregamos totalOffers a las dependencias de los tooltips
+        tooltipDeps={[rawData, searchQuery, refreshKey, totalOffers]}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         getSearchText={(row) => `${row.user_login} ${row.user_name}`}
-        pageSize={10}
+        pageSize={50}
         renderRow={(row) => (
           <Fragment key={row.user_login}>
             <tr>
               <td>
+                <Icon name="user-call" size="lg" className="me-0" />
                 <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={row.user_name}>
                   {row.user_login || '-'}
                 </span>
@@ -90,8 +109,29 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
                   </td>
                 );
               })}
-              <td className="table-active fw-bold text-primary" data-bs-toggle="tooltip" title={`${row.total_user}`}>{row.total_user}</td>
+              <td className="table-active fw-bold text-primary" data-bs-toggle="tooltip" title={String(row.total_user)}>
+                {row.total_user}
+              </td>
             </tr>
+
+            {/* Fila de Totales */}
+            {rawData.indexOf(row) === rawData.length - 1 && (
+              <tr className="table-light fw-bold">
+                <td className="text-center ps-3">TOTAL</td>
+                {Array.from({ length: 16 }, (_, i) => {
+                  const hour = i + 6;
+                  const sum = hourlyTotals[hour];
+                  return <td key={`total-${hour}`}><CellText value={sum === 0 ? '-' : sum}/></td>;
+                })}
+                {/* SOLUCIÓN AL TOOLTIP: 
+                   1. Forzamos String(totalOffers) 
+                   2. Nos aseguramos que NO haya cálculos en esta celda
+                */}
+                <td className="table-primary text-primary fw-bold" data-bs-toggle="tooltip" title={String(totalOffers)}>
+                  {totalOffers}
+                </td>
+              </tr>
+            )}
           </Fragment>
         )}
       />

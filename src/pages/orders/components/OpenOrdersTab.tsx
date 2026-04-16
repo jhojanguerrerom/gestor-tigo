@@ -10,9 +10,10 @@ import { useToast } from '@/context/ToastContext';
 interface OpenOrdersTabProps {
   refreshKey: number;
   onManage: (ofertaId: string, row: any) => void;
+  onOpenHistory: (ofertaId: string) => void;
 }
 
-export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabProps) {
+export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: OpenOrdersTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const tableId = 'openOrdersTable';
@@ -35,7 +36,7 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
   const columns = useMemo(() => [
     { header: 'Asesor' }, { header: 'Oferta Siebel' }, { header: 'Pedido Fenix' },
     { header: 'Concepto o cola' }, { header: 'Segmento' }, { header: 'Fecha ingreso' },
-    { header: 'Detalles' }, { header: 'Gestión' }
+    { header: 'Detalles' }, { header: 'Historico' }, { header: 'Gestión' }
   ], []);
 
   const getSearchText = (row: any) => {
@@ -207,11 +208,19 @@ export default function OpenOrdersTab({ refreshKey, onManage }: OpenOrdersTabPro
                   <Icon name="plus" size="lg" className="cursor-pointer" data-bs-toggle="collapse" data-bs-target={`#details-${row.id || ofertaIdActual}`} />
                 </td>
                 <td>
+                  <button 
+                    className="btn btn-link p-0 text-primary border-0" 
+                    onClick={() => onOpenHistory(ofertaIdActual)}
+                  >
+                    <Icon name="look-for" size="lg" /> 
+                  </button>
+                </td>
+                <td>
                   <button className="badge rounded-pill text-bg-bluelight border-0 p-2" onClick={() => onManage(ofertaIdActual, row)}>Gestionar</button>
                 </td>
               </tr>
               <tr className="data-details-row">
-                <td colSpan={8}>
+                <td colSpan={9}>
                   <div className="collapse" id={`details-${row.id || ofertaIdActual}`} data-bs-parent={`#${tableId}`}>
                     <div className="p-3 bg-light border-top">
                       <table className="table table-sm table-bordered mb-0 bg-white text-center">

@@ -3,26 +3,41 @@ import { useState, useCallback } from 'react';
 import { Icon } from '@/icons/Icon';
 import { enlistmentService } from '@/api/services/enlistmentService';
 import ManagementModal from './components/ManagementModal';
+import OfferHistoryModal from './components/OfferHistoryModal'; // 1. Importar el modal
 import Loading from '@/components/Loading';
 import OpenOrdersTab from './components/OpenOrdersTab';
 import InTransitOrdersTab from './components/InTransitOrdersTab';
 
 export type ViewMode = 'ABIERTO' | 'TRAMITE';
 
-
 export default function OrdersHomePage() {
   const [viewMode, setViewMode] = useState<ViewMode>('ABIERTO');
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Estado para el modal compartido
+  // --- ESTADOS PARA MODAL DE GESTIÓN ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOfertaId, setSelectedOfertaId] = useState('');
   const [selectedInTransit, setSelectedInTransit] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // --- 2. ESTADOS PARA MODAL DE HISTORIAL ---
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historyOfertaId, setHistoryOfertaId] = useState('');
+
   // Handler para refrescar la tabla
   const handleRefresh = useCallback(() => {
     setRefreshKey((prev) => prev + 1);
+  }, []);
+
+  // --- 3. HANDLER PARA ABRIR HISTORIAL (Se pasará a las Tabs) ---
+  const handleOpenHistory = useCallback((ofertaId: string) => {
+    setHistoryOfertaId(ofertaId);
+    setIsHistoryOpen(true);
+  }, []);
+
+  const handleCloseHistory = useCallback(() => {
+    setIsHistoryOpen(false);
+    setHistoryOfertaId('');
   }, []);
 
   // Handler para abrir el modal de gestión
@@ -58,7 +73,6 @@ export default function OrdersHomePage() {
     }
   }, []);
 
-  // Handler para cerrar el modal
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedOfertaId('');
@@ -91,18 +105,35 @@ export default function OrdersHomePage() {
         </div>
       </header>
 
+      {/* 4. Pasamos onOpenHistory a las pestañas */}
       {viewMode === 'ABIERTO' ? (
-        <OpenOrdersTab refreshKey={refreshKey} onManage={handleOpenModal} />
+        <OpenOrdersTab 
+          refreshKey={refreshKey} 
+          onManage={handleOpenModal} 
+          onOpenHistory={handleOpenHistory} 
+        />
       ) : (
-        <InTransitOrdersTab refreshKey={refreshKey} onManage={handleOpenModal} />
+        <InTransitOrdersTab 
+          refreshKey={refreshKey} 
+          onManage={handleOpenModal} 
+          onOpenHistory={handleOpenHistory}
+        />
       )}
 
+      {/* Modal de Gestión */}
       <ManagementModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         ofertaId={selectedOfertaId}
         onSuccess={handleRefresh}
         isInTransit={selectedInTransit}
+      />
+
+      {/* 5. Componente del Modal de Historial */}
+      <OfferHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={handleCloseHistory}
+        ofertaId={historyOfertaId}
       />
     </section>
   );

@@ -8,9 +8,10 @@ import Loading from '@/components/Loading';
 interface InTransitOrdersTabProps {
   refreshKey: number;
   onManage: (ofertaId: string, row: any) => void;
+  onOpenHistory: (ofertaId: string) => void;
 }
 
-export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOrdersTabProps) {
+export default function InTransitOrdersTab({ refreshKey, onManage, onOpenHistory }: InTransitOrdersTabProps) {
   const tableId = 'transitOrdersTable';
   
   // Mantenemos el estado solo para cumplir con la interfaz de DataTable, 
@@ -37,7 +38,8 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
     { header: 'Segmento' }, 
     { header: 'Fecha ingreso' },
     { header: 'Tiempo' }, 
-    { header: 'Detalles' }, 
+    { header: 'Detalles' },
+    { header: 'Historico' }, 
     { header: 'Gestión' }
   ], []);
 
@@ -73,7 +75,7 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
               <tr>
                 <td>
                   <div className="d-flex align-items-center">
-                    <Icon name="user-call" size="lg" className="me-2" />
+                    <Icon name="user-call" size="lg" className="me-0" />
                     <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={asesorName}>{asesorUser}</span>
                   </div>
                 </td>
@@ -96,6 +98,14 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
                 </td>
                 <td>
                   <button 
+                    className="btn btn-link p-0 text-primary border-0" 
+                    onClick={() => onOpenHistory(ofertaIdActual)}
+                  >
+                    <Icon name="look-for" size="lg" /> 
+                  </button>
+                </td>
+                <td>
+                  <button 
                     className="badge rounded-pill text-bg-bluelight border-0 p-2" 
                     onClick={() => onManage(ofertaIdActual, row)}
                   >
@@ -104,7 +114,7 @@ export default function InTransitOrdersTab({ refreshKey, onManage }: InTransitOr
                 </td>
               </tr>
               <tr className="data-details-row">
-                <td colSpan={9}>
+                <td colSpan={10}>
                   <div className="collapse" id={`details-transit-${row.id || ofertaIdActual}`} data-bs-parent={`#${tableId}`}>
                     <div className="p-3 bg-light border-top">
                       <table className="table table-sm table-bordered mb-0 bg-white text-center">

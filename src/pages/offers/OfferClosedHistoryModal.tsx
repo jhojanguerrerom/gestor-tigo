@@ -24,7 +24,7 @@ interface ChangeHistoryItem {
 // ...existing code...
   export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: OfferClosedHistoryModalProps) {
     // --- CONSTANTES Y ESTADO ---
-    const CHANGES_LIMIT = 5;
+    const CHANGES_LIMIT = 20;
     const { error } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [history, setHistory] = useState<any[]>([]);

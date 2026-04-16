@@ -27,7 +27,7 @@ export default function IncomeAnalysisPage() {
     <section className="container py-4">
       <header className="mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div className="d-flex align-items-center">
-          <h1 className="h3 font-dm-bold mb-0 text-primary">
+          <h1 className="h3 font-dm-bold mb-0">
             {TITLES[viewMode]}
           </h1>
           <button 
