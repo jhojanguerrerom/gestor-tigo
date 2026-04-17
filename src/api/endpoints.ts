@@ -30,5 +30,10 @@ export const ENDPOINTS = {
     HISTORICAL_INCOME: "/v1/reports/historical-income-vs-managed",
     DAILY_INCOME_MANAGED: "/v1/reports/daily-income-managed",
     INCOME_BY_HOUR: "/v1/reports/income-by-hour",
+    INCOME_BY_CONCEPT: "/v1/reports/income-by-concept",
+  },
+  USERS: {
+    BASE_USERS: '/v1/users/',
+    BY_ID: (userId: number | string) => `/v1/users/${userId}`,
   }
 } as const;

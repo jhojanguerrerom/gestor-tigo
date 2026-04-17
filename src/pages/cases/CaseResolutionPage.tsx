@@ -21,9 +21,12 @@ const INITIAL_FORM_DATA = {
   fecha_creado: '',
   segmento: '',
   coordenadas: '',
+  estado_scoring: '',
+  estado_direccion: '',
   pagina: '',
   nodo_id: '',
   megagold: '',
+  id_gis: '',
 };
 
 const extractFormData = (campos: any = {}) => {
@@ -44,6 +47,9 @@ const extractFormData = (campos: any = {}) => {
     pagina: campos.paginacion || '',
     nodo_id: campos.nodo_id || '',
     megagold: campos.megagold || '',
+    estado_scoring: campos.estado_scoring || '',
+    estado_direccion: campos.estado_direccion || '',
+    id_gis: campos.id_gis || '',
   };
 };
 
@@ -367,6 +373,11 @@ export default function CaseResolutionPage() {
                   </div>
 
                   <div className="col-md-2">
+                    <label className="form-label">ID Gis</label>
+                    <input className="form-control" type="text" value={formData.id_gis || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-3">
                     <label className="form-label">Concepto o cola</label>
                     <input className="form-control" type="text" value={formData.concepto_id || formData.concepto || '-'} disabled />
                   </div>
@@ -376,7 +387,7 @@ export default function CaseResolutionPage() {
                     <input className="form-control" type="text" value={formData.segmento || '-'} disabled />
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-2">
                     <label className="form-label">Municipio</label>
                     <input className="form-control" type="text" value={formData.municipio || '-'} disabled />
                   </div>
@@ -391,9 +402,19 @@ export default function CaseResolutionPage() {
                     <input className="form-control" type="text" value={formData.pagina || '-'} disabled />
                   </div>
 
+                  <div className="col-md-2">
+                    <label className="form-label">Estado dirección</label>
+                    <input className="form-control" type="text" value={formData.estado_direccion || '-'} disabled />
+                  </div>
+
                   <div className="col-md-4">
                     <label className="form-label">Coordenadas (latitud y longitud)</label>
                     <input className="form-control" type="text" value={formData.coordenadas || '-'} disabled />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label">Estado scoring</label>
+                    <input className="form-control" type="text" value={formData.estado_scoring || '-'} disabled />
                   </div>
 
                   <div className="col-md-2">
@@ -406,13 +427,13 @@ export default function CaseResolutionPage() {
                     <input className="form-control" type="text" value={formData.megagold || '-'} disabled />
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <label className="form-label">Fecha y hora de ingreso</label>
                     <input className="form-control" type="text" value={formData.fecha_creado ? new Date(formData.fecha_creado).toLocaleString('es-CO') : '-'} disabled />
                   </div>
 
                   {/* FORMULARIO DE GESTIÓN */}
-                  <div className="col-md-2">
+                  <div className="col-md-4">
                     <label className="form-label" htmlFor="Accion">Acción*</label>
                     <select className="form-select" id="Accion" value={accionAuto} onChange={e => setAccionAuto(e.target.value)} disabled={!formData.oferta} required>
                       <option value="">Seleccionar</option>
@@ -422,7 +443,7 @@ export default function CaseResolutionPage() {
                     </select>
                   </div>
                   
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <label className="form-label" htmlFor="SubAccion">Subacción*</label>
                     <select className="form-select" id="SubAccion" value={subaccion} onChange={e => setSubaccion(e.target.value)} disabled={!accionAuto} required>
                       <option value="">Seleccionar</option>

@@ -35,8 +35,7 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
 
   const columns = useMemo(() => [
     { header: 'Asesor' }, { header: 'Oferta Siebel' }, { header: 'Pedido Fenix' },
-    { header: 'Concepto o cola' }, { header: 'Segmento' }, { header: 'Fecha ingreso' },
-    { header: 'Detalles' }, { header: 'Historico' }, { header: 'Gestión' }
+    { header: 'Concepto o cola' }, { header: 'Segmento' }, { header: 'Fecha ingreso' }, { header: 'Historico' }, { header: 'Gestión' },{ header: 'Detalles' }
   ], []);
 
   const getSearchText = (row: any) => {
@@ -144,12 +143,12 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
       )}
       
       <div className="d-flex justify-content-end mb-3 align-items-center">
+        <Icon name="download" size="xl" className='me-2'/>
         <button 
           className="btn btn-outline-primary d-flex align-items-center shadow-sm"
           onClick={handleExportAll}
           disabled={total === 0 || isExporting}
         >
-          <Icon name="download" size="lg" className='me-2'/>
           <span>Exportar</span>
         </button>
       </div>
@@ -204,9 +203,6 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
                 <td><span className="cell-text" data-bs-toggle="tooltip" title={campos.concepto || campos.concepto_id}>{campos.concepto || campos.concepto_id || '-'}</span></td>
                 <td><span className="cell-text" data-bs-toggle="tooltip" title={campos.uen}>{campos.uen || '-'}</span></td>
                 <td><span className="cell-text" data-bs-toggle="tooltip" title={fechaIngreso}>{fechaIngreso}</span></td>
-                <td className="text-center">
-                  <Icon name="plus" size="lg" className="cursor-pointer" data-bs-toggle="collapse" data-bs-target={`#details-${row.id || ofertaIdActual}`} />
-                </td>
                 <td>
                   <button 
                     className="btn btn-link p-0 text-primary border-0" 
@@ -217,6 +213,9 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
                 </td>
                 <td>
                   <button className="badge rounded-pill text-bg-bluelight border-0 p-2" onClick={() => onManage(ofertaIdActual, row)}>Gestionar</button>
+                </td>
+                <td className="text-center">
+                  <Icon name="plus" size="lg" className="cursor-pointer" data-bs-toggle="collapse" data-bs-target={`#details-${row.id || ofertaIdActual}`} />
                 </td>
               </tr>
               <tr className="data-details-row">

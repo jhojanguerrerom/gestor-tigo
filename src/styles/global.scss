@@ -257,9 +257,12 @@ video {
       line-height: 1.4;
       white-space: nowrap;
       cursor: default;
-      span.badge {
+      span{
         vertical-align: middle;
-        min-width: 80px;
+        &.badge {
+          vertical-align: middle;
+          min-width: 80px;
+        }
       }
     }
 

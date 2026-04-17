@@ -6,6 +6,7 @@ import OrdersHomePage from '../pages/orders/index'
 import CaseResolutionPage from '../pages/cases/CaseResolutionPage'
 import OffersManagedPage from '../pages/offers/OffersManagedPage'
 import ActionsPage from '../pages/admin/actions/ActionsPage'
+import UsersPage from '../pages/admin/users/index'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
 import HistoricalIncomePage from '../pages/reports/HistoricalIncome/index'
 import { PrivateRoute } from './PrivateRoute'
@@ -66,6 +67,15 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
             <ActionsPage />
+          </PrivateRoute>
+        ),
+      },
+      // ACCESO: SOLO SUPER_USER
+      {
+        path: '/config/users',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
+            <UsersPage />
           </PrivateRoute>
         ),
       },

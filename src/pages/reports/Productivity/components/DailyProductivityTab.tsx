@@ -140,72 +140,67 @@ export default function DailyProductivityTab({ refreshKey }: TabProps) {
       </div>
 
       {loading && <Loading fullScreen text="Cargando reporte..." />}
-      
-      <div className="card shadow-sm border-0">
-        <div className="card-header bg-white border-0 py-3">
-            <h5 className="mb-0 font-dm-bold text-secondary">
-                Tabla de Productividad <span className="text-muted fw-normal small">({dates.from} a {dates.to})</span>
-            </h5>
-        </div>
         <div className="card-body p-0">
-            <DataTable<DailyData>
-                rows={data}
-                columns={columns}
-                // Añadimos totalManaged a las dependencias de tooltips
-                tooltipDeps={[data, searchQuery, allDates, totalManaged]}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                getSearchText={(row) => `${row.user_login} ${row.user_name}`}
-                pageSize={50}
-                renderRow={(row) => (
-                <Fragment key={row.user_login}>
-                    <tr>
-                      <td className="text-center p-0">
-                        
-                          <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={row.user_name}>
-                              {row.user_login || '-'}
-                          </span>
-                      </td>
+          <h5 className="mb-2 font-dm-bold text-secondary">
+            Tabla de productividad <span className="text-muted fw-normal small">({dates.from} a {dates.to})</span>
+          </h5>
+          <DataTable<DailyData>
+              rows={data}
+              columns={columns}
+              // Añadimos totalManaged a las dependencias de tooltips
+              tooltipDeps={[data, searchQuery, allDates, totalManaged]}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              getSearchText={(row) => `${row.user_login} ${row.user_name}`}
+              pageSize={50}
+              renderRow={(row) => (
+              <Fragment key={row.user_login}>
+                  <tr>
+                    <td className="text-center p-0">
                       
-                      {allDates.map(date => {
-                          const dayData = row.managed_by_day?.find(d => d.date === date);
-                          const val = dayData ? dayData.quantity : 0;
-                          return (
-                          <td key={date}>
-                              <CellText value={val} className="text-muted" />
-                          </td>
-                          );
-                      })}
+                        <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={row.user_name}>
+                            {row.user_login || '-'}
+                        </span>
+                    </td>
+                    
+                    {allDates.map(date => {
+                        const dayData = row.managed_by_day?.find(d => d.date === date);
+                        const val = dayData ? dayData.quantity : 0;
+                        return (
+                        <td key={date}>
+                            <CellText value={val} className="text-muted" />
+                        </td>
+                        );
+                    })}
 
-                      <td className="fw-bold" data-bs-toggle="tooltip" title={String(row.daily_average)}>
-                        {row.daily_average.toFixed(1)}
-                      </td>
-                      <td className="table-active text-primary fw-bold text-center" data-bs-toggle="tooltip" title={String(row.total_managed)}>
-                        {row.total_managed}
+                    <td className="fw-bold" data-bs-toggle="tooltip" title={String(row.daily_average)}>
+                      {row.daily_average.toFixed(1)}
+                    </td>
+                    <td className="table-active text-primary fw-bold text-center" data-bs-toggle="tooltip" title={String(row.total_managed)}>
+                      {row.total_managed}
+                    </td>
+                  </tr>
+
+                  {/* Fila de Totales al final */}
+                  {data.indexOf(row) === data.length - 1 && (
+                    <tr className="table-light fw-bold">
+                      <td className="text-center ps-3">TOTAL</td>
+                      {allDates.map(date => (
+                        <td key={`total-${date}`}>
+                          <CellText value={dailyTotals[date]} />
+                        </td>
+                      ))}
+                      {/* Celda vacía para la columna 'Promedio' */}
+                      <td>-</td>
+                      {/* Gran Total: Usamos el 701 del response directamente */}
+                      <td className="table-primary text-primary text-center" data-bs-toggle="tooltip" title={String(totalManaged)}>
+                        {totalManaged}
                       </td>
                     </tr>
-
-                    {/* Fila de Totales al final */}
-                    {data.indexOf(row) === data.length - 1 && (
-                      <tr className="table-light fw-bold">
-                        <td className="text-center ps-3">TOTAL</td>
-                        {allDates.map(date => (
-                          <td key={`total-${date}`}>
-                            <CellText value={dailyTotals[date]} />
-                          </td>
-                        ))}
-                        {/* Celda vacía para la columna 'Promedio' */}
-                        <td>-</td>
-                        {/* Gran Total: Usamos el 701 del response directamente */}
-                        <td className="table-primary text-primary text-center" data-bs-toggle="tooltip" title={String(totalManaged)}>
-                          {totalManaged}
-                        </td>
-                      </tr>
-                    )}
-                </Fragment>
-                )}
-            />
-        </div>
+                  )}
+              </Fragment>
+              )}
+          />
       </div>
     </div>
   );

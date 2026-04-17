@@ -38,9 +38,9 @@ export default function InTransitOrdersTab({ refreshKey, onManage, onOpenHistory
     { header: 'Segmento' }, 
     { header: 'Fecha ingreso' },
     { header: 'Tiempo' }, 
-    { header: 'Detalles' },
     { header: 'Historico' }, 
-    { header: 'Gestión' }
+    { header: 'Gestión' },
+    { header: 'Detalles' }
   ], []);
 
   return (
@@ -87,15 +87,6 @@ export default function InTransitOrdersTab({ refreshKey, onManage, onOpenHistory
                 <td className="text-center">
                   <span className="badge rounded-pill bg-light text-dark border">{row.tiempo_transcurrido_minutos} min</span>
                 </td>
-                <td className="text-center">
-                  <Icon 
-                    name="plus" 
-                    size="lg" 
-                    className="cursor-pointer" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target={`#details-transit-${row.id || ofertaIdActual}`} 
-                  />
-                </td>
                 <td>
                   <button 
                     className="btn btn-link p-0 text-primary border-0" 
@@ -111,6 +102,15 @@ export default function InTransitOrdersTab({ refreshKey, onManage, onOpenHistory
                   >
                     Gestionar
                   </button>
+                </td>
+                <td className="text-center">
+                  <Icon 
+                    name="plus" 
+                    size="lg" 
+                    className="cursor-pointer" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target={`#details-transit-${row.id || ofertaIdActual}`} 
+                  />
                 </td>
               </tr>
               <tr className="data-details-row">

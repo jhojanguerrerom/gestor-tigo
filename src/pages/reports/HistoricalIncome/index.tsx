@@ -4,11 +4,12 @@ import { useBootstrapTooltips } from '@/hooks/useBootstrapTooltips';
 import TendencyTab from './components/IncomeAndTransactionsMonthTab';
 import ComparativeTab from './components/IncomeAndTransactionsDetailTab';
 import LiveTab from './components/IncomeDayTab';
+import ConceptTab from './components/IncomeByConceptMonthTab';
 
-type IncomeViewMode = 'TENDENCY' | 'COMPARATIVE' | 'LIVE';
+type IncomeViewMode = 'TENDENCY' | 'COMPARATIVE' | 'LIVE' | 'CONCEPT';
 
 export default function IncomeAnalysisPage() {
-  const [viewMode, setViewMode] = useState<IncomeViewMode>('TENDENCY');
+  const [viewMode, setViewMode] = useState<IncomeViewMode>('LIVE');
   const [refreshKey, setRefreshKey] = useState(0);
 
   useBootstrapTooltips([viewMode, refreshKey]);
@@ -16,7 +17,8 @@ export default function IncomeAnalysisPage() {
   const TITLES: Record<IncomeViewMode, string> = {
     TENDENCY: 'Ingresos y Gestiones por mes',
     COMPARATIVE: 'Ingresos y Gestiones por rango personalizado',
-    LIVE: 'Ingresos por horas de hoy'
+    LIVE: 'Ingresos por horas de hoy',
+    CONCEPT: 'Ingresos por mes y concepto'
   };
 
   const handleRefresh = useCallback(() => {
@@ -41,15 +43,25 @@ export default function IncomeAnalysisPage() {
             <Icon name="refresh" size="xl" />
           </button>
         </div>
+      </header>
+
+      <header className="mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
 
         <div className="btn-group shadow-sm border-2">
+          <input 
+            type="radio" className="btn-check" id="radioLive" 
+            autoComplete="off"
+            checked={viewMode === 'LIVE'} 
+            onChange={() => setViewMode('LIVE')} 
+          />
+          <label className="btn btn-outline-primary px-3" htmlFor="radioLive">Ingresos por día</label>
           <input 
             type="radio" className="btn-check" id="radioTendency" 
             autoComplete="off"
             checked={viewMode === 'TENDENCY'} 
             onChange={() => setViewMode('TENDENCY')} 
           />
-          <label className="btn btn-outline-primary px-3" htmlFor="radioTendency">Vista mensual</label>
+          <label className="btn btn-outline-primary px-3" htmlFor="radioTendency">Ingresos y Gestiones por mes</label>
           
           <input 
             type="radio" className="btn-check" id="radioComp" 
@@ -57,15 +69,15 @@ export default function IncomeAnalysisPage() {
             checked={viewMode === 'COMPARATIVE'} 
             onChange={() => setViewMode('COMPARATIVE')} 
           />
-          <label className="btn btn-outline-primary px-3" htmlFor="radioComp">Rango personalizado</label>
+          <label className="btn btn-outline-primary px-3" htmlFor="radioComp">Ingresos y Gestiones por rango personalizado</label>
 
           <input 
-            type="radio" className="btn-check" id="radioLive" 
+            type="radio" className="btn-check" id="radioConcept" 
             autoComplete="off"
-            checked={viewMode === 'LIVE'} 
-            onChange={() => setViewMode('LIVE')} 
+            checked={viewMode === 'CONCEPT'} 
+            onChange={() => setViewMode('CONCEPT')} 
           />
-          <label className="btn btn-outline-primary px-3" htmlFor="radioLive">Hoy</label>
+          <label className="btn btn-outline-primary px-3" htmlFor="radioConcept">Ingresos por mes y concepto</label>
         </div>
       </header>
 
@@ -81,6 +93,10 @@ export default function IncomeAnalysisPage() {
         
         {viewMode === 'LIVE' && (
           <LiveTab refreshKey={refreshKey} />
+        )}
+
+        {viewMode === 'CONCEPT' && (
+          <ConceptTab refreshKey={refreshKey} />
         )}
       </div>
     </section>
