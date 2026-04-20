@@ -15,7 +15,7 @@ const INITIAL_STATE = {
   login: '',
   user_identify: '',
   full_name: '',
-  profile_id: 3,
+  profile_id: 4,
   email: '',
   user_state: true
 };
@@ -117,7 +117,7 @@ const UserFormModal = ({ isOpen, onClose, user, onSuccess }: UserFormModalProps)
                 type="text"
                 className="form-control bg-light"
                 id="fullName"
-                placeholder="Ej: Jhojan Guerrero"
+                placeholder="Ej: Jhojan David Guerrero Medina"
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                 ref={nameRef}

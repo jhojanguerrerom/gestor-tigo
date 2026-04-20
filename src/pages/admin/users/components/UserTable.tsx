@@ -72,22 +72,22 @@ export default function UserTable({ refreshKey, onEdit, onToggleStatus }: UserTa
               </div>
             </td>
             <td>
-              <span className="cell-text" data-bs-toggle="tooltip" title={user.full_name}>
-                {user.full_name}
+              <span className={`cell-text ${!user.full_name ? 'text-muted fst-italic opacity-75' : 'fw-bold'}`} data-bs-toggle="tooltip" title={user.full_name || 'Sin nombre'}>
+                {user.full_name || 'Sin nombre'}
               </span>
             </td>
             <td>
-              <span className="cell-text" data-bs-toggle="tooltip" title={`${user.user_identify}`}>
-                {user.user_identify}
+              <span className={`cell-text ${!user.user_identify ? 'text-muted fst-italic opacity-75' : ''}`} data-bs-toggle="tooltip" title={`${user.user_identify || 'Sin identificación'}`}>
+                {user.user_identify || 'Sin identificación'}
               </span>
             </td>
             <td>
-              <span className="cell-text" data-bs-toggle="tooltip" title={user.email || 'Sin correo'}>
-                {user.email || '-'}
+              <span className={`cell-text ${!user.email ? 'text-muted fst-italic opacity-75' : ''}`} data-bs-toggle="tooltip" title={user.email || 'Sin correo'}>
+                {user.email || 'Sin correo'}
               </span>
             </td>
             <td>
-              <span className="badge text-bg-blue">
+              <span className="badge text-bg-blue" data-bs-toggle="tooltip" title={user.profile_id === 1 ? 'Administrador' : user.profile_id === 3 ? 'Supervisor' : user.profile_id === 4 ? 'Asesor' : 'Espectador'}>
                 {user.profile_id === 1 ? 'Administrador' : user.profile_id === 3 ? 'Supervisor' : user.profile_id === 4 ? 'Asesor' : 'Espectador'}
               </span>
             </td>
@@ -99,9 +99,11 @@ export default function UserTable({ refreshKey, onEdit, onToggleStatus }: UserTa
                   checked={user.user_state} 
                   onChange={() => onToggleStatus(user)}
                 />
-                <span className={`badge ${user.user_state ? 'text-bg-success' : 'text-bg-danger'}`}>
-                  {user.user_state ? 'Activo' : 'Inactivo'}
-                </span>
+                {user.user_state ? (
+                  <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Activo</span>
+                ) : (
+                  <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Inactivo</span>
+                )}
               </div>
             </td>
             <td>

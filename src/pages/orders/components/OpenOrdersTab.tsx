@@ -138,7 +138,7 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
       {(loading || isExporting) && (
         <Loading 
           fullScreen 
-          text={isExporting ? "Obteniendo registros en lotes de 1000..." : "Cargando pedidos abiertos..."} 
+          text={isExporting ? "Obteniendo registros en lotes de 1000..." : "Cargando pedidos..."} 
         />
       )}
       

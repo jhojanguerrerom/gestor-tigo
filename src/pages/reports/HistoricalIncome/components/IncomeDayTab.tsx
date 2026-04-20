@@ -51,7 +51,7 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
 
   return (
     <div className="position-relative">
-      {loading && <Loading fullScreen text="Cargando ingresos del día..." />}
+      {loading && <Loading fullScreen text="Cargando ingresos por día..." />}
       
       <div className="d-flex align-items-end gap-2 flex-wrap mb-4 justify-content-end">
         <div className="date-input-group">
