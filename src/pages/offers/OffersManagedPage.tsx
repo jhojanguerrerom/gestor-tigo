@@ -49,7 +49,7 @@ const CellText = ({ value, className = '' }: { value?: string; className?: strin
 
 export default function OffersManagedPage() {
   const today = useMemo(() => new Date(), []);
-  const { success, error } = useToast();
+  const { success, error, warning } = useToast(); // Añadido warning para el toast
 
   const [fromDate, setFromDate] = useState(formatDate(today));
   const [toDate, setToDate] = useState(formatDate(addDays(today, 1)));
@@ -66,15 +66,33 @@ export default function OffersManagedPage() {
   const tableId = 'managedTable';
   const pageSize = 10;
 
+  // Lógica de validación de rango (Máximo 90 días)
+  const isRangeValid = useCallback((start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 90;
+  }, []);
+
   const { data: rows, total, totalPages, currentPage, setCurrentPage, loading } = useEnlistmentTable({
     pageSize,
     searchQuery,
     refreshKey,
     fetchFn: useCallback(async (page: number, limit: number, search: string) => {
-      return search 
-        ? enlistmentService.searchByOferta(search, page, limit, 'CERRADO')
-        : enlistmentService.getEnlistments(page, limit, 'CERRADO', fromDate, toDate);
-    }, [fromDate, toDate])
+      // Si el usuario está buscando una oferta específica, se ignora el rango de fechas usualmente
+      if (search) {
+        return await enlistmentService.searchByOferta(search, page, limit, 'CERRADO');
+      }
+
+      // Validación de rango antes de llamar al servicio
+      if (!isRangeValid(fromDate, toDate)) {
+        warning('Seleccione un rango máximo de 90 días');
+        return { data: { data: [], total: 0, totalPages: 0 } };
+      }
+
+      return await enlistmentService.getEnlistments(page, limit, 'CERRADO', fromDate, toDate);
+    }, [fromDate, toDate, isRangeValid, warning])
   });
 
   useEffect(() => {
@@ -94,10 +112,17 @@ export default function OffersManagedPage() {
 
   const ejecutarExportacion = async () => {
     if (!total) return;
+
+    if (!isRangeValid(fromDate, toDate)) {
+      error('El rango de fechas no puede ser mayor a 90 días para exportar');
+      return;
+    }
+
     if (camposSeleccionados.length === 0) {
       error('Selecciona al menos un campo para el reporte');
       return;
     }
+
     setIsExporting(true);
     setIsConfigModalOpen(false);
     try {
@@ -154,7 +179,7 @@ export default function OffersManagedPage() {
 
       <div className="d-flex justify-content-end mb-3 align-items-center">
         <Icon name="download" size="xl" className='me-2'/>
-        <button className="btn btn-outline-primary d-flex align-items-center shadow-sm" onClick={() => setIsConfigModalOpen(true)} disabled={total === 0 || isExporting}>
+        <button className="btn btn-outline-primary d-flex align-items-center shadow-sm" onClick={() => setIsConfigModalOpen(true)} disabled={total === 0 || isExporting || !isRangeValid(fromDate, toDate)}>
           <span>Exportar</span>
         </button>
       </div>

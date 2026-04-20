@@ -17,7 +17,7 @@ export default function IncomeAnalysisPage() {
   const TITLES: Record<IncomeViewMode, string> = {
     TENDENCY: 'Ingresos y Gestiones por mes',
     COMPARATIVE: 'Ingresos y Gestiones por rango personalizado',
-    LIVE: 'Ingresos por horas de hoy',
+    LIVE: 'Ingresos por día',
     CONCEPT: 'Ingresos por mes y concepto'
   };
 

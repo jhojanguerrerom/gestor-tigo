@@ -1,5 +1,6 @@
 /**
  * Shared case resolution view for all roles.
+ * Converted to Tab Component.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
@@ -7,7 +8,7 @@ import { Icon } from '@/icons/Icon';
 import { actionService } from '@/api/services/actionService';
 import { offerService } from '@/api/services/offerService';
 import { useToast } from '@/context/ToastContext';
-import OrderHistoryModal from '@/pages/cases/OrderHistoryModal';
+import OrderHistoryModal from './OrderHistoryModal';
 import Loading from '@/components/Loading';
 import { useBootstrapTooltips } from '@/hooks/useBootstrapTooltips';
 
@@ -53,7 +54,7 @@ const extractFormData = (campos: any = {}) => {
   };
 };
 
-export default function CaseResolutionPage() {
+export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }) {
   const location = useLocation();
   const isMounted = useRef(true);
 
@@ -78,7 +79,7 @@ export default function CaseResolutionPage() {
   const { success, info, error } = useToast();
 
   // 1. Inicializamos los tooltips reaccionando a la data de la oferta
-  useBootstrapTooltips([formData]);
+  useBootstrapTooltips([formData, refreshKey]);
 
   // Función para cargar o refrescar los conceptos disponibles
   const fetchConcepts = useCallback(async () => {
@@ -88,14 +89,9 @@ export default function CaseResolutionPage() {
         const fetchedConcepts = res.data || [];
         setConcepts(fetchedConcepts);
         
-        // Evaluamos si el concepto seleccionado todavía existe en la nueva data
         setSelectedConcepto(prevSelected => {
-          if (!prevSelected) return prevSelected; // Si ya estaba en Aleatorio, lo dejamos así
-          
-          // Buscamos si el concepto que el usuario tenía seleccionado sigue teniendo ofertas
+          if (!prevSelected) return prevSelected;
           const exists = fetchedConcepts.some((c: any) => c.concepto === prevSelected);
-          
-          // Si existe lo mantenemos, si no (porque llegó a 0), lo devolvemos a Aleatorio ("")
           return exists ? prevSelected : "";
         });
       }
@@ -127,7 +123,7 @@ export default function CaseResolutionPage() {
     return () => {
       isMounted.current = false;
     };
-  }, [location.pathname, location.key, info, fetchConcepts]);
+  }, [location.pathname, location.key, info, fetchConcepts, refreshKey]);
 
   // Cargar acciones
   useEffect(() => {
@@ -142,7 +138,7 @@ export default function CaseResolutionPage() {
           }));
         setAcciones(accionesActivas);
       });
-  }, []);
+  }, [refreshKey]);
 
   // Actualizar subacciones al cambiar de acción
   useEffect(() => {
@@ -166,7 +162,6 @@ export default function CaseResolutionPage() {
       .finally(() => setIsAssigning(false));
   };
 
-  // Función genérica y segura para copiar al portapapeles
   const safeCopyText = (text: string, successMsg: string) => {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text)
@@ -181,14 +176,12 @@ export default function CaseResolutionPage() {
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
       try {
         document.execCommand('copy');
         info(successMsg);
       } catch (err) {
         error('Tu navegador bloqueó la copia automática');
       }
-      
       document.body.removeChild(textArea);
     }
   };
@@ -223,15 +216,11 @@ export default function CaseResolutionPage() {
     try {
       await offerService.manageOffer(payload);
       success(`Pedido ${payload.oferta} cerrado exitosamente`);
-      
       setFormData(INITIAL_FORM_DATA);
       setAccionAuto("");
       setSubaccion("");
       setObservacion("");
-      
-      // YA NO BORRAMOS EL selectedConcepto AQUÍ
-      
-      fetchConcepts(); // La lógica inteligente de fetchConcepts decidirá si se queda o se borra
+      fetchConcepts(); 
     } catch (err) {
       console.error("Error al gestionar el pedido:", err);
       try {
@@ -239,12 +228,10 @@ export default function CaseResolutionPage() {
         error('Ocurrió un error al enviar. Por favor, intente de nuevo');
       } catch (verifyErr) {
         error('El pedido ya no se encuentra asignado');
-        
         setFormData(INITIAL_FORM_DATA);
         setAccionAuto("");
         setSubaccion("");
         setObservacion("");
-        
         fetchConcepts();
       }
     } finally {
@@ -253,14 +240,8 @@ export default function CaseResolutionPage() {
   };
 
   return (
-    <section className="container py-4">
+    <div className="animate__animated animate__fadeIn">
       {isPageLoading && <Loading fullScreen text="Cargando información..." />}
-      <header className="mb-4">
-        <h1 className="h3 font-dm-bold mb-2">Pedidos de trabajo</h1>
-        <p className="text-body-secondary mb-0">
-          Espacio de trabajo para la gestión de pedidos.
-        </p>
-      </header>
       
       <div className="row">
         <div className="col-md-3">
@@ -348,12 +329,10 @@ export default function CaseResolutionPage() {
               </div>
 
               <form className="row g-3" onSubmit={handleSubmit}>
-                  {/* CAMPOS DE SOLO LECTURA */}
                   <div className="col-md-3">
                     <label className="form-label">Oferta Siebel</label>
                     <div className="d-flex align-items-center">
                       <input className="form-control" type="text" value={formData.oferta || '-'} disabled />
-                      {/* Icono de Copiar Oferta Funcional con Tooltip */}
                       {formData.oferta && (<span className={`ms-2 ${formData.oferta ? 'cursor-pointer text-primary' : 'text-muted'}`} 
                         data-bs-toggle="tooltip" 
                         data-bs-placement="top" 
@@ -432,7 +411,6 @@ export default function CaseResolutionPage() {
                     <input className="form-control" type="text" value={formData.fecha_creado ? new Date(formData.fecha_creado).toLocaleString('es-CO') : '-'} disabled />
                   </div>
 
-                  {/* FORMULARIO DE GESTIÓN */}
                   <div className="col-md-4">
                     <label className="form-label" htmlFor="Accion">Acción*</label>
                     <select className="form-select" id="Accion" value={accionAuto} onChange={e => setAccionAuto(e.target.value)} disabled={!formData.oferta} required>
@@ -486,6 +464,6 @@ export default function CaseResolutionPage() {
         onClose={() => setIsHistoryOpen(false)}
         ofertaId={formData.oferta}
       />
-    </section>
-  )
+    </div>
+  );
 }

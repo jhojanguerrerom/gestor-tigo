@@ -49,12 +49,14 @@ export default function UsersHomePage() {
 
       <header className="mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div className="d-flex align-items-center">
-          <h1 className="h3 font-dm-bold mb-0">Gestión de Usuarios</h1>
+          <h1 className="h3 font-dm-bold mb-0">Gestión de usuarios</h1>
           <button 
             type="button" 
             className="btn btn-link p-0 ms-2" 
             onClick={handleRefresh} 
-            title="Actualizar tabla"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            title="Actualizar datos"
           >
             <Icon name="refresh" size="xl" />
           </button>
