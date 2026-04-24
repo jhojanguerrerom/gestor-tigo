@@ -68,9 +68,14 @@ export const reportService = {
   /**
    * Obtiene el histórico de ingresos vs gestiones (Vista de Tendencia Mensual).
    */
-  getHistoricalIncome: (fromDate: string, toDate: string, businessUnit: string) => 
+  getHistoricalIncome: (fromDate: string, toDate: string, businessUnit: string, conceptGroup: string) => 
     httpClient.get<HistoricalIncomeResponse>(ENDPOINTS.REPORTS.HISTORICAL_INCOME, {
-      params: { date_from: fromDate, date_to: toDate, business_unit: businessUnit }
+      params: {
+        date_from: fromDate, 
+        date_to: toDate, 
+        business_unit: businessUnit,
+        concept_group: conceptGroup
+      }
     }),
 
   /**
@@ -91,18 +96,12 @@ export const reportService = {
    * Obtiene los ingresos distribuidos por hora para un día específico (Vista En Vivo).
    * @param date Fecha opcional en formato YYYY-MM-DD. Si no se envía, usa la fecha de Colombia.
    */
-  getLiveIncome: (date?: string) => {
-    // Si no viene fecha, calculamos la de hoy en Bogotá por defecto
-    const defaultDate = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/Bogota',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date());
-
+  getLiveIncome: (fromDate: string, toDate: string) => {
+    // El return es vital para que no devuelva 'void' o 'never'
     return httpClient.get<LiveIncomeResponse>(ENDPOINTS.REPORTS.INCOME_BY_HOUR, {
       params: { 
-        date: date || defaultDate 
+        date_from: fromDate, 
+        date_to: toDate 
       }
     });
   },

@@ -12,15 +12,14 @@ interface TabProps {
 export default function IncomeAndTransactionsMonthTab({ refreshKey }: TabProps) {
   const now = new Date();
   
-  // Filtros internos: UEN y Calendario por Mes/Año
   const [businessUnit, setBusinessUnit] = useState('ALL');
+  const [conceptGroup, setConceptGroup] = useState('ALL'); // <-- Nuevo estado para el filtro
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   
   const [report, setReport] = useState<HistoricalIncomeResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Calculamos el rango de fechas (primer y último día del mes) automáticamente
   const { fromDate, toDate } = useMemo(() => {
     const firstDay = new Date(selectedYear, selectedMonth, 1);
     const lastDay = new Date(selectedYear, selectedMonth + 1, 0); 
@@ -30,8 +29,13 @@ export default function IncomeAndTransactionsMonthTab({ refreshKey }: TabProps) 
   const fetchReport = useCallback(async () => {
     setLoading(true);
     try {
-      // Usamos getHistoricalIncome para la vista de tendencia mensual
-      const res = await reportService.getHistoricalIncome(fromDate, toDate, businessUnit);
+      // Ahora enviamos conceptGroup al servicio
+      const res = await reportService.getHistoricalIncome(
+        fromDate, 
+        toDate, 
+        businessUnit, 
+        conceptGroup
+      );
       setReport(res.data);
     } catch (err) {
       console.error("Error en tendencia mensual:", err);
@@ -39,50 +43,51 @@ export default function IncomeAndTransactionsMonthTab({ refreshKey }: TabProps) 
     } finally {
       setLoading(false);
     }
-  }, [fromDate, toDate, businessUnit]);
+  }, [fromDate, toDate, businessUnit, conceptGroup]); // <-- Añadido a dependencias
 
   useEffect(() => { 
     fetchReport(); 
   }, [fetchReport, refreshKey]);
 
-  // Mantenemos los labels y colores originales para seguir la línea gráfica
   const chartConfig: ChartSeries[] = [
-    { 
-      key: 'income', 
-      label: 'Ingresos', 
-      type: 'line', 
-      color: '#001eb4', 
-      showColorInAxis: true 
-    },
-    { 
-      key: 'managed', 
-      label: 'Gestiones', 
-      type: 'line', 
-      color: '#FFBE00', 
-      yAxisId: 'right', 
-      showColorInAxis: true 
-    }
+    { key: 'income', label: 'Ingresos', type: 'line', color: '#001eb4', showColorInAxis: true },
+    { key: 'managed', label: 'Gestiones', type: 'line', color: '#FFBE00', yAxisId: 'right', showColorInAxis: true }
   ];
 
   return (
     <div className="position-relative">
-      {/* Sección de Filtros Independientes */}
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div className="">
-          <label className="form-label">UEN</label>
-          <select 
-            className="form-select shadow-sm" 
-            style={{ width: '180px' }}
-            value={businessUnit}
-            onChange={(e) => setBusinessUnit(e.target.value)}
-          >
-            <option value="ALL">Todas las UEN</option>
-            <option value="RESIDENCIAL">Hogares</option>
-            <option value="EMPRESARIAL">Empresas</option>
-          </select>
+        <div className="d-flex gap-3 flex-wrap">
+          <div>
+            <label className="form-label">UEN</label>
+            <select 
+              className="form-select shadow-sm" 
+              style={{ width: '180px' }}
+              value={businessUnit}
+              onChange={(e) => setBusinessUnit(e.target.value)}
+            >
+              <option value="ALL">Todas las UEN</option>
+              <option value="RESIDENCIAL">Hogares</option>
+              <option value="EMPRESARIAL">Empresas</option>
+            </select>
+          </div>
+
+          {/* NUEVO SELECT: Filtro de Conceptos */}
+          <div>
+            <label className="form-label">Agrupación de conceptos</label>
+            <select 
+              className="form-select shadow-sm" 
+              style={{ width: '200px' }}
+              value={conceptGroup}
+              onChange={(e) => setConceptGroup(e.target.value)}
+            >
+              <option value="ALL">Todos los conceptos</option>
+              <option value="ASESOR">Gestión ASESOR</option>
+              <option value="BOT">Gestión BOT</option>
+            </select>
+          </div>
         </div>
 
-        {/* Picker de Mes/Año solicitado */}
         <MonthPicker 
           selectedMonth={selectedMonth} 
           selectedYear={selectedYear} 
@@ -93,13 +98,13 @@ export default function IncomeAndTransactionsMonthTab({ refreshKey }: TabProps) 
         />
       </div>
 
-      {loading && <Loading fullScreen text="Cargando..." />}
+      {loading && <Loading fullScreen text="Cargando tendencia mensual..." />}
       
       {report && (
         <div className="card shadow-sm">
           <div className="card-header bg-white border-0 py-3">
             <h5 className="mb-0 font-dm-bold text-secondary">
-              Ingresos y/o Gestiones de <span className="text-muted fw-normal small">({fromDate} a {toDate})</span>
+              Tendencia de Ingresos y Gestiones <span className="text-muted fw-normal small">({fromDate} a {toDate})</span>
             </h5>
           </div>
           <div className="card-body p-4">

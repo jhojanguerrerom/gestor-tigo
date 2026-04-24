@@ -114,7 +114,7 @@ export default function CustomChart({
             return s.type === 'line' ? (
               <Line {...common} type="monotone" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, stroke: '#fff' }} />
             ) : (
-              <Bar {...common} radius={s.stack ? [0, 0, 0, 0] : [4, 4, 0, 0]} barSize={isHourly ? 30 : 20} />
+              <Bar {...common} radius={s.stack ? [0, 0, 0, 0] : [4, 4, 0, 0]} barSize={isHourly ? 15 : 12} />
             );
           })}
         </ComposedChart>

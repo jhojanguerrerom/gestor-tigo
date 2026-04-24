@@ -17,7 +17,7 @@ export default function IncomeAnalysisPage() {
   const TITLES: Record<IncomeViewMode, string> = {
     TENDENCY: 'Ingresos y Gestiones por mes',
     COMPARATIVE: 'Ingresos y Gestiones por rango personalizado',
-    LIVE: 'Ingresos por día',
+    LIVE: 'Ingresos por franja horaria (día y promedio)',
     CONCEPT: 'Ingresos por mes y concepto'
   };
 
@@ -54,7 +54,7 @@ export default function IncomeAnalysisPage() {
             checked={viewMode === 'LIVE'} 
             onChange={() => setViewMode('LIVE')} 
           />
-          <label className="btn btn-outline-primary px-3" htmlFor="radioLive">Ingresos por día</label>
+          <label className="btn btn-outline-primary px-3" htmlFor="radioLive">Ingresos por franja horaria (día y promedio)</label>
           <input 
             type="radio" className="btn-check" id="radioTendency" 
             autoComplete="off"
