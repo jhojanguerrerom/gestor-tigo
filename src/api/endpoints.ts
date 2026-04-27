@@ -22,6 +22,7 @@ export const ENDPOINTS = {
     PAUSE: '/v1/ofertas/pausar',
     PAUSED: '/v1/ofertas/mis-pausadas',
     RESUME: '/v1/ofertas/reanudar',
+    PAUSE_CONFIG: '/v1/ofertas/config-pausada',
   },
   ACTIONS: {
     CATALOG: '/v1/ofertas/catalogo/acciones',

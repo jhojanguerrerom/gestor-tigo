@@ -104,7 +104,7 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
               value={metricView}
               onChange={(e) => setMetricView(e.target.value as MetricView)}
             >
-              <option value="BOTH">Todos (Ambos)</option>
+              <option value="BOTH">Todo</option>
               <option value="INCOME">Solo Ingresos</option>
               <option value="MANAGED">Solo Gestiones</option>
             </select>
@@ -123,7 +123,7 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
 
       {loading && <Loading fullScreen text="Cargando..." />}
 
-      <div className="card shadow-sm">
+      <div className="card shadow-sm border-0">
         <div className="card-header bg-white border-0 py-3">
           <h5 className="mb-0 font-dm-bold text-secondary">
             Ingresos y/o Gestiones de <span className="text-muted fw-normal small">({dates.from} a {dates.to})</span>

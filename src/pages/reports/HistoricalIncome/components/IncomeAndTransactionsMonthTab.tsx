@@ -101,7 +101,7 @@ export default function IncomeAndTransactionsMonthTab({ refreshKey }: TabProps) 
       {loading && <Loading fullScreen text="Cargando tendencia mensual..." />}
       
       {report && (
-        <div className="card shadow-sm">
+        <div className="card shadow-sm border-0">
           <div className="card-header bg-white border-0 py-3">
             <h5 className="mb-0 font-dm-bold text-secondary">
               Tendencia de Ingresos y Gestiones <span className="text-muted fw-normal small">({fromDate} a {toDate})</span>

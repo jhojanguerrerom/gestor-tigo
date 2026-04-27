@@ -113,7 +113,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
         setFormData(extractFormData(res.data.campos_dinamicos));
       } catch (err) {
         if (!isMounted.current) return;
-        info('Solicite un pedido para comenzar a gestionar');
+        //info('Solicite un pedido para comenzar a gestionar');
         setFormData(INITIAL_FORM_DATA);
       } finally {
         if (isMounted.current) setIsPageLoading(false);
@@ -271,7 +271,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
       <div className="row">
         <div className="col-md-3">
           <div 
-            className={`card shadow-sm mb-4 ${formData.oferta ? 'opacity-50' : ''}`} 
+            className={`card shadow-sm border-0 mb-4 ${formData.oferta ? 'opacity-50' : ''}`} 
             style={formData.oferta ? { pointerEvents: 'none', cursor: 'not-allowed' } : {}}
           >
             <div className="card-body">
@@ -328,7 +328,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
           </div>
           {formData.oferta && (
             <div 
-              className="card shadow-sm mb-4"
+              className="card shadow-sm border-0 mb-4"
             >
               <div className="card-body">
                 <div className="d-flex flex-column gap-3">
@@ -365,7 +365,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
         </div>
         
         <div className="col-md-9">
-          <div className="card shadow-sm">
+          <div className="card shadow-sm border-0">
             <div className="card-body">
               <div className="row">
                 <div className="col-md-6">

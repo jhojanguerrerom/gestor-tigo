@@ -9,6 +9,7 @@ import ActionsPage from '../pages/admin/actions/ActionsPage'
 import UsersPage from '../pages/admin/users/index'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
 import HistoricalIncomePage from '../pages/reports/HistoricalIncome/index'
+import PauseSettingsPage from '../pages/admin/paused/PauseSettingsPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'
 
@@ -85,6 +86,15 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
             <HistoricalIncomePage />
+          </PrivateRoute>
+        ),
+      },
+      // ACCESO: SOLO SUPER_USER
+      {
+        path: '/config/pause-settings',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
+            <PauseSettingsPage />
           </PrivateRoute>
         ),
       },

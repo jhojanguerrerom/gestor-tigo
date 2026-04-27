@@ -110,7 +110,7 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
         />
       </div>
 
-      <div className="card shadow-sm">
+      <div className="card shadow-sm border-0">
         <div className="card-header bg-white border-0 py-3">
           <h5 className="mb-0 font-dm-bold text-secondary">
             {isAverageMode ? 'Promedio de Ingresos' : 'Ingresos'} por hora: {filters.fromDate} {filters.fromDate !== filters.toDate ? `a ${filters.toDate}` : ''}

@@ -5,27 +5,34 @@ import { offerService } from '@/api/services/offerService';
 import { useEnlistmentTable } from '@/hooks/useEnlistmentTable';
 import OrderHistoryModal from './OrderHistoryModal';
 import { Icon } from '@/icons/Icon';
+import Loading from '@/components/Loading';
 import { useBootstrapTooltips } from '@/hooks/useBootstrapTooltips';
 
 interface PausedCasesTabProps {
   refreshKey: number;
-  onResumeSuccess: () => void;
+  onResumeSuccess: () => void; // Callback para navegar al tab de Gestión
 }
 
 export default function PausedCasesTab({ refreshKey, onResumeSuccess }: PausedCasesTabProps) {
   const { success, error } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Estados para modales y carga de reanudación
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
 
+  // Función de carga de datos mapeada para el hook
   const fetchFn = useCallback(async () => {
     const res = await offerService.getPausedOffers();
     return {
       ...res,
       data: {
         data: res.data.ofertas,
-        pagination: { total: res.data.total, total_pages: 1 }
+        pagination: {
+          total: res.data.total,
+          total_pages: 1
+        }
       }
     };
   }, []);
@@ -36,22 +43,30 @@ export default function PausedCasesTab({ refreshKey, onResumeSuccess }: PausedCa
     searchQuery: ''
   });
 
-  // CRITICO: Esto activa los tooltips de Bootstrap cuando los datos cargan
+  // CRÍTICO: Se pasan los datos como dependencia para que los tooltips se activen al renderizar las filas
   useBootstrapTooltips([data, refreshKey]);
+
+  const handleOpenHistory = (ofertaId: string) => {
+    setSelectedOfferId(ofertaId);
+    setIsHistoryOpen(true);
+  };
 
   const handleResume = async (ofertaId: string) => {
     if (isResuming) return;
+    
     setIsResuming(true);
     try {
       const res = await offerService.resumeOffer({ oferta: ofertaId });
+      
       if (res.data.type === 'error') {
         error(res.data.message);
       } else {
-        success(`Oferta ${ofertaId} reanudada`);
-        onResumeSuccess();
+        success(`Oferta ${ofertaId} reanudada correctamente`);
+        onResumeSuccess(); 
       }
     } catch (err: any) {
-      error(err.response?.data?.message || "Error al reanudar");
+      const msg = err.response?.data?.message || "Error al intentar reanudar la oferta";
+      error(msg);
     } finally {
       setIsResuming(false);
     }
@@ -68,6 +83,11 @@ export default function PausedCasesTab({ refreshKey, onResumeSuccess }: PausedCa
 
   return (
     <>
+      {/* Componente Loading integrado */}
+      {(loading || isResuming) && (
+        <Loading fullScreen text={isResuming ? "Reanudando oferta..." : "Cargando casos pausados..."} />
+      )}
+
       <DataTable
         rows={data}
         columns={columns}
@@ -77,7 +97,6 @@ export default function PausedCasesTab({ refreshKey, onResumeSuccess }: PausedCa
         getSearchText={(row: any) => `${row.oferta} ${row.concepto_anterior}`}
         renderRow={(row: any) => (
           <tr key={row.oferta}>
-            {/* Estilo idéntico a InTransit: fw-bold y cell-text */}
             <td>
               <span 
                 className="fw-bold text-primary cell-text" 
@@ -113,20 +132,20 @@ export default function PausedCasesTab({ refreshKey, onResumeSuccess }: PausedCa
             <td>
               <button 
                 className="btn btn-link p-0 text-primary border-0"
-                onClick={() => { setSelectedOfferId(row.oferta); setIsHistoryOpen(true); }}
+                onClick={() => handleOpenHistory(row.oferta)}
               >
                 <Icon name="look-for" size="lg" /> 
               </button>
             </td>
             <td>
               <button 
-                className="btn btn-link p-0 text-success border-0"
-                onClick={() => handleResume(row.oferta)}
-                disabled={isResuming}
-              >
-                <Icon name="play" size="lg" /> 
-              </button>
-          </td>
+                  className="btn btn-link p-0 text-success border-0"
+                  onClick={() => handleResume(row.oferta)}
+                  disabled={isResuming}
+                >
+                  <Icon name="play" size="lg" /> 
+                </button>
+            </td>
           </tr>
         )}
       />

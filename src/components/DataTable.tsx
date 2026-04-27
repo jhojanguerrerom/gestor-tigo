@@ -97,7 +97,7 @@ export default function DataTable<T>({
     : `Mostrando ${total === 0 ? 0 : startIndex + 1}–${endIndex} de ${total}`;
 
   return (
-    <div className="card shadow-sm">
+    <div className="card shadow-sm border-0">
       <div className="card-body">
         {/* Usamos d-flex para que si el buscador desaparece, el resumen se alinee a la derecha */}
         <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3">

@@ -163,7 +163,7 @@ export default function IncomeByConceptMonthTab({ refreshKey }: TabProps) {
         <div className="row g-4">
           {/* Columna Izquierda: Lista de Conceptos (Sidebar) */}
           <div className="col-12 col-lg-3">
-            <div className="card shadow-sm h-100">
+            <div className="card shadow-sm border-0 h-100">
               <div className="card-header bg-white border-0 py-3 pb-2">
                 <h6 className="mb-0 font-dm-bold text-secondary text-uppercase small">Conceptos</h6>
               </div>
@@ -201,7 +201,7 @@ export default function IncomeByConceptMonthTab({ refreshKey }: TabProps) {
 
           {/* Columna Derecha: Gráfica Principal */}
           <div className="col-12 col-lg-9">
-            <div className="card shadow-sm">
+            <div className="card shadow-sm border-0">
               <div className="card-body p-0">
                 <CustomChart 
                   data={chartData} 
