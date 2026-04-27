@@ -19,6 +19,9 @@ export const ENDPOINTS = {
     MANAGEMENT_DETAIL: (oferta: string) => `/v1/ofertas/gestion-detalle/${oferta}`,
     UNFREEZE: '/v1/ofertas/descongelar',
     REASSIGN: '/v1/ofertas/reasignar',
+    PAUSE: '/v1/ofertas/pausar',
+    PAUSED: '/v1/ofertas/mis-pausadas',
+    RESUME: '/v1/ofertas/reanudar',
   },
   ACTIONS: {
     CATALOG: '/v1/ofertas/catalogo/acciones',

@@ -1,17 +1,30 @@
 import { useEffect, useState, useCallback } from 'react'
 
-// 1. Definimos la forma de la función que esperamos
+// 1. Definimos la forma de la función que carga los datos
 type FetchFunction = (
   page: number, 
   pageSize: number, 
   searchQuery: string
-) => Promise<any>; // Puedes cambiar 'any' por el tipo de respuesta de tu API si lo tienes
+) => Promise<any>;
 
+// 2. Definimos qué recibe el hook
 interface UseEnlistmentProps {
   pageSize?: number;
   searchQuery?: string;
   refreshKey?: number;
-  fetchFn: FetchFunction; // <--- Aquí aplicamos el tipo
+  fetchFn: FetchFunction;
+}
+
+// 3. ESTA ES LA QUE BUSCABAS: Definimos qué devuelve el hook
+// Al ponerle nombre, el error ts(2339) desaparecerá
+interface UseEnlistmentReturn {
+  data: any[];
+  total: number;
+  totalPages: number;
+  currentPage: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  loading: boolean;
+  loadData: () => Promise<void>; // <--- Aquí incluimos la función
 }
 
 export function useEnlistmentTable({ 
@@ -19,7 +32,7 @@ export function useEnlistmentTable({
   searchQuery = '', 
   refreshKey = 0,
   fetchFn 
-}: UseEnlistmentProps) {
+}: UseEnlistmentProps): UseEnlistmentReturn { // <--- Le decimos al hook que use esa interfaz
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
@@ -31,7 +44,7 @@ export function useEnlistmentTable({
     try {
       const res = await fetchFn(currentPage, pageSize, searchQuery);
       
-      // Ajusta estas rutas según la estructura real de tu respuesta de API
+      // Mapeo de la respuesta según tu API
       setData(res.data?.data || []);
       setTotal(res.data?.pagination?.total || 0);
       setTotalPages(res.data?.pagination?.total_pages || 1);
@@ -41,12 +54,13 @@ export function useEnlistmentTable({
     } finally {
       setLoading(false)
     }
-  }, [currentPage, pageSize, searchQuery, fetchFn])
+  }, [currentPage, pageSize, searchQuery, fetchFn]);
 
   useEffect(() => {
     loadData();
   }, [loadData, refreshKey]);
 
+  // IMPORTANTE: Retornamos todo lo que definimos en la interfaz arriba
   return {
     data,
     total,
@@ -54,5 +68,6 @@ export function useEnlistmentTable({
     currentPage,
     setCurrentPage,
     loading,
-  }
+    loadData // <--- Ahora sí es visible para PausedCasesTab
+  };
 }

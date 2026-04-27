@@ -55,6 +55,7 @@ export default function IncomeAnalysisPage() {
             onChange={() => setViewMode('LIVE')} 
           />
           <label className="btn btn-outline-primary px-3" htmlFor="radioLive">Ingresos por franja horaria (día y promedio)</label>
+          
           <input 
             type="radio" className="btn-check" id="radioTendency" 
             autoComplete="off"

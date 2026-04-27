@@ -74,6 +74,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPausing, setIsPausing] = useState(false); // Estado para carga de pausa
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   
   const { success, info, error } = useToast();
@@ -160,6 +161,30 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
       })
       .catch(() => error('No se pudo asignar pedido'))
       .finally(() => setIsAssigning(false));
+  };
+
+  // Función para manejar la pausa de la oferta
+  const handlePauseOffer = async () => {
+    if (!formData.oferta) return;
+
+    setIsPausing(true);
+    try {
+      await offerService.pauseOffer({ oferta: formData.oferta });
+      success(`Oferta ${formData.oferta} pausada correctamente`);
+      
+      // Resetear formulario tras pausa exitosa
+      setFormData(INITIAL_FORM_DATA);
+      setAccionAuto("");
+      setSubaccion("");
+      setObservacion("");
+      fetchConcepts(); 
+    } catch (err: any) {
+      // Manejo de error dinámico (ej: tiempo mínimo de gestión)
+      const errorMsg = err.response?.data?.message || 'No se pudo pausar la oferta';
+      error(errorMsg);
+    } finally {
+      setIsPausing(false);
+    }
   };
 
   const safeCopyText = (text: string, successMsg: string) => {
@@ -301,6 +326,42 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
               </div>
             </div>
           </div>
+          {formData.oferta && (
+            <div 
+              className="card shadow-sm mb-4"
+            >
+              <div className="card-body">
+                <div className="d-flex flex-column gap-3">
+                  <div>
+                    <h2 className="h5 mb-1">Pausar pedido</h2>
+                    <p className="text-body-secondary mb-0">
+                      Pausar un pedido detendrá temporalmente su gestión.
+                    </p>
+                  </div>
+                  <div className="row g-3 align-items-end">
+                    <div className="col-md-12 d-flex justify-content-md-end align-items-center">
+                      <Icon name="pause" size="xl" className="me-2" />
+                      <button
+                        className="button button-blue w-100"
+                        type="button"
+                        onClick={handlePauseOffer}
+                        disabled={!formData.oferta || isPausing}
+                      >
+                        {isPausing ? (
+                          <>
+                            Pausando...
+                            <span className="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                          </>
+                        ) : (
+                          'Pausar pedido'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="col-md-9">

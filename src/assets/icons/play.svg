@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #001eb4;
+        stroke-width: 8;
+      }
+
+      .cls-2 {
+        fill: #44c8f5;
+      }
+    </style>
+  </defs>
+
+  <!-- Círculo -->
+  <circle class="cls-1" cx="50" cy="50" r="46"/>
+
+  <!-- Triángulo de play (reanudar) -->
+  <polygon class="cls-2" points="40,30 70,50 40,70"/>
+
+</svg>

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Icon } from '@/icons/Icon';
 import ResolutionFormTab from './components/ResolutionFormTab';
-import FrozenCasesTab from './components/FrozenCasesTab';
+import PausedCasesTab from './components/PausedCasesTab';
 
 export type CaseViewMode = 'RESOLUCION' | 'CONGELADOS';
 
@@ -43,20 +43,22 @@ export default function CaseManagementPage() {
           <input 
             type="radio" 
             className="btn-check" 
-            disabled={viewMode === 'RESOLUCION'}
             style={{ pointerEvents: viewMode === 'RESOLUCION' ? 'none' : 'auto' }}
             id="radioCongelados" 
             checked={viewMode === 'CONGELADOS'} 
             onChange={() => setViewMode('CONGELADOS')} 
           />
-          <label className="btn btn-outline-primary" htmlFor="radioCongelados">Casos congelados</label>
+          <label className="btn btn-outline-primary" htmlFor="radioCongelados">Casos pausados</label>
         </div>
       </header>
 
       {viewMode === 'RESOLUCION' ? (
         <ResolutionFormTab refreshKey={refreshKey} />
       ) : (
-        <FrozenCasesTab refreshKey={refreshKey} />
+        <PausedCasesTab 
+          refreshKey={refreshKey} 
+          onResumeSuccess={() => setViewMode('RESOLUCION')} 
+        />
       )}
     </section>
   );

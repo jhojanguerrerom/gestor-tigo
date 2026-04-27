@@ -32,4 +32,15 @@ export const offerService = {
   reassignOffer: (payload: { oferta: string, asesor_login: string, motivo: string }) => {
     return httpClient.post(ENDPOINTS.OFFERS.REASSIGN, payload);
   },
+
+  pauseOffer: (payload: { oferta: string }) => {
+    return httpClient.post(ENDPOINTS.OFFERS.PAUSE, payload);
+  },
+
+  getPausedOffers: () => httpClient.get(ENDPOINTS.OFFERS.PAUSED),
+
+  resumeOffer: (payload: { oferta: string }) => {
+    return httpClient.post(ENDPOINTS.OFFERS.RESUME, payload);
+  },
+
 };
