@@ -4,6 +4,7 @@ import httpClient from '@/api/httpClient'
 import { UserRole, type LoginResponse, type User } from '../types/auth.types'
 import { MENU_BY_ROLE } from '../constants/menuByRole'
 import { useToast } from '@/context/ToastContext' // Restaurado
+import { authService } from '@/api/services/authService'
 
 export function useAuth() {
   const { error: notifyError } = useToast() // Restaurado
@@ -49,7 +50,12 @@ export function useAuth() {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (e) {
+      // Ignorar error de logout, igual limpiar localStorage
+    }
     setUser(null)
     localStorage.clear()
   }

@@ -161,7 +161,7 @@ export default function PauseSettingsPage() {
             </h5>
             <ul className=" mt-3 mb-0 ps-3">
               <li className="mb-2">El <strong>tiempo mínimo</strong> evita que se pausen ofertas recién abiertas sin una gestión previa.</li>
-              <li>El <strong>límite por asesor</strong> asegura que la bandeja de entrada no se sature con casos "congelados" indefinidamente.</li>
+              <li>El <strong>límite por asesor</strong> asegura que la bandeja de entrada no se sature con casos pausados indefinidamente.</li>
             </ul>
           </div>
         </div>

@@ -6,14 +6,13 @@ import { useAuth } from '@/auth/hooks/useAuth'
 
 export default function AppLayout() {
   const { user, logout } = useAuth()
-  // Esto usará el del backend si existe, o el fallback si no.
   const menu = user?.menu || [] 
   
   const navigate = useNavigate()
   const location = useLocation()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login')
   }
 

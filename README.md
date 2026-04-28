@@ -132,14 +132,14 @@ src/
 │   └── iconsMap.ts
 ├── pages/                # Páginas principales y submódulos
 │   ├── admin/
-│   │   ├── actions/      # Gestión de acciones y catálogo
-│   │   ├── paused/       # Configuración de motivos de pausa
+│   │   ├── actions/      # Gestión de acciones y subacciones
+│   │   ├── paused/       # Configuración de parametros de pausa
 │   │   └── users/        # Gestión de usuarios
 │   ├── auth/             # Login
 │   ├── cases/            # Resolución de casos y su historial
 │   ├── common/           # Página de no encontrado
 │   ├── offers/           # Consulta de ofertas cerradas
-│   ├── orders/           # Gestión de pedidos abiertos/en tránsito
+│   ├── orders/           # Gestión de pedidos abiertos/en tramite
 │   └── reports/
 │       ├── HistoricalIncome/ # Reportes de ingresos históricos
 │       └── Productivity/     # Reportes de productividad
