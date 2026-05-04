@@ -88,7 +88,7 @@ export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: O
             {/* COLUMNA 1: CAMBIOS TÉCNICOS (Auditoría de campos) */}
             <div className="col-md-6 border-end">
               <h6 className="fw-bold mb-4 text-primary d-flex align-items-center">
-                <i className="bi bi-cpu me-2"></i> Auditoría de Cambios Técnicos
+                <i className="bi bi-cpu me-2"></i> Cambios en la oferta
               </h6>
               {changes.length > 0 ? (
                 <>
@@ -155,7 +155,7 @@ export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: O
             {/* COLUMNA 2: HISTÓRICO DE GESTIONES (Estados) */}
             <div className="col-md-6">
               <h6 className="fw-bold mb-4 text-primary d-flex align-items-center">
-                <i className="bi bi-clock-history me-2"></i> Histórico de Gestiones y Estados
+                <i className="bi bi-clock-history me-2"></i> Histórico de gestiones
               </h6>
               {history.length > 0 ? (
                 <div className="position-relative ps-3 border-start border-start-4 border-primary ms-2">

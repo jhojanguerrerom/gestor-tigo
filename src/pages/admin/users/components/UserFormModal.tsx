@@ -82,7 +82,7 @@ const UserFormModal = ({ isOpen, onClose, user, onSuccess }: UserFormModalProps)
           <div className="row g-3">
             {/* Login - Solo editable al crear */}
             <div className="col-md-6 mb-3">
-              <label htmlFor="userLogin" className="form-label font-dm-bold">Login (Usuario)*</label>
+              <label htmlFor="userLogin" className="form-label font-dm-bold">Usuario*</label>
               <input
                 type="text"
                 className={`form-control ${user ? 'bg-secondary-subtle' : 'bg-light'}`}

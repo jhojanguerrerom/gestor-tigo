@@ -333,9 +333,9 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
               <div className="card-body">
                 <div className="d-flex flex-column gap-3">
                   <div>
-                    <h2 className="h5 mb-1">Pausar pedido</h2>
+                    <h2 className="h5 mb-1">Pausar oferta</h2>
                     <p className="text-body-secondary mb-0">
-                      Pausar un pedido detendrá temporalmente su gestión.
+                      Pausar una oferta detendrá temporalmente su gestión.
                     </p>
                   </div>
                   <div className="row g-3 align-items-end">
@@ -353,7 +353,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
                             <span className="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
                           </>
                         ) : (
-                          'Pausar pedido'
+                          'Pausar oferta'
                         )}
                       </button>
                     </div>
@@ -381,7 +381,7 @@ export default function CaseResolutionTab({ refreshKey }: { refreshKey: number }
                         type="button"
                         onClick={() => setIsHistoryOpen(true)}
                       >
-                        Ver historico de pedido
+                        Ver historico de oferta
                       </button>
                       <Icon name="look-for" size="md" className="ms-1 align-bottom" />
                     </>
