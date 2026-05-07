@@ -48,16 +48,66 @@ interface ChangeHistoryItem {
     const fetchAllData = useCallback(async () => {
       setIsLoading(true);
       try {
-        const [historyResult, detailsResult, changesResult] = await Promise.all([
+        const results = await Promise.allSettled([
           offerService.getHistory(ofertaId),
           offerService.getManagementDetail(ofertaId),
-          enlistmentService.getOfferChangeHistory(ofertaId, changesPage, CHANGES_LIMIT)
+          enlistmentService.getOfferChangeHistory(
+            ofertaId,
+            changesPage,
+            CHANGES_LIMIT
+          )
         ]);
-        setHistory(historyResult.data || []);
-        const detailsData = detailsResult.data;
-        setDetails(!detailsData ? [] : Array.isArray(detailsData) ? detailsData : [detailsData]);
-        setChanges(changesResult.data?.history || []);
-        setChangesTotalPages(Math.ceil((changesResult.data?.total_cambios || 0) / CHANGES_LIMIT));
+
+        const [historyResult, detailsResult, changesResult] = results;
+
+        // =========================
+        // HISTORY
+        // =========================
+        if (historyResult.status === 'fulfilled') {
+          setHistory(historyResult.value.data || []);
+        } else {
+          console.error('Error history:', historyResult.reason);
+          setHistory([]);
+        }
+
+        // =========================
+        // DETAILS
+        // =========================
+        if (detailsResult.status === 'fulfilled') {
+          const detailsData = detailsResult.value.data;
+
+          setDetails(
+            !detailsData
+              ? []
+              : Array.isArray(detailsData)
+              ? detailsData
+              : [detailsData]
+          );
+        } else {
+          console.error('Error details:', detailsResult.reason);
+          setDetails([]);
+        }
+
+        // =========================
+        // CHANGES
+        // =========================
+        if (changesResult.status === 'fulfilled') {
+          console.log('CHANGES OK:', changesResult.value.data);
+
+          setChanges(changesResult.value.data?.history || []);
+
+          setChangesTotalPages(
+            Math.ceil(
+              (changesResult.value.data?.total_cambios || 0) /
+                CHANGES_LIMIT
+            )
+          );
+        } else {
+          console.error('Error changes:', changesResult.reason);
+
+          setChanges([]);
+          setChangesTotalPages(1);
+        }
       } catch (err: any) {
         error('Error al obtener datos del histórico');
         setHistory([]);

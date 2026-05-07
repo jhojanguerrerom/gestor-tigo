@@ -2,13 +2,13 @@ import { Fragment, useState, useCallback, useMemo, useEffect } from 'react';
 import DataTable from '@/components/DataTable';
 import DateRangePicker from '@/components/DateRangePicker';
 import BaseModal from '@/components/BaseModal';
-import OfferClosedHistoryModal from './OfferClosedHistoryModal';
+import OfferClosedHistoryModal from '../components/OfferClosedHistoryModal';
 import { useEnlistmentTable } from '@/hooks/useEnlistmentTable';
 import { enlistmentService } from '@/api/services/enlistmentService';
 import { Icon } from '@/icons/Icon';
 import Loading from '@/components/Loading';
 import { formatDate, addDays, formatDateTime } from '@/utils/dateUtils';
-import { downloadCSV } from '@/utils/csvUtils';
+import { downloadExcel } from '@/utils/downloadExcel';
 import { useToast } from '@/context/ToastContext';
 
 interface RowType {
@@ -22,8 +22,8 @@ interface RowType {
 
 const OPCIONES_REPORTE = [
   { id: 'oferta', label: 'Oferta' },
-  { id: 'usuario_asignado_login', label: 'Login Asesor' },
-  { id: 'usuario_asignado_nombre', label: 'Nombre Asesor' },
+  { id: 'usuario_asignado_login', label: 'Usuario' },
+  { id: 'usuario_asignado_nombre', label: 'Nombre asesor' },
   { id: 'concepto', label: 'Concepto' },
   { id: 'producto', label: 'Producto' },
   { id: 'uen', label: 'UEN' },
@@ -33,9 +33,9 @@ const OPCIONES_REPORTE = [
   { id: 'tecnologia', label: 'Tecnología' },
   { id: 'garantia', label: 'Garantía' },
   { id: 'departamento', label: 'Departamento' },
-  { id: 'tipo_scoring', label: 'Tipo Scoring' },
-  { id: 'tipo_trabajo', label: 'Tipo Trabajo' },
-  { id: 'fecha_creado', label: 'Fecha Creación' }
+  { id: 'tipo_scoring', label: 'Tipo scoring' },
+  { id: 'tipo_trabajo', label: 'Tipo trabajo' },
+  { id: 'fecha_creado', label: 'Fecha creación' }
 ];
 
 const CellText = ({ value, className = '' }: { value?: string; className?: string }) => {
@@ -80,15 +80,19 @@ export default function OffersManagedPage() {
     searchQuery,
     refreshKey,
     fetchFn: useCallback(async (page: number, limit: number, search: string) => {
-      // Si el usuario está buscando una oferta específica, se ignora el rango de fechas usualmente
       if (search) {
         return await enlistmentService.searchByOferta(search, page, limit, 'CERRADO');
       }
 
-      // Validación de rango antes de llamar al servicio
       if (!isRangeValid(fromDate, toDate)) {
         warning('Seleccione un rango máximo de 90 días');
-        return { data: { data: [], total: 0, totalPages: 0 } };
+        // AJUSTE: La estructura debe coincidir con lo que espera tu hook (res.data.pagination)
+        return { 
+          data: { 
+            data: [], 
+            pagination: { total: 0, total_pages: 0 } 
+          } 
+        };
       }
 
       return await enlistmentService.getEnlistments(page, limit, 'CERRADO', fromDate, toDate);
@@ -146,8 +150,8 @@ export default function OffersManagedPage() {
         });
         return filtrado;
       });
-      downloadCSV(dataFinal, `Reporte_Cerradas_${fromDate}`);
-      success('Descarga iniciada correctamente');
+      downloadExcel(dataFinal, `Reporte_Cerradas_${fromDate}`);
+      success('Informe generado y descargado correctamente');
     } catch (err) {
       error('Error al generar el reporte');
     } finally {
@@ -185,7 +189,7 @@ export default function OffersManagedPage() {
       </div>
 
       <BaseModal isOpen={isConfigModalOpen} onClose={() => setIsConfigModalOpen(false)} title="Personalizar columnas del reporte" size="modal-lg">
-        <p className="text-muted small mb-3">Marque los campos que desee incluir en el archivo CSV:</p>
+        <p className="text-muted small mb-3">Marque los campos que desee incluir en el archivo:</p>
         <div className="row g-2 mb-4">
           {OPCIONES_REPORTE.map(opcion => (
             <div key={opcion.id} className="col-md-4">

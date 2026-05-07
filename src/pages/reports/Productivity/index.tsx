@@ -37,7 +37,7 @@ export default function ManagementByHourPage() {
             <input type="radio" className="btn-check" id="radioDaily" checked={viewMode === 'DAILY'} onChange={() => setViewMode('DAILY')} />
             <label className="btn btn-outline-primary px-3" htmlFor="radioDaily">Gestiónes por fecha</label>
 
-            <input type="radio" className="btn-check" id="radioPending" checked={viewMode === 'PENDING'} onChange={() => setViewMode('PENDING')} />
+            <input disabled type="radio" className="btn-check" id="radioPending" checked={viewMode === 'PENDING'} onChange={() => setViewMode('PENDING')} />
             <label className="btn btn-outline-primary px-3" htmlFor="radioPending">Ofertas pendientes</label>
           </div>
         </div>

@@ -4,7 +4,8 @@ import AppLayout from '../components/layouts/AppLayout'
 import LoginPage from '../pages/auth/LoginPage'
 import OrdersHomePage from '../pages/orders/index'
 import CaseResolutionPage from '../pages/cases/index'
-import OffersManagedPage from '../pages/offers/OffersManagedPage'
+import OffersManagedPage from '../pages/offers/OffersManagedPage/index'
+import GlobalSearchPage from '../pages/offers/GlobalSearchPage/index'
 import ActionsPage from '../pages/admin/actions/ActionsPage'
 import UsersPage from '../pages/admin/users/index'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
@@ -50,6 +51,15 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR]}>
             <OffersManagedPage />
+          </PrivateRoute>
+        ),
+      },
+      // ACCESO: SUPER_USER, SUPERVISOR
+      {
+        path: '/offers/global-search',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR]}>
+            <GlobalSearchPage />
           </PrivateRoute>
         ),
       },

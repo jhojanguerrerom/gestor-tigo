@@ -34,12 +34,19 @@ export const enlistmentService = {
    * Búsqueda por campo específico (oferta) filtrando por estado opcionalmente.
    */
   searchByOferta: (oferta: string, page = 1, limit = 10, state?: string) => {
-    let url = `${ENDPOINTS.ENLISTMENT.SEARCH}?field=oferta&value=${encodeURIComponent(oferta)}&page=${page}&limit=${limit}`;
-    // Si se pasa un estado, lo concatenamos a la URL de búsqueda
+    // Usamos URLSearchParams para manejar los parámetros de forma limpia
+    const params = new URLSearchParams({
+      field: 'oferta',
+      value: oferta,
+      page: page.toString(),
+      limit: limit.toString()
+    });
+
     if (state) {
-      url += `&offer_state=${state}`;
+      params.append('offer_state', state);
     }
-    return httpClient.get(url);
+
+    return httpClient.get(`${ENDPOINTS.ENLISTMENT.SEARCH}?${params.toString()}`);
   },
 
   // --- Histórico de cambios de oferta ---

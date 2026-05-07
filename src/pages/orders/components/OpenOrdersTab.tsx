@@ -4,7 +4,7 @@ import { useEnlistmentTable } from '@/hooks/useEnlistmentTable';
 import { enlistmentService } from '@/api/services/enlistmentService';
 import { Icon } from '@/icons/Icon';
 import Loading from '@/components/Loading';
-import { downloadCSV } from '@/utils/csvUtils';
+import { downloadExcel } from '@/utils/downloadExcel';
 import { useToast } from '@/context/ToastContext';
 
 interface OpenOrdersTabProps {
@@ -22,7 +22,7 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
 
   const fetchFn = useCallback((page: number, limit: number, search: string) => {
     return search
-      ? enlistmentService.searchByOferta(search, page, limit, 'ABIERTO')
+      ? enlistmentService.searchByOferta(search, page, limit, 'ABIERTO') // <-- Forzamos estado ABIERTO
       : enlistmentService.getEnlistments(page, limit, 'ABIERTO');
   }, []);
 
@@ -123,7 +123,7 @@ export default function OpenOrdersTab({ refreshKey, onManage, onOpenHistory }: O
         };
       });
 
-      downloadCSV(dataToExport, `Pedidos_Abiertos_${new Date().toISOString().split('T')[0]}`);
+      downloadExcel(dataToExport, `Pedidos_Abiertos_${new Date().toISOString().split('T')[0]}`);
       success('Informe generado y descargado correctamente');
     } catch (err) {
       console.error("Error al exportar:", err);

@@ -54,7 +54,7 @@ export default function UserTable({ refreshKey, onEdit, onToggleStatus }: UserTa
         showSearch={true}
         onSearchChange={setSearchQuery}
         searchQuery={searchQuery}
-        searchPlaceholder="Buscar por login o nombre..."
+        searchPlaceholder="Buscar por usuario o nombre..."
         // 3. Pasar las dependencias al DataTable (si tu componente DataTable lo requiere)
         tooltipDeps={[data, currentPage]}
         renderRow={(user: User) => (
