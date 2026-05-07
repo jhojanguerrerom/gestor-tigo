@@ -36,9 +36,26 @@ Este es un proyecto de frontend para una aplicación de gestión interna de Tigo
 - **SVGR**: Carga y uso de iconos SVG como componentes React.
 - **PostCSS** y **Autoprefixer**: Procesamiento de CSS moderno.
 
+
 ## Empezando
 
 Sigue estos pasos para tener una copia local del proyecto:
+
+### Variables de entorno
+
+El proyecto requiere archivos `.env` para definir la URL de la API y otros parámetros. Ejemplos incluidos:
+
+- `.env.development` (desarrollo)
+- `.env.production` (producción)
+
+Variables principales:
+
+- `VITE_API_URL`: URL base de la API.
+- `VITE_APP_NAME`: Nombre de la app.
+- `VITE_APP_VERSION`: Versión de la app.
+- `PORT`: Puerto del servidor local (opcional).
+
+Puedes copiar y modificar estos archivos según tu entorno.
 
 ### Prerrequisitos
 
@@ -60,6 +77,10 @@ Sigue estos pasos para tener una copia local del proyecto:
    npm install
    ```
 
+### Entornos
+
+Usa `.env.development` para desarrollo local y `.env.production` para despliegue. Vite selecciona el archivo según el comando ejecutado.
+
 ### Ejecutando la aplicación
 
 Para iniciar el servidor de desarrollo:
@@ -70,7 +91,7 @@ npm run dev
 
 La app estará disponible en `http://localhost:5173` (o el puerto que asigne Vite).
 
-La aplicación estará disponible en `http://localhost:5173` (o el puerto que Vite asigne).
+
 
 ## Scripts Disponibles
 
@@ -82,17 +103,21 @@ En el directorio del proyecto puedes ejecutar:
 - `npm run format`: Formatea el código con Prettier.
 - `npm run preview`: Previsualiza la build de producción localmente.
 
+Puedes usar `yarn` o `pnpm` si lo prefieres, adaptando los comandos.
+
 
 ## Estructura del Proyecto
 
-El código fuente está en la carpeta `src` y sigue una estructura modular y escalable:
+
+El código fuente está en la carpeta `src` y sigue una estructura modular y escalable. A continuación se listan todas las carpetas y archivos principales, incluyendo los módulos y subcomponentes recientes:
 
 ```
 src/
-├── api/                  # Lógica para peticiones HTTP (axios, endpoints, servicios)
-│   ├── endpoints.ts      # Definición de endpoints de la API
-│   ├── httpClient.ts     # Configuración de instancia Axios
-│   └── services/         # Servicios para dominios: pedidos, ofertas, reportes, acciones, usuarios, pausas...
+├── api/
+│   ├── endpoints.ts
+│   ├── httpClient.ts
+│   ├── index.ts
+│   └── services/
 │       ├── actionService.ts
 │       ├── authService.ts
 │       ├── enlistmentService.ts
@@ -100,6 +125,112 @@ src/
 │       ├── PauseService.ts
 │       ├── reportService.ts
 │       └── userService.ts
+├── assets/
+│   ├── fonts/ (DMSans-*.ttf)
+│   ├── icons/ (SVGs)
+│   ├── logo-tigo-blanco.png
+│   └── logo-tigo.png
+├── auth/
+│   ├── constants/
+│   │   └── menuByRole.ts
+│   ├── hooks/
+│   │   └── useAuth.ts
+│   └── types/
+│       └── auth.types.ts
+├── components/
+│   ├── BaseModal.tsx
+│   ├── CustomChart.tsx
+│   ├── DataTable.tsx
+│   ├── DateRangePicker.tsx
+│   ├── Loading.tsx
+│   ├── MonthPicker.tsx
+│   └── layouts/
+│       └── AppLayout.tsx
+├── context/
+│   ├── ToastContainer.tsx
+│   ├── ToastContext.tsx
+│   └── ToastMessage.tsx
+├── hooks/
+│   ├── useBootstrapTooltips.ts
+│   ├── useEnlistmentTable.ts
+│   └── useTableSearchPagination.ts
+├── icons/
+│   ├── Icon.tsx
+│   └── iconsMap.ts
+├── pages/
+│   ├── admin/
+│   │   ├── actions/
+│   │   │   ├── ActionsPage.tsx
+│   │   │   └── ManageCatalogModal.tsx
+│   │   ├── paused/
+│   │   │   └── PauseSettingsPage.tsx
+│   │   └── users/
+│   │       ├── components/
+│   │       │   ├── UserFormModal.tsx
+│   │       │   └── UserTable.tsx
+│   │       └── index.tsx
+│   ├── auth/
+│   │   └── LoginPage.tsx
+│   ├── cases/
+│   │   ├── components/
+│   │   │   ├── OrderHistoryModal.tsx
+│   │   │   ├── PausedCasesTab.tsx
+│   │   │   └── ResolutionFormTab.tsx
+│   │   └── index.tsx
+│   ├── common/
+│   │   └── NotFoundPage.tsx
+│   ├── offers/
+│   │   ├── GlobalSearchPage/
+│   │   │   └── index.tsx
+│   │   ├── OffersManagedPage/
+│   │   │   └── index.tsx
+│   │   ├── components/
+│   │   │   └── OfferClosedHistoryModal.tsx
+│   │   └── index.tsx
+│   ├── orders/
+│   │   ├── components/
+│   │   │   ├── InTransitOrdersTab.tsx
+│   │   │   ├── ManagementModal.tsx
+│   │   │   ├── OfferHistoryModal.tsx
+│   │   │   └── OpenOrdersTab.tsx
+│   │   └── index.tsx
+│   └── reports/
+│       ├── HistoricalIncome/
+│       │   ├── components/
+│       │   │   ├── IncomeAndTransactionsDetailTab.tsx
+│       │   │   ├── IncomeAndTransactionsMonthTab.tsx
+│       │   │   ├── IncomeByConceptMonthTab.tsx
+│       │   │   └── IncomeDayTab.tsx
+│       │   └── index.tsx
+│       └── Productivity/
+│           ├── components/
+│           │   ├── DailyProductivityTab.tsx
+│           │   ├── HourlyTab.tsx
+│           │   └── PendingByConceptTab.tsx
+│           └── index.tsx
+├── routes/
+│   ├── AppProviders.tsx
+│   ├── PrivateRoute.tsx
+│   └── router.tsx
+├── styles/
+│   ├── app.scss
+│   └── global.scss
+├── utils/
+│   ├── dateUtils.ts
+│   └── downloadExcel.ts
+├── App.tsx
+└── main.tsx
+```
+
+#### Cambios y módulos recientes
+
+- Se agregaron subcarpetas y componentes en `pages/admin/users/components`, `pages/cases/components`, `pages/offers/components`, `pages/orders/components`, `pages/reports/HistoricalIncome/components`, `pages/reports/Productivity/components`.
+- Nuevo utilitario: `utils/downloadExcel.ts` para exportación de datos.
+- Nuevos íconos SVG y variantes de fuentes en `assets/`.
+- Estructura de carpetas y archivos alineada a una arquitectura modular y escalable.
+- Se recomienda consultar cada subcarpeta para ver los componentes y utilidades disponibles.
+
+> **Convención:** Los nuevos módulos y componentes se agregan bajo la estructura modular de `src/pages`, `src/components` o `src/utils` según su función. Consulta la estructura anterior para ver todos los archivos y submódulos actualizados.
 ├── assets/               # Imágenes, fuentes e iconos
 │   ├── fonts/            # Fuentes DM Sans (ttf)
 │   └── icons/            # Iconos SVG centralizados
@@ -150,9 +281,9 @@ src/
 ├── styles/                # Estilos globales y variables SCSS
 │   ├── app.scss
 │   └── global.scss
-├── utils/                 # Utilidades generales (csv, fechas)
-│   ├── csvUtils.ts
-│   └── dateUtils.ts
+├── utils/                 # Utilidades generales (fechas, exportación)
+│   ├── dateUtils.ts
+│   └── downloadExcel.ts
 ├── App.tsx                # Componente raíz
 └── main.tsx               # Punto de entrada
 ```
@@ -165,6 +296,8 @@ src/
 - **Selectores de fechas:** `DateRangePicker`, `MonthPicker`.
 - **Layouts:** `AppLayout`.
 
+> **Nota:** Consulta la estructura detallada arriba para ver todos los submódulos y componentes actualizados.
+
 ### Hooks personalizados
 
 - `useAuth`, `useBootstrapTooltips`, `useEnlistmentTable`, `useTableSearchPagination`.
@@ -173,9 +306,11 @@ src/
 
 - `actionService`, `authService`, `enlistmentService`, `offerService`, `PauseService`, `reportService`, `userService`.
 
+> **Actualización:** Los servicios pueden crecer según nuevos endpoints agregados en el backend.
+
 ### Utilidades
 
-- `csvUtils`, `dateUtils`.
+- `dateUtils`, `downloadExcel`.
 
 ### Fuentes e iconos
 
@@ -200,6 +335,8 @@ La aplicación utiliza `react-router-dom` para la navegación y protección de r
    - `/config/users`: Gestión de usuarios (**SUPER_USER**)
 - Rutas no encontradas redirigen a `/login`.
 
+   > El archivo `src/routes/router.tsx` define todas las rutas y su protección por rol.
+
 
 ## Autenticación y Autorización
 
@@ -213,3 +350,24 @@ El sistema de autenticación y autorización está basado en roles y tokens JWT.
 - `ASESOR`: Acceso a la resolución de casos asignados.
 
 Cada usuario ve un menú y funcionalidades adaptadas a su rol.
+
+---
+
+## Dependencias principales
+
+Revisa y actualiza las dependencias en `package.json` según sea necesario. Algunas principales:
+
+- `react`, `react-dom`, `react-router-dom`, `axios`, `recharts`, `bootstrap`, `sass`, `xlsx`
+- Linter y formateo: `eslint`, `prettier`, `typescript`, `vite`, `vite-plugin-svgr`
+
+---
+
+## Notas adicionales
+
+- Usa Prettier y ESLint para mantener la calidad y formato del código.
+- Los estilos globales y variables están en `src/styles/global.scss` y `app.scss`.
+- Los iconos SVG se gestionan centralizadamente y pueden ser extendidos fácilmente.
+
+---
+
+Última actualización: 7 de mayo de 2026 (estructura y módulos revisados)
