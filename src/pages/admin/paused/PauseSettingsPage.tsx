@@ -102,7 +102,7 @@ export default function PauseSettingsPage() {
                   {/* Input 2: Límite por Asesor */}
                   <div className="col-md-6">
                     <label className="form-label font-dm-bold mb-1">Límite por asesor</label>
-                    <p className="text-muted mb-3">Máximo de casos pausados simultáneamente.</p>
+                    <p className="text-muted mb-3">Máximo de ofertas pausadas simultáneamente.</p>
                     <div className="input-group shadow-sm border rounded">
                       <button 
                         className="btn btn-light border-0" 
@@ -161,7 +161,7 @@ export default function PauseSettingsPage() {
             </h5>
             <ul className=" mt-3 mb-0 ps-3">
               <li className="mb-2">El <strong>tiempo mínimo</strong> evita que se pausen ofertas recién abiertas sin una gestión previa.</li>
-              <li>El <strong>límite por asesor</strong> asegura que la bandeja de entrada no se sature con casos pausados indefinidamente.</li>
+              <li>El <strong>límite por asesor</strong> asegura que la bandeja de entrada no se sature con ofertas pausadas indefinidamente.</li>
             </ul>
           </div>
         </div>

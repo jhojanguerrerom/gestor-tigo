@@ -4,34 +4,35 @@ import { reportService } from '@/api/services/reportService';
 import Loading from '@/components/Loading';
 import { formatDate } from '@/utils/dateUtils';
 import DateRangePicker from '@/components/DateRangePicker';
-import { useToast } from '@/context/ToastContext'; // Importamos el toast para las alertas
+import { useToast } from '@/context/ToastContext';
 
 interface TabProps { 
   refreshKey: number; 
 }
 
 export default function IncomeDayTab({ refreshKey }: TabProps) {
-  const { warning } = useToast(); // Hook para mostrar la advertencia de días
+  const { warning } = useToast();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAverageMode, setIsAverageMode] = useState(false);
+  
+  // 1. Mantenemos el estado del filtro
+  const [conceptGroup, setConceptGroup] = useState('ALL');
   
   const [filters, setFilters] = useState({
     fromDate: formatDate(new Date()),
     toDate: formatDate(new Date())
   });
 
-  // Validación de rango máximo 30 días
   const isRangeValid = useCallback((start: string, end: string) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 30; // Límite de 30 días
+    return diffDays <= 30;
   }, []);
 
   const fetchReport = useCallback(async () => {
-    // Verificación antes de llamar a la API
     if (!isRangeValid(filters.fromDate, filters.toDate)) {
       warning('Seleccione un rango máximo de 30 días');
       setData([]); 
@@ -40,8 +41,14 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
 
     setLoading(true);
     try {
-      // @ts-ignore
-      const res: any = await reportService.getLiveIncome(filters.fromDate, filters.toDate);
+      // 2. Pasamos el conceptGroup como tercer argumento al servicio
+      // Nota: Asegúrate de que el método getLiveIncome en reportService acepte este tercer parámetro
+      const res: any = await reportService.getLiveIncome(
+        filters.fromDate, 
+        filters.toDate, 
+        conceptGroup 
+      );
+      
       const result = res?.data?.data || [];
       const isAverage = res?.data?.is_average || false;
       
@@ -60,7 +67,8 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
     } finally {
       setLoading(false);
     }
-  }, [filters, isRangeValid, warning]); 
+    // 3. Agregamos conceptGroup a las dependencias de useCallback
+  }, [filters, conceptGroup, isRangeValid, warning]); 
 
   useEffect(() => { 
     fetchReport(); 
@@ -72,7 +80,6 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
 
   const chartConfig = useMemo((): ChartSeries[] => {
     const config: ChartSeries[] = [];
-
     if (!isAverageMode) {
       config.push({ 
         key: 'income', 
@@ -82,7 +89,6 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
         showColorInAxis: true
       });
     }
-
     if (isAverageMode) {
       config.push({ 
         key: 'average', 
@@ -92,7 +98,6 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
         showColorInAxis: true
       });
     }
-
     return config;
   }, [isAverageMode]);
 
@@ -100,7 +105,25 @@ export default function IncomeDayTab({ refreshKey }: TabProps) {
     <div className="position-relative">
       {loading && <Loading fullScreen text="Cargando análisis de ingresos..." />}
       
-      <div className="d-flex align-items-end gap-2 flex-wrap mb-4 justify-content-end">
+      <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div className="d-flex gap-3 flex-wrap">
+          {/* Selector de Agrupación de Conceptos */}
+          <div>
+            <label className="form-label">Agrupación de conceptos</label>
+            <select 
+              className="form-select shadow-sm" 
+              style={{ width: '210px' }}
+              value={conceptGroup}
+              onChange={(e) => setConceptGroup(e.target.value)}
+            >
+              <option value="ALL">Todos los conceptos</option>
+              <option value="ANULAR">Anular</option>
+              <option value="RECONFIGURACION">Reconfiguración</option>
+              <option value="ASIGNACION">Asignación</option>
+            </select>
+          </div>
+        </div>
+
         <DateRangePicker 
           fromDate={filters.fromDate}
           toDate={filters.toDate}

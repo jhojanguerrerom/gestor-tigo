@@ -82,13 +82,13 @@ export const reportService = {
    * Obtiene el comparativo detallado diario (Vista Comparativa).
    * El parámetro dataType puede ser: 'INCOME', 'MANAGED' o 'BOTH'.
    */
-  getDailyComparative: (fromDate: string, toDate: string, businessUnit: string, dataType: string) => 
+  getDailyComparative: (fromDate: string, toDate: string, dataType: string, conceptGroup: string,) => 
     httpClient.get<DailyComparativeResponse>(ENDPOINTS.REPORTS.DAILY_INCOME_MANAGED, {
       params: { 
         date_from: fromDate, 
         date_to: toDate, 
-        business_unit: businessUnit, 
-        data_type: dataType 
+        data_type: dataType,
+        concept_group: conceptGroup
       }
     }),
 
@@ -96,21 +96,23 @@ export const reportService = {
    * Obtiene los ingresos distribuidos por hora para un día específico (Vista En Vivo).
    * @param date Fecha opcional en formato YYYY-MM-DD. Si no se envía, usa la fecha de Colombia.
    */
-  getLiveIncome: (fromDate: string, toDate: string) => {
+  getLiveIncome: (fromDate: string, toDate: string, conceptGroup: string) => {
     // El return es vital para que no devuelva 'void' o 'never'
     return httpClient.get<LiveIncomeResponse>(ENDPOINTS.REPORTS.INCOME_BY_HOUR, {
       params: { 
         date_from: fromDate, 
-        date_to: toDate 
+        date_to: toDate,
+        concept_group: conceptGroup
       }
     });
   },
 
-  getIncomeByConcept: (month: string, concept?: string) => {
+  getIncomeByConcept: (month: string, concept?: string, conceptGroup: string = 'ALL') => {
     return httpClient.get<IncomeByConceptResponse>(ENDPOINTS.REPORTS.INCOME_BY_CONCEPT, {
       params: { 
         month,
-        concept: concept !== 'ALL' ? concept : undefined 
+        concept: concept !== 'ALL' ? concept : undefined,
+        concept_group: conceptGroup
       }
     });
   },

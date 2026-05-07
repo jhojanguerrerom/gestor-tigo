@@ -17,6 +17,7 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
   
   // Filtros internos
   const [metricView, setMetricView] = useState<MetricView>('BOTH');
+  const [conceptGroup, setConceptGroup] = useState('ALL'); // 1. Nuevo estado para el filtro
   const [dates, setDates] = useState({ 
     from: formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
     to: formatDate(new Date()) 
@@ -28,7 +29,6 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
   const cacheRef = useRef<Record<string, HistoricalDataPoint[]>>({});
   const lastRefreshKey = useRef(refreshKey);
 
-  // Validación de rango máximo 60 días (Igual a tu referencia)
   const isRangeValid = useCallback((start: string, end: string) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
@@ -38,14 +38,14 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
   }, []);
 
   const fetchReport = useCallback(async (forceRefresh = false) => {
-    // Verificación de seguridad antes de llamar a la API
     if (!isRangeValid(dates.from, dates.to)) {
       warning('Seleccione un rango máximo de 60 días');
       setData([]); 
       return;
     }
 
-    const cacheKey = `${dates.from}_${dates.to}_${metricView}`;
+    // 2. Actualizamos la Cache Key para incluir el conceptGroup
+    const cacheKey = `${dates.from}_${dates.to}_${metricView}_${conceptGroup}`;
 
     if (!forceRefresh && cacheRef.current[cacheKey]) {
       setData(cacheRef.current[cacheKey]);
@@ -58,11 +58,13 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
 
     setLoading(true);
     try {
+      // 3. Enviamos conceptGroup como 5to argumento al servicio
+      // Asegúrate de que getDailyComparative acepte este parámetro en reportService
       const res = await reportService.getDailyComparative(
         dates.from, 
         dates.to, 
-        'ALL', 
-        metricView
+        metricView,
+        conceptGroup
       );
       const result = res.data?.data || [];
       cacheRef.current[cacheKey] = result;
@@ -73,7 +75,8 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
     } finally {
       setLoading(false);
     }
-  }, [dates, metricView, error, warning, isRangeValid]);
+    // 4. Agregamos conceptGroup a las dependencias de useCallback
+  }, [dates, metricView, conceptGroup, error, warning, isRangeValid]);
 
   useEffect(() => {
     const isManualRefresh = refreshKey !== lastRefreshKey.current;
@@ -95,18 +98,34 @@ export default function IncomeAndTransactionsDetailTab({ refreshKey }: TabProps)
   return (
     <div className="position-relative">
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div className="d-flex align-items-center gap-3">
+        <div className="d-flex align-items-center gap-3 flex-wrap">
           <div>
             <label className="form-label">Métrica</label>
             <select 
               className="form-select shadow-sm" 
-              style={{ width: '200px' }}
+              style={{ width: '160px' }}
               value={metricView}
               onChange={(e) => setMetricView(e.target.value as MetricView)}
             >
               <option value="BOTH">Todo</option>
               <option value="INCOME">Solo Ingresos</option>
               <option value="MANAGED">Solo Gestiones</option>
+            </select>
+          </div>
+
+          {/* 5. UI del Selector de Agrupación de Conceptos */}
+          <div>
+            <label className="form-label">Agrupación de conceptos</label>
+            <select 
+              className="form-select shadow-sm" 
+              style={{ width: '210px' }}
+              value={conceptGroup}
+              onChange={(e) => setConceptGroup(e.target.value)}
+            >
+              <option value="ALL">Todos los conceptos</option>
+              <option value="ANULAR">Anular</option>
+              <option value="RECONFIGURACION">Reconfiguración</option>
+              <option value="ASIGNACION">Asignación</option>
             </select>
           </div>
         </div>

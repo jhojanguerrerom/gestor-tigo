@@ -85,7 +85,7 @@ export default function PausedCasesTab({ refreshKey, onResumeSuccess }: PausedCa
     <>
       {/* Componente Loading integrado */}
       {(loading || isResuming) && (
-        <Loading fullScreen text={isResuming ? "Reanudando oferta..." : "Cargando casos pausados..."} />
+        <Loading fullScreen text={isResuming ? "Reanudando oferta..." : "Cargando ofertas pausadas..."} />
       )}
 
       <DataTable

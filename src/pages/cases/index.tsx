@@ -38,7 +38,7 @@ export default function CaseManagementPage() {
             checked={viewMode === 'RESOLUCION'} 
             onChange={() => setViewMode('RESOLUCION')} 
           />
-          <label className="btn btn-outline-primary" htmlFor="radioResolucion">Gestionar caso</label>
+          <label className="btn btn-outline-primary" htmlFor="radioResolucion">Gestionar oferta</label>
           
           <input 
             type="radio" 
@@ -48,7 +48,7 @@ export default function CaseManagementPage() {
             checked={viewMode === 'CONGELADOS'} 
             onChange={() => setViewMode('CONGELADOS')} 
           />
-          <label className="btn btn-outline-primary" htmlFor="radioCongelados">Casos pausados</label>
+          <label className="btn btn-outline-primary" htmlFor="radioCongelados">Ofertas pausadas</label>
         </div>
       </header>
 

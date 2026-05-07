@@ -36,7 +36,7 @@ export default function GlobalSearchPage() {
     const query = searchQuery.trim();
     
     if (!query) {
-      info('Por favor ingrese un número de oferta');
+      info('Por favor ingrese el ID de la oferta');
       return;
     }
 
@@ -81,7 +81,7 @@ export default function GlobalSearchPage() {
                     <input
                       type="text"
                       className="form-control bg-light border-start-0 ps-0"
-                      placeholder="Ingrese el número de oferta (ej: 1-12345678)..."
+                      placeholder="Ingrese el ID de la oferta (ej: 1-12345678)..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -115,7 +115,7 @@ export default function GlobalSearchPage() {
                         <thead className="table-secondary small">
                           <tr>
                             <th>Oferta</th>
-                            <th>Asesor Asignado</th>
+                            <th>Asesor asignado</th>
                             <th>Concepto</th>
                             <th>Producto</th>
                             <th>Tecnología</th>
@@ -126,7 +126,7 @@ export default function GlobalSearchPage() {
                             <td className="fw-bold text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title={offer.oferta || '-'}>
                               {offer.oferta || '-'}
                             </td>
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title={offer.usuario_asignado_login || 'SIN ASIGNAR'}>
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title={offer.usuario_asignado_nombre || 'SIN ASIGNAR'}>
                               <span className="badge text-bg-blue">
                                 {offer.usuario_asignado_login || 'SIN ASIGNAR'}
                               </span>

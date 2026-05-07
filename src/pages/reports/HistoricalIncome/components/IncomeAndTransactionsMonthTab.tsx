@@ -77,13 +77,14 @@ export default function IncomeAndTransactionsMonthTab({ refreshKey }: TabProps) 
             <label className="form-label">Agrupación de conceptos</label>
             <select 
               className="form-select shadow-sm" 
-              style={{ width: '200px' }}
+              style={{ width: '210px' }}
               value={conceptGroup}
               onChange={(e) => setConceptGroup(e.target.value)}
             >
               <option value="ALL">Todos los conceptos</option>
-              <option value="ASESOR">Gestión ASESOR</option>
-              <option value="BOT">Gestión BOT</option>
+              <option value="ANULAR">Anular</option>
+              <option value="RECONFIGURACION">Reconfiguración</option>
+              <option value="ASIGNACION">Asignación</option>
             </select>
           </div>
         </div>
