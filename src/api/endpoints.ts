@@ -35,6 +35,7 @@ export const ENDPOINTS = {
     DAILY_INCOME_MANAGED: "/v1/reports/daily-income-managed",
     INCOME_BY_HOUR: "/v1/reports/income-by-hour",
     INCOME_BY_CONCEPT: "/v1/reports/income-by-concept",
+    PENDING_BY_CONCEPT: '/v1/reports/available-offers-by-concept',
   },
   USERS: {
     BASE_USERS: '/v1/users/',

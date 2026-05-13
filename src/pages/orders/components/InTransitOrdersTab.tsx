@@ -45,7 +45,7 @@ export default function InTransitOrdersTab({ refreshKey, onManage, onOpenHistory
 
   return (
     <>
-      {loading && <Loading fullScreen text="Cargando pedidos en trámite..." />}
+      {loading && <Loading fullScreen text="Cargando ofertas en trámite..." />}
       
       <DataTable
         rows={data}

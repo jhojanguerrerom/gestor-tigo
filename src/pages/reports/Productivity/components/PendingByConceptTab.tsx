@@ -1,120 +1,168 @@
-import { Fragment, useState, useMemo } from 'react';
+import { Fragment, useState, useMemo, useEffect, useCallback } from 'react';
 import DataTable, { type DataTableColumn } from '@/components/DataTable';
 import DateRangePicker from '@/components/DateRangePicker';
+import Loading from '@/components/Loading';
+import { reportService, type PendingConceptData } from '@/api/services/reportService';
 import { formatDate } from '@/utils/dateUtils';
+import { useToast } from '@/context/ToastContext';
+import { Icon } from '@/icons/Icon';
+import { downloadExcel } from '@/utils/downloadExcel';
 
-interface PendingData {
-  concepto: string;
-  total: number;
-  intervals: Record<string, number>;
+// Sub-componente extraído de HourlyTab para consistencia visual y tooltips
+const CellText = ({ value, className = '', refreshKey }: { value?: string | number; className?: string; refreshKey?: number }) => {
+  const displayValue = value === undefined || value === null || value === '' || value === 0 ? '-' : String(value);
+  const showTooltip = displayValue !== '-';
+  
+  return (
+    <span
+      key={`${displayValue}-${refreshKey}`}
+      className={`cell-text ${className}`}
+      data-bs-toggle={showTooltip ? 'tooltip' : undefined}
+      title={showTooltip ? displayValue : undefined}
+    >
+      {displayValue}
+    </span>
+  );
+};
+
+interface TabProps { 
+  refreshKey: number; 
 }
 
-const MOCK_DATA: PendingData[] = [
-  { concepto: 'Verificar disponibilidad', total: 10, intervals: { '0-30m': 2, '31-60m': 6, '1-2h': 0, '3-4h': 1, '13-24h': 1 } },
-  { concepto: 'Reconfigurar por cobertura', total: 47, intervals: { '31-60m': 3, '1-2h': 5, '7-12h': 3, '13-24h': 34, '24-48h': 1, 'Mas 48h': 1 } },
-  { concepto: 'Pumed', total: 2, intervals: { '31-60m': 1, '13-24h': 1 } },
-  { concepto: 'Premisas extendidas', total: 14, intervals: { '31-60m': 1, '1-2h': 4, '7-12h': 2, '13-24h': 5, '24-48h': 1, 'Mas 48h': 1 } },
-];
-
-export default function PendingByConceptTab({ refreshKey }: { refreshKey: number }) {
-  const [filterType, setFilterType] = useState<'CRM' | 'GESTOR'>('CRM');
+export default function PendingByConceptTab({ refreshKey }: TabProps) {
+  const { warning, error } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<PendingConceptData[]>([]);
+  const [totals, setTotals] = useState<PendingConceptData | null>(null);
+  const [dateField, setDateField] = useState<'CRM' | 'GESTOR'>('CRM');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const [dates, setDates] = useState({ 
+
+  const [dates, setDates] = useState({
     from: formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
-    to: formatDate(new Date()) 
+    to: formatDate(new Date())
   });
 
-  const intervals = ['0-30m', '31-60m', '1-2h', '3-4h', '5-6h', '7-12h', '13-24h', '24-48h', 'Mas 48h'];
+  // Mapeo de nombres técnicos a nombres legibles
+  const intervalLabels: Record<string, string> = {
+    '0_30m': '0 a 30 min',
+    '31_60m': '31 a 60 min',
+    '1_2h': '1 a 2 h',
+    '3_5h': '3 a 5 h',
+    '5_7h': '5 a 7 h',
+    '7_12h': '7 a 12 h',
+    '12_24h': '12 a 24 h',
+    '24_48h': '24 a 48 h',
+    'more_48h': 'Más de 48 h'
+  };
+
+  const intervals = useMemo(() => Object.keys(intervalLabels), []);
 
   const columns: DataTableColumn[] = useMemo(() => [
     { header: 'Concepto' },
-    { header: 'TOTAL' },
-    ...intervals.map(inv => ({ header: inv }))
-  ], []);
+    { header: 'Total' },
+    ...intervals.map(inv => ({ header: intervalLabels[inv] }))
+  ], [intervals]);
 
-  const totals = useMemo(() => {
-    const res: Record<string, number> = { grandTotal: 0 };
-    intervals.forEach(inv => res[inv] = 0);
-    MOCK_DATA.forEach(row => {
-      res.grandTotal += row.total;
-      intervals.forEach(inv => res[inv] += (row.intervals[inv] || 0));
+  const fetchData = useCallback(async () => {
+    const diffDays = Math.ceil(Math.abs(new Date(dates.to).getTime() - new Date(dates.from).getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays > 90) {
+      warning("El rango de fechas no puede superar los 90 días");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await reportService.getPendingByConcept(dates.from, dates.to, dateField);
+      setData(res.data.data || []);
+      setTotals(res.data.totals || null);
+    } catch (err) {
+      error("Error al cargar las ofertas pendientes");
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [dates, dateField, warning, error]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, refreshKey]);
+
+  const handleExport = () => {
+    if (!data.length) return;
+    const exportData = data.map(item => {
+      const row: any = { Concepto: item.concept, Total: item.total };
+      intervals.forEach(inv => { row[intervalLabels[inv]] = item.intervals[inv] || 0; });
+      return row;
     });
-    return res;
-  }, [refreshKey]);
+    downloadExcel(exportData, `Pendientes_Concepto_${dates.from}_${dates.to}`);
+  };
 
   return (
     <div className="position-relative">
-      {/* Contenedor de filtros con el estilo de radio buttons unificado[cite: 9, 12] */}
-      <div className="d-flex flex-wrap justify-content-end align-items-center mb-4 gap-3">
-        <div className="d-flex flex-column">
-          <label className="form-label">Fecha por:</label>
-          <div className="btn-group shadow-sm border-2">
-            <input 
-              type="radio" 
-              className="btn-check" 
-              id="filterCRM" 
-              name="filterType"
-              checked={filterType === 'CRM'} 
-              onChange={() => setFilterType('CRM')} 
-            />
-            <label className="btn btn-outline-primary px-3" htmlFor="filterCRM">CRM</label>
-            
-            <input 
-              type="radio" 
-              className="btn-check" 
-              id="filterGestor" 
-              name="filterType"
-              checked={filterType === 'GESTOR'} 
-              onChange={() => setFilterType('GESTOR')} 
-            />
-            <label className="btn btn-outline-primary px-3" htmlFor="filterGestor">Gestor</label>
+      <div className="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
+        <div className="d-flex align-items-center gap-3 flex-wrap">
+          <div>
+            <label className="form-label">Fecha por:</label>
+            <div className="btn-group shadow-sm border-2 d-block">
+              <input type="radio" className="btn-check" id="filterCRM" checked={dateField === 'CRM'} onChange={() => setDateField('CRM')} />
+              <label className="btn btn-outline-primary px-3" htmlFor="filterCRM">CRM</label>
+              <input type="radio" className="btn-check" id="filterGestor" checked={dateField === 'GESTOR'} onChange={() => setDateField('GESTOR')} />
+              <label className="btn btn-outline-primary px-3" htmlFor="filterGestor">Gestor</label>
+            </div>
           </div>
+          <DateRangePicker fromDate={dates.from} toDate={dates.to} onChange={(from, to) => setDates({ from, to })} />
         </div>
 
-        <div>
-           <DateRangePicker 
-             fromDate={dates.from} 
-             toDate={dates.to} 
-             showToday={false}
-             onChange={(from, to) => setDates({ from, to })} 
-           />
-        </div>
+        <div className="d-flex justify-content-end mb-3 align-items-center">
+        <Icon name="download" size="xl" className='me-2'/>
+        <button 
+          className="btn btn-outline-primary d-flex align-items-center shadow-sm"
+          onClick={handleExport} 
+          disabled={loading || !data.length}
+        >
+          <span>Exportar</span>
+        </button>
+      </div>
       </div>
 
-      <DataTable<PendingData>
-        rows={MOCK_DATA}
+      {loading && <Loading fullScreen text="Consultando pendientes..." />}
+
+      <DataTable<PendingConceptData>
+        rows={data}
         columns={columns}
-        tooltipDeps={[MOCK_DATA, searchQuery, refreshKey, dates]}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        getSearchText={(row) => row.concepto}
+        getSearchText={(row) => row.concept}
+        tooltipDeps={[data, searchQuery, refreshKey]}
         pageSize={50}
         renderRow={(row) => {
-          const index = MOCK_DATA.indexOf(row);
+          const index = data.indexOf(row);
           return (
-            <Fragment key={`${row.concepto}-${refreshKey}`}>
+            <Fragment key={`${row.concept}-${index}`}>
               <tr>
-                <td data-bs-toggle="tooltip" title={String(row.concepto)}>{row.concepto}</td>
-                <td className="table-active text-center fw-bold text-primary" data-bs-toggle="tooltip" title={String(row.total)}>
-                  {row.total}
+                <td data-bs-toggle="tooltip" title={row.concept}>{row.concept}</td>
+                <td className="table-active text-center fw-bold text-primary">
+                  <CellText value={row.total} refreshKey={refreshKey} />
                 </td>
                 {intervals.map(inv => (
-                  <td key={inv} className="text-center text-muted" data-bs-toggle="tooltip" title={String(row.intervals[inv] || 0)}>
-                    {row.intervals[inv] || 0}
+                  <td key={inv} className="text-center">
+                    <CellText 
+                      value={row.intervals[inv]} 
+                      refreshKey={refreshKey} 
+                    />
                   </td>
                 ))}
               </tr>
 
-              {index === MOCK_DATA.length - 1 && (
+              {index === data.length - 1 && totals && (
                 <tr className="table-light fw-bold">
-                  <td className="ps-3">TOTALES</td>
-                  <td className="text-center table-primary text-primary" data-bs-toggle="tooltip" title={String(totals.grandTotal)}>
-                    {totals.grandTotal}
+                  <td className="ps-3">TOTAL</td>
+                  <td className="text-center table-primary">
+                    <CellText value={totals.total} refreshKey={refreshKey} />
                   </td>
                   {intervals.map(inv => (
-                    <td key={`total-${inv}`} className="text-center" data-bs-toggle="tooltip" title={String(totals[inv])}>
-                      {totals[inv]}
+                    <td key={`total-${inv}`} className="text-center">
+                      <CellText value={totals.intervals[inv]} refreshKey={refreshKey} />
                     </td>
                   ))}
                 </tr>

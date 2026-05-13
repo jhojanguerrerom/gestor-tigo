@@ -16,9 +16,18 @@ const CONCEPT_COLORS = [
 
 const CustomTooltipGrid = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
+    // Filtramos para no mostrar conceptos con valor 0 y ahorrar espacio
     const items = payload.filter((p: any) => p.value > 0);
+    
     return (
-      <div className="bg-white shadow-lg border-0 rounded-3 p-2">
+      <div 
+        className="bg-white shadow-lg border-0 rounded-3 p-2" 
+        style={{ 
+          width: '220px', // Ancho fijo más pequeño
+          fontSize: '0.72rem', // Fuente ligeramente más reducida
+          pointerEvents: 'none' 
+        }}
+      >
         <div className="border-bottom pb-1 mb-2 d-flex justify-content-between align-items-center">
           <span className="font-dm-bold text-dark">Día: {label}</span>
           <span className="text-primary font-dm-bold">
@@ -28,8 +37,11 @@ const CustomTooltipGrid = ({ active, payload, label }: any) => {
         <div className="row g-1"> 
           {items.map((entry: any, index: number) => (
             <div key={index} className="col-12 d-flex align-items-center justify-content-between py-0">
-              <div className="d-flex align-items-center overflow-hidden" style={{ maxWidth: '70%' }}>
-                <span className="rounded-circle me-2 flex-shrink-0" style={{ width: '6px', height: '6px', backgroundColor: entry.color }} />
+              <div className="d-flex align-items-center overflow-hidden" style={{ maxWidth: '75%' }}>
+                <span 
+                  className="rounded-circle me-2 flex-shrink-0" 
+                  style={{ width: '6px', height: '6px', backgroundColor: entry.color }} 
+                />
                 <span className="text-muted text-truncate">{entry.name}</span>
               </div>
               <span className="font-dm-bold text-dark">{entry.value}</span>
@@ -195,7 +207,7 @@ export default function IncomeByConceptMonthTab({ refreshKey }: TabProps) {
                   data={chartData} 
                   xAxisKey="date" 
                   series={chartConfig} 
-                  height={550} 
+                  height={573} 
                   onlyDays={true}
                   hideLegend={true}
                   tooltipProps={{ content: <CustomTooltipGrid /> }}

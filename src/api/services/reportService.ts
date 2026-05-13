@@ -47,6 +47,21 @@ export interface IncomeByConceptResponse {
   data: ConceptDataPoint[];
 }
 
+export interface PendingConceptData {
+  concept: string;
+  total: number;
+  intervals: Record<string, number>;
+}
+
+export interface PendingConceptResponse {
+  date_field: string;
+  date_from: string;
+  date_to: string;
+  total_offers: number;
+  data: PendingConceptData[];
+  totals: PendingConceptData;
+}
+
 // --- Servicio de Reportes ---
 
 export const reportService = {
@@ -116,4 +131,15 @@ export const reportService = {
       }
     });
   },
+
+  getPendingByConcept: (fromDate: string, toDate: string, dateField: string) => 
+  httpClient.get<PendingConceptResponse>(ENDPOINTS.REPORTS.PENDING_BY_CONCEPT, {
+    params: { 
+      date_from: fromDate, 
+      date_to: toDate, 
+      date_field: dateField,
+      export_format: 'JSON' 
+    }
+  }),
+  
 };
