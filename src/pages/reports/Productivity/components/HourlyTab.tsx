@@ -2,13 +2,15 @@ import { Fragment, useState, useMemo, useEffect, useCallback } from 'react';
 import DataTable, { type DataTableColumn } from '@/components/DataTable';
 import { reportService } from '@/api/services/reportService';
 import Loading from '@/components/Loading';
-import { Icon } from '@/icons/Icon';
 
 interface UserHourData {
   user_login: string;
   user_name: string;
   hours: Record<string, number>;
   total_user: number;
+  passed_to_order: number;
+  effectiveness_percentage: number;
+  average_ratio: number;
 }
 
 const CellText = ({ value, className = '', refreshKey }: { value?: string | number; className?: string; refreshKey?: number }) => {
@@ -17,7 +19,6 @@ const CellText = ({ value, className = '', refreshKey }: { value?: string | numb
   
   return (
     <span
-      // Al usar el valor como key, forzamos a Bootstrap a reinicializar el tooltip si el número cambia
       key={`${displayValue}-${refreshKey}`}
       className={`cell-text ${className}`}
       data-bs-toggle={showTooltip ? 'tooltip' : undefined}
@@ -75,7 +76,14 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
       const displayHour = h > 12 ? h - 12 : h;
       return { header: `${displayHour} ${ampm}` };
     });
-    return [...base, ...hourCols, { header: 'Total' }];
+    return [
+      ...base, 
+      ...hourCols, 
+      { header: 'Total' }, 
+      { header: 'Pasó a orden' }, 
+      { header: 'Efectividad' }, 
+      { header: 'Promedio' }
+    ];
   }, []);
 
   return (
@@ -91,11 +99,9 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
         getSearchText={(row) => `${row.user_login} ${row.user_name}`}
         pageSize={50}
         renderRow={(row) => (
-          // Usamos refreshKey en la key del Fragment para recrear la fila completa al refrescar
           <Fragment key={`${row.user_login}-${refreshKey}`}>
             <tr>
               <td>
-                <Icon name="user-call" size="lg" className="me-0" />
                 <span 
                   key={`login-${row.user_login}-${refreshKey}`}
                   className="badge text-bg-blue" 
@@ -118,13 +124,22 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
                   </td>
                 );
               })}
-              <td 
-                key={`total-user-${row.total_user}-${refreshKey}`}
-                className="table-active fw-bold text-primary" 
-                data-bs-toggle="tooltip" 
-                title={String(row.total_user)}
-              >
-                {row.total_user}
+              <td className="table-active fw-bold text-primary">
+                <CellText value={row.total_user} refreshKey={refreshKey} />
+              </td>
+              
+              <td>
+                <CellText value={row.passed_to_order} refreshKey={refreshKey} />
+              </td>
+
+              {/* Columna: Efectividad - Redondeo a 1 decimal en celda, completo en tooltip */}
+              <td data-bs-toggle="tooltip" title={String(row.effectiveness_percentage || 0)}>
+                {row.effectiveness_percentage ? `${row.effectiveness_percentage.toFixed(1)}%` : '0%'}
+              </td>
+
+              {/* Columna: Promedio - Redondeo a 1 decimal en celda, completo en tooltip */}
+              <td className="fw-bold" data-bs-toggle="tooltip" title={String(row.average_ratio || 0)}>
+                {row.average_ratio ? row.average_ratio.toFixed(1) : '-'}
               </td>
             </tr>
 
@@ -140,14 +155,12 @@ export default function HourlyTab({ refreshKey }: HourlyTabProps) {
                     </td>
                   );
                 })}
-                <td 
-                  key={`footer-total-${totalOffers}-${refreshKey}`}
-                  className="table-primary text-primary fw-bold" 
-                  data-bs-toggle="tooltip" 
-                  title={String(totalOffers)}
-                >
-                  {totalOffers}
+                <td className="table-primary text-primary fw-bold">
+                  <CellText value={totalOffers} refreshKey={refreshKey} />
                 </td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
               </tr>
             )}
           </Fragment>
