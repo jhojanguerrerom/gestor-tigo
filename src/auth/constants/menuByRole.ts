@@ -23,13 +23,15 @@ export const MENU_BY_ROLE: MenuByRole = {
       label: '(e) Indicadores',
       subItems: [
         { label: 'Pruductividad', path: '/reports/management-by-hour' },
-        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' }
+        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' },
+        { label: 'Exportar Cancelaciones', path: '/reports/export-cancellations' }
       ]
     },
     { 
       label: '(e) Configuración',
       subItems: [
-        { label: 'Acción y Subacción', path: '/config/actions' }
+        { label: 'Acción y Subacción', path: '/config/actions' },
+        { label: 'Configuración de Ofertas', path: '/config/offers' }
       ]
     },
   ],
@@ -45,7 +47,8 @@ export const MENU_BY_ROLE: MenuByRole = {
       label: '(e) Indicadores',
       subItems: [
         { label: 'Pruductividad', path: '/reports/management-by-hour' },
-        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' }
+        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' },
+        { label: 'Exportar Cancelaciones', path: '/reports/export-cancellations' }
       ]
     },
     { 
@@ -60,7 +63,8 @@ export const MENU_BY_ROLE: MenuByRole = {
       label: '(e) Indicadores',
       subItems: [
         { label: 'Pruductividad', path: '/reports/management-by-hour' },
-        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' }
+        { label: 'Ingresos y Gestiones', path: '/reports/historical-income' },
+        { label: 'Exportar Cancelaciones', path: '/reports/export-cancellations' }
       ]
     },
   ],

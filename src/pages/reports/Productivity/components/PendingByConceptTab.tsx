@@ -46,7 +46,7 @@ export default function PendingByConceptTab({ refreshKey }: TabProps) {
   const intervalLabels: Record<string, string> = {
     '0_30m': '0 a 30 m',
     '31_60m': '31 a 60 m',
-    '1_2h': '1 a 2 horas',
+    '1_2h': '1 a 2 h',
     '3_5h': '3 a 5 h',
     '5_7h': '5 a 7 h',
     '7_12h': '7 a 12 h',

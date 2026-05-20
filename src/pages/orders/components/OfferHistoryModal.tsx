@@ -29,13 +29,41 @@ export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: O
   const [changesTotalPages, setChangesTotalPages] = useState(1);
 
   // --- HELPERS ---
+  // 🟢 Traduce las operaciones del backend (Insert, Update, Create) al español
+  const formatAction = useCallback((action: string) => {
+    if (!action) return '-';
+    const upperAction = action.toUpperCase();
+    if (upperAction === 'UPDATE') return 'Actualización';
+    if (upperAction === 'INSERT' || upperAction === 'CREATE') return 'Creación';
+    return action;
+  }, []);
+
+  // Formatea los valores viejos y nuevos de manera segura
   const formatValue = useCallback((value: any) => {
     if (value === null || value === undefined || value === '') return 'Vacío';
+    
     if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          // 🟢 Si el arreglo parseado está vacío, muestra 'Todos'
+          if (parsed.length === 0) return 'Todos';
+          return parsed.join(', ');
+        }
+      } catch {}
+      
+      // Formateo de fechas
       const date = new Date(value);
       if (!isNaN(date.getTime()) && value.includes('T')) return date.toLocaleString('es-CO');
       if (!isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(value)) return date.toLocaleDateString('es-CO');
     }
+    
+    if (Array.isArray(value)) {
+      // 🟢 Si es un objeto Array nativo vacío, muestra 'Todos'
+      if (value.length === 0) return 'Todos';
+      return value.join(', ');
+    }
+
     return String(value);
   }, []);
 
@@ -43,7 +71,6 @@ export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: O
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Solo llamamos a los dos endpoints solicitados
       const [historyResult, changesResult] = await Promise.all([
         offerService.getHistory(ofertaId),
         enlistmentService.getOfferChangeHistory(ofertaId, changesPage, CHANGES_LIMIT)
@@ -97,8 +124,9 @@ export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: O
                       <div key={item.id} className="mb-4 position-relative py-1">
                         <div className="position-absolute bg-primary rounded-circle border border-white border-3" style={{ width: '18px', height: '18px', left: '-1.65rem', top: '0.45rem' }}></div>
                         <div className="d-flex justify-content-between align-items-center mb-2">
+                          {/* 🟢 Cambiado: Ahora traduce INSERT/UPDATE usando el helper */}
                           <span className="badge bg-primary p-1 fw-bold text-uppercase">
-                            {item.tipo_operacion}
+                            {formatAction(item.tipo_operacion)}
                           </span>
                           <small className="fw-bold text-muted">
                             {item.created_at ? new Date(item.created_at).toLocaleString('es-CO') : '-'}
@@ -163,7 +191,10 @@ export default function OfferClosedHistoryModal({ isOpen, onClose, ofertaId }: O
                     <div key={item.id} className="mb-4 position-relative py-1">
                       <div className="position-absolute bg-primary rounded-circle border border-white border-3" style={{ width: '18px', height: '18px', left: '-1.65rem', top: '0.45rem' }}></div>
                       <div className="d-flex justify-content-between align-items-center mb-2">
-                        <span className="badge bg-primary p-1 fw-bold text-uppercase">{item.accion}</span>
+                        {/* 🟢 Cambiado: También traduce la acción en la columna de gestiones por coherencia */}
+                        <span className="badge bg-primary p-1 fw-bold text-uppercase">
+                          {item.accion}
+                        </span>
                         <small className="fw-bold text-muted">{item.fecha ? new Date(item.fecha).toLocaleString('es-CO') : '-'}</small>
                       </div>
                       <div className="card shadow-sm border-0 bg-light p-3">

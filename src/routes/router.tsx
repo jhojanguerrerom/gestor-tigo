@@ -8,8 +8,10 @@ import OffersManagedPage from '../pages/offers/OffersManagedPage/index'
 import GlobalSearchPage from '../pages/offers/GlobalSearchPage/index'
 import ActionsPage from '../pages/admin/actions/ActionsPage'
 import UsersPage from '../pages/admin/users/index'
+import OffersConfigPage from '@/pages/admin/offers-config/OffersConfigPage'
 import ManagementByHourPage from '../pages/reports/Productivity/index';
 import HistoricalIncomePage from '../pages/reports/HistoricalIncome/index'
+import CancellationsExport from '@/pages/reports/CancellationsExport'
 import PauseSettingsPage from '../pages/admin/paused/PauseSettingsPage'
 import { PrivateRoute } from './PrivateRoute'
 import { UserRole } from '@/auth/types/auth.types'
@@ -36,11 +38,11 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      // ACCESO: SOLO ASESOR
+      // ACCESO: ASESOR, SUPER_USER
       {
         path: '/advisor/home',
         element: (
-          <PrivateRoute allowedRoles={[UserRole.ASESOR]}>
+          <PrivateRoute allowedRoles={[UserRole.ASESOR, UserRole.SUPER_USER]}>
             <CaseResolutionPage />
           </PrivateRoute>
         ),
@@ -69,6 +71,15 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
             <ManagementByHourPage />
+          </PrivateRoute>
+        ),
+      },
+      // ACCESO: SUPER_USER, SUPERVISOR, VIEWER
+      {
+        path: '/reports/export-cancellations',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER, UserRole.SUPERVISOR, UserRole.VIEWER]}>
+            <CancellationsExport />
           </PrivateRoute>
         ),
       },
@@ -105,6 +116,15 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
             <PauseSettingsPage />
+          </PrivateRoute>
+        ),
+      },
+      // ACCESO: SOLO SUPER_USER
+      {
+        path: '/config/config-offers',
+        element: (
+          <PrivateRoute allowedRoles={[UserRole.SUPER_USER]}>
+            <OffersConfigPage />
           </PrivateRoute>
         ),
       },

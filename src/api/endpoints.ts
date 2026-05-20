@@ -23,6 +23,12 @@ export const ENDPOINTS = {
     PAUSED: '/v1/ofertas/mis-pausadas',
     RESUME: '/v1/ofertas/reanudar',
     PAUSE_CONFIG: '/v1/ofertas/config-pausada',
+    // Configuración avanzada de entrega de ofertas
+    CONFIG_AVANZADA: '/v1/ofertas/configuracion/avanzada',
+    CONFIG_AVANZADA_HISTORY: '/v1/ofertas/configuracion/avanzada/historial',
+    CONFIG_CONCEPTOS_SISTEMA: '/v1/ofertas/configuracion/conceptos-sistema',
+    CONFIG_CONCEPTOS_DISPONIBLES: '/v1/ofertas/configuracion/conceptos-disponibles',
+    CONFIG_REGIONALES_DISPONIBLES: '/v1/ofertas/configuracion/regionales-disponibles',
   },
   ACTIONS: {
     CATALOG: '/v1/ofertas/catalogo/acciones',
@@ -36,6 +42,7 @@ export const ENDPOINTS = {
     INCOME_BY_HOUR: "/v1/reports/income-by-hour",
     INCOME_BY_CONCEPT: "/v1/reports/income-by-concept",
     PENDING_BY_CONCEPT: '/v1/reports/available-offers-by-concept',
+    EXPORT_CANCELLATIONS: '/v1/reports/export-cancellations-csv',
   },
   USERS: {
     BASE_USERS: '/v1/users/',

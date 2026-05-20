@@ -137,8 +137,12 @@ export default function OrderHistoryModal({ isOpen, onClose, ofertaId }: OrderHi
                         <div className="position-absolute bg-primary rounded-circle border border-white border-3" style={{ width: '18px', height: '18px', left: '-1.6rem', top: '0.45rem' }}></div>
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <div>
-                            <span className="badge bg-primary p-1 fw-bold text-uppercase me-1">{item.accion || '-'}</span>
-                            <span className="badge bg-outline-primary border border-primary text-primary p-1 fw-bold text-uppercase">{item.subaccion || '-'}</span>
+                            <span className="badge bg-primary p-1 fw-bold text-uppercase me-1">
+                              {item.accion || '-'}
+                            </span>
+                            <span className="badge bg-secondary p-1 fw-bold text-uppercase">
+                              {item.subaccion || '-'}
+                            </span>
                           </div>
                           <small className="fw-bold text-muted">
                             {item.fecha_gestion ? new Date(item.fecha_gestion).toLocaleString('es-CO') : '-'}

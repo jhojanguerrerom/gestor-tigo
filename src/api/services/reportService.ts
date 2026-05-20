@@ -141,5 +141,14 @@ export const reportService = {
       export_format: 'JSON' 
     }
   }),
+
+  exportCancellations: (daysBack: number) => 
+  httpClient.get<Blob>(ENDPOINTS.REPORTS.DAILY_PRODUCTIVITY.replace('daily-productivity', 'export-cancellations-csv'), {
+    params: 
+      { 
+        days_back: daysBack
+        },
+    responseType: 'blob'
+  }),
   
 };
