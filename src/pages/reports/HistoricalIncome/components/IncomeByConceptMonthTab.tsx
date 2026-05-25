@@ -165,7 +165,7 @@ export default function IncomeByConceptMonthTab({ refreshKey }: TabProps) {
         </div>
       </div>
 
-      {loading && <Loading fullScreen text="Sincronizando datos..." />}
+      {loading && <Loading fullScreen text="Cargando..." />}
 
       {report && (
         <div className="row g-4">
@@ -207,7 +207,7 @@ export default function IncomeByConceptMonthTab({ refreshKey }: TabProps) {
                   data={chartData} 
                   xAxisKey="date" 
                   series={chartConfig} 
-                  height={573} 
+                  height={631} 
                   onlyDays={true}
                   hideLegend={true}
                   tooltipProps={{ content: <CustomTooltipGrid /> }}

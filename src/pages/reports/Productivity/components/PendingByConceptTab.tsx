@@ -110,7 +110,7 @@ export default function PendingByConceptTab({ refreshKey }: TabProps) {
               <label className="btn btn-outline-primary px-3" htmlFor="filterGestor">Gestor</label>
             </div>
           </div>
-          <DateRangePicker fromDate={dates.from} toDate={dates.to} onChange={(from, to) => setDates({ from, to })} />
+          <DateRangePicker fromDate={dates.from} toDate={dates.to} showToday={false} onChange={(from, to) => setDates({ from, to })} />
         </div>
 
         <div className="d-flex justify-content-end mb-3 align-items-center">

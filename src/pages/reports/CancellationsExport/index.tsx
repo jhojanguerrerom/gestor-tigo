@@ -102,7 +102,7 @@ const CancellationsExport: React.FC = () => {
         <div>
           <h1 className="h3 font-dm-bold mb-0">Informe de cancelaciones</h1>
         </div>
-        <Icon name="settings" size="xl" />
+        <Icon name="income" size="xl" />
       </header>
 
       <div className="row">
@@ -132,6 +132,7 @@ const CancellationsExport: React.FC = () => {
                         type="number"
                         className="form-control border-0 text-center bg-white"
                         value={daysBack}
+                        placeholder='Ej: 20'
                         disabled={loading}
                         onChange={e => {
                           const val = e.target.value;
